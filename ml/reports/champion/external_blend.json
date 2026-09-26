@@ -1,0 +1,40 @@
+{
+  "summer": {
+    "0": 0.8135604875433082,
+    "0.005": 0.8137408441941534,
+    "0.01": 0.8139268923895931,
+    "0.02": 0.8142919909797416,
+    "0.05": 0.8153958707190837,
+    "feature_importance": {
+      "is_day_off": 33,
+      "temperature_2m_mean": 0,
+      "precipitation_sum": 0,
+      "snowfall_sum": 0,
+      "wind_speed_10m_max": 36,
+      "known_events": 8,
+      "has_short_event": 0,
+      "traffic_proxy": 125,
+      "osm_road_count": 0,
+      "crash_risk_proxy": 118
+    }
+  },
+  "autumn": {
+    "0": 0.8919939588290577,
+    "0.005": 0.8920238306835064,
+    "0.01": 0.8920383353897348,
+    "0.02": 0.8920614645158826,
+    "0.05": 0.8919901170420027,
+    "feature_importance": {
+      "is_day_off": 9,
+      "temperature_2m_mean": 0,
+      "precipitation_sum": 14,
+      "snowfall_sum": 0,
+      "wind_speed_10m_max": 2,
+      "known_events": 8,
+      "has_short_event": 6,
+      "traffic_proxy": 78,
+      "osm_road_count": 0,
+      "crash_risk_proxy": 216
+    }
+  }
+}

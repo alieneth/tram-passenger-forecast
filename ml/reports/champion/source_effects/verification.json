@@ -1,0 +1,10 @@
+{
+  "rows_per_variant": 39744,
+  "variants": 6,
+  "all_months_reported": true,
+  "same_targets_and_keys": true,
+  "all_predictions_after_origin": true,
+  "scores_recomputed": true,
+  "full_autumn_reproduces_champion": true,
+  "predictions_sha256": "b00e8ee5f125098ec8994a68a7e531273c8c7bc72c03fdebc00ce9216aa939c7"
+}

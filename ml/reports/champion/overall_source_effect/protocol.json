@@ -1,0 +1,38 @@
+{
+  "comparison": "zero external sources versus exactly four external sources",
+  "sources": [
+    "Open-Meteo",
+    "XMLCalendar",
+    "KudaGo",
+    "historical crashes"
+  ],
+  "origins_and_horizons": [
+    [
+      "2025-05-01",
+      "2025-06-30"
+    ],
+    [
+      "2025-07-01",
+      "2025-08-31"
+    ],
+    [
+      "2025-09-01",
+      "2025-10-31"
+    ]
+  ],
+  "evaluation": "all eligible out-of-time rows under the unchanged rolling-training recipe",
+  "why_not_january_april": "Jan-Feb initialise profiles; Mar-Apr supply first leakage-safe residual training block",
+  "objective": "regression_l1",
+  "trees": 150,
+  "seed": 42,
+  "ensemble_weights": {
+    "seasonal_profile": 0.98,
+    "lightgbm_residual_plus_profile": 0.02
+  },
+  "external_reads_in_control": false,
+  "osm_in_both_variants": false,
+  "traffic_proxy_in_both_variants": false,
+  "route5": "excluded from both evaluations because ground truth is absent",
+  "primary_metric": "1 - sum(abs(y-prediction)) / sum(y), over all eligible rows",
+  "selection": "two variants fixed before execution; every eligible fold is included"
+}
