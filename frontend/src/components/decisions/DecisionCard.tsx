@@ -16,6 +16,8 @@ import { ErrorState } from '../states/ErrorState';
 interface DecisionCardProps {
   decision: Decision;
   alternatives: Decision[];
+  // На экране «Решения» заголовок уже есть у строки списка
+  showHeader?: boolean;
 }
 
 type TargetStatus = DecisionStatusUpdate['status_code'];
@@ -23,7 +25,7 @@ type TargetStatus = DecisionStatusUpdate['status_code'];
 type ReasonStatus = Extract<TargetStatus, 'rejected' | 'not_executed'>;
 
 // Карточка решения: проблема → предложение → эффект → действие (экран 1в)
-export function DecisionCard({ decision, alternatives }: DecisionCardProps) {
+export function DecisionCard({ decision, alternatives, showHeader = true }: DecisionCardProps) {
   const update = useUpdateDecision();
   const [reasonFor, setReasonFor] = useState<ReasonStatus | null>(null);
   const [reason, setReason] = useState('');
@@ -32,7 +34,7 @@ export function DecisionCard({ decision, alternatives }: DecisionCardProps) {
 
   const change = (status: TargetStatus, withReason?: string) =>
     update.mutate(
-      { decisionId: decision.decision_id, update: { status_code: status, reason: withReason } },
+      { decision, update: { status_code: status, reason: withReason } },
       {
         onSuccess: () => {
           setReasonFor(null);
@@ -43,15 +45,17 @@ export function DecisionCard({ decision, alternatives }: DecisionCardProps) {
 
   return (
     <article className={`decision${waiting ? ' decision--waiting' : ''}`}>
-      <header className="decision__header">
-        <span className="decision__icon" aria-hidden="true">
-          <Icon name="warning" size={20} />
-        </span>
-        <strong>{problemText(decision)}</strong>
-        <span className={`badge decision__status decision__status--${decision.status_code}`}>
-          {decision.status_name}
-        </span>
-      </header>
+      {showHeader && (
+        <header className="decision__header">
+          <span className="decision__icon" aria-hidden="true">
+            <Icon name="warning" size={20} />
+          </span>
+          <strong>{problemText(decision)}</strong>
+          <span className={`badge decision__status decision__status--${decision.status_code}`}>
+            {decision.status_name}
+          </span>
+        </header>
+      )}
 
       <p>
         <span className="decision__label">Проблема:</span> на {decision.excess_pct}% выше нормы{' '}
@@ -163,10 +167,7 @@ export function DecisionCard({ decision, alternatives }: DecisionCardProps) {
           number={index + 2}
           decision={alternative}
           onAccept={() =>
-            update.mutate({
-              decisionId: alternative.decision_id,
-              update: { status_code: 'accepted' },
-            })
+            update.mutate({ decision: alternative, update: { status_code: 'accepted' } })
           }
           disabled={update.isPending}
         />

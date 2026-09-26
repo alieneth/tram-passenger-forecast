@@ -12,8 +12,12 @@ import { PlaceholderPage } from './pages/PlaceholderPage';
 const RoutePage = lazy(() =>
   import('./pages/RoutePage').then((module) => ({ default: module.RoutePage })),
 );
+const DecisionsPage = lazy(() =>
+  import('./pages/DecisionsPage').then((module) => ({ default: module.DecisionsPage })),
+);
 
-const MVP_PATHS = new Set(['/', '/map', '/route', '/export']);
+// Экраны, у которых уже есть своя страница; остальные пункты меню — заглушки волн 2 и 3
+const READY_PATHS = new Set(['/', '/map', '/route', '/export', '/decisions']);
 
 export function App() {
   return (
@@ -23,7 +27,8 @@ export function App() {
         <Route path="map" element={<MapPage />} />
         <Route path="route/:route?" element={<RoutePage />} />
         <Route path="export" element={<ExportPage />} />
-        {NAV_ITEMS.filter((item) => !MVP_PATHS.has(item.path)).map((item) => (
+        <Route path="decisions" element={<DecisionsPage />} />
+        {NAV_ITEMS.filter((item) => !READY_PATHS.has(item.path)).map((item) => (
           <Route
             key={item.path}
             path={item.path.slice(1)}

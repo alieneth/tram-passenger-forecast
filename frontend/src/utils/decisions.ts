@@ -51,3 +51,17 @@ export function groupDecisions(
       alternatives: decisions.filter((item) => item.parent_decision_id === main.decision_id),
     }));
 }
+
+export type DecisionTab = 'new' | 'accepted' | 'rejected' | 'closed';
+
+const ACCEPTED: Decision['status_code'][] = ['accepted', 'executed', 'not_executed'];
+
+// Вкладка группы решений — по итогу всей группы: принят хоть один вариант — «Принятые»,
+// что-то ещё ждёт — «Новые», иначе — по статусу основного решения
+export function decisionTab(group: { main: Decision; alternatives: Decision[] }): DecisionTab {
+  const all = [group.main, ...group.alternatives];
+  if (all.some((item) => ACCEPTED.includes(item.status_code))) return 'accepted';
+  if (all.some(isWaiting) || group.main.status_code === 'generated') return 'new';
+  if (group.main.status_code === 'rejected') return 'rejected';
+  return 'closed';
+}

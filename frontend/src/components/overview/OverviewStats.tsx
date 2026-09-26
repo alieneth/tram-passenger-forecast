@@ -49,11 +49,7 @@ export function OverviewStats({ forecast, routesTotal, date }: OverviewStatsProp
         label="Решения ждут диспетчера"
         value={decisions.isPending ? '…' : (waiting ?? '—')}
         note={
-          decisions.isError ? (
-            errorMessage(decisions.error)
-          ) : (
-            <Link to={`/decisions?date=${date}`}>Перейти →</Link>
-          )
+          decisions.isError ? errorMessage(decisions.error) : <Link to="/decisions">Перейти →</Link>
         }
       />
     </div>

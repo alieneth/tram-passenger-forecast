@@ -21,6 +21,8 @@ const PATHS = {
   briefcase: 'M4 7h16v13H4zM9 7V4h6v3M4 12h16',
   event: 'M12 2l3 6.5 7 .8-5.2 4.8 1.4 7-6.2-3.6-6.2 3.6 1.4-7L2 9.3l7-.8z',
   chevronLeft: 'M15 18l-6-6 6-6',
+  chevronUp: 'M18 15l-6-6-6 6',
+  chevronDown: 'M6 9l6 6 6-6',
   chevronRight: 'M9 18l6-6-6-6',
 } as const;
 

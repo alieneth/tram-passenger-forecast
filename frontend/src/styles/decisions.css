@@ -1,0 +1,160 @@
+/* Экран «Решения» (UI-8) */
+.decisions-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: var(--gap);
+  align-items: start;
+}
+
+.decisions-grid__main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (max-width: 1200px) {
+  .decisions-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.decision-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.decision-item {
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.decision-item--waiting {
+  border-left-color: var(--danger);
+}
+
+.decision-item__summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.decision-item__icon {
+  color: var(--warning);
+}
+
+.decision-item--waiting .decision-item__icon {
+  color: var(--danger);
+}
+
+.decision-item__title {
+  flex: 1;
+  min-width: 220px;
+  font-size: 15px;
+}
+
+.decision-item__excess {
+  color: var(--danger);
+  font-size: 13px;
+}
+
+.decision-item__body {
+  padding: 0 14px 14px;
+}
+
+.decision-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.decision-details__charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.before-after {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-raised);
+}
+
+.before-after__title {
+  margin-right: auto;
+  color: var(--text);
+}
+
+.chart-legend__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+/* --- Журнал --- */
+.journal__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.journal__entry {
+  display: grid;
+  grid-template-columns: 10px 1fr;
+  gap: 2px 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-raised);
+}
+
+.journal__entry > :not(.journal__dot) {
+  grid-column: 2;
+}
+
+.journal__dot {
+  grid-row: 1 / span 4;
+  width: 10px;
+  height: 10px;
+  margin-top: 4px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.journal__dot--accepted,
+.journal__dot--executed {
+  background: var(--ok);
+}
+
+.journal__dot--rejected,
+.journal__dot--not_executed {
+  background: var(--danger);
+}
+
+.journal__time {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.journal__note {
+  margin-top: 12px;
+  font-size: 12px;
+}

@@ -11,6 +11,7 @@ import './styles/map.css';
 import './styles/route.css';
 import './styles/export.css';
 import './styles/overview.css';
+import './styles/decisions.css';
 
 const MAX_RETRIES = 2;
 
