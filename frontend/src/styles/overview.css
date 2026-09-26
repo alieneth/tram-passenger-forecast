@@ -275,3 +275,88 @@
   padding: 8px 12px;
   resize: vertical;
 }
+
+/* --- Маршрут без истории (UI-9) --- */
+.notice--strong {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+}
+
+.notice--strong svg {
+  flex: none;
+  color: var(--warning);
+}
+
+.new-route-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--gap);
+}
+
+@media (max-width: 1200px) {
+  .new-route-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.analogs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.analogs__row {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) repeat(3, auto);
+  align-items: center;
+  gap: 14px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-raised);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.analogs__row:hover {
+  border-color: #60a5fa;
+}
+
+.analogs__badge {
+  border-color: var(--border);
+}
+
+.analogs__name,
+.analogs__metric {
+  display: flex;
+  flex-direction: column;
+}
+
+.analogs__metric {
+  align-items: flex-end;
+  font-size: 12px;
+}
+
+.analogs__metric strong {
+  font-size: 15px;
+}
+
+.analogs__note {
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+.analog-quality {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.analogs-map {
+  height: 320px;
+}

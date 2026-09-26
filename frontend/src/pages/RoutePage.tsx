@@ -5,6 +5,7 @@ import { errorMessage, exportForecast, type Route } from '../api';
 import { Panel } from '../components/Panel';
 import { RouteLabel } from '../components/RouteLabel';
 import { RouteMonthView } from '../components/month/RouteMonthView';
+import { NewRouteSection } from '../components/newRoute/NewRouteSection';
 import { DayForecastPanel } from '../components/route/DayForecastPanel';
 import { DaysHoursTable } from '../components/route/DaysHoursTable';
 import { FactorContributions } from '../components/route/FactorContributions';
@@ -154,12 +155,7 @@ function RouteDetails({ route, routes }: { route: Route; routes: Route[] }) {
         <RouteLabel route={route} showName />
         {route.depot_name && <span className="muted">Депо: {route.depot_name}</span>}
       </div>
-      {route.is_new && (
-        <div className="notice notice--warning" role="note">
-          Истории поездок по маршруту нет — прогноз построен по похожим маршрутам, поэтому коридор
-          уверенности шире.
-        </div>
-      )}
+      {route.is_new && <NewRouteSection route={route} routes={routes} />}
 
       {horizon === 'month' ? (
         <RouteMonthView route={route} />

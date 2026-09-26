@@ -16,6 +16,7 @@ import type {
   FactorsResponse,
   ForecastResponse,
   Health,
+  ModelQuality,
   RouteGeometry,
   RouteList,
   operations,
@@ -32,6 +33,7 @@ export type ActualsQuery = operations['getActuals']['parameters']['query'];
 export type FactorsQuery = operations['getFactors']['parameters']['query'];
 export type ExportQuery = operations['exportForecast']['parameters']['query'];
 export type DecisionsQuery = NonNullable<operations['getDecisions']['parameters']['query']>;
+export type ModelQualityQuery = operations['getModelQuality']['parameters']['query'];
 
 export type { DownloadedFile };
 
@@ -111,4 +113,14 @@ export function updateDecisionStatus(
   return IS_MOCK_MODE
     ? loadMock().then((mock) => mock.updateDecisionStatus(decisionId, update))
     : sendJson('PATCH', `/decisions/${decisionId}`, update);
+}
+
+// MAE нашей и базовой модели на сентябре–октябре; у маршрута без истории — метод аналогов
+export function getModelQuality(
+  query: ModelQualityQuery,
+  signal?: AbortSignal,
+): Promise<ModelQuality> {
+  return IS_MOCK_MODE
+    ? loadMock().then((mock) => mock.getModelQuality(query))
+    : getJson('/model/quality', query, signal);
 }

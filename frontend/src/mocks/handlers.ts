@@ -3,6 +3,7 @@
 import type {
   ActualsQuery,
   DecisionsQuery,
+  ModelQualityQuery,
   DownloadedFile,
   ExportQuery,
   FactorsQuery,
@@ -22,6 +23,7 @@ import type {
   FactorsResponse,
   ForecastItem,
   Health,
+  ModelQuality,
   ForecastResponse,
   RouteGeometry,
   RouteList,
@@ -37,6 +39,7 @@ import {
   allForecastItems,
 } from './data/forecast';
 import { geometryMock } from './data/geometry';
+import { qualityMock } from './data/quality';
 import { routesMock } from './data/routes';
 import { commonFailure, currentScenario } from './scenario';
 
@@ -300,6 +303,15 @@ export function updateDecisionStatus(
       .forEach((item) => setStatus(item, 'closed', null));
   }
   return respond(result);
+}
+
+export function getModelQuality(query: ModelQualityQuery): Promise<ModelQuality> {
+  if (currentScenario() === 'not-ready') return notReady();
+  const quality = qualityMock[query.horizon];
+  if (query.model_version && query.model_version !== quality.model_version) {
+    return fail(404, 'MODEL_VERSION_NOT_FOUND', `Версия модели ${query.model_version} не найдена`);
+  }
+  return respond(quality);
 }
 
 export function getHealth(): Promise<Health> {
