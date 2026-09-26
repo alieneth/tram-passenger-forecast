@@ -30,6 +30,7 @@ import { useRoutes } from '../hooks/useRoutes';
 import { saveFile } from '../utils/download';
 import { hasNoItems } from '../utils/empty';
 import { formatNumber } from '../utils/format';
+import { apiHorizon } from '../utils/horizon';
 
 const FILE_FORMATS: { value: FileFormat; label: string }[] = [
   { value: 'csv', label: 'CSV' },
@@ -52,7 +53,8 @@ export function ExportPage() {
 }
 
 function ExportScreen({ routes }: { routes: Route[] }) {
-  const { horizon } = useFilters();
+  const { horizon: viewHorizon } = useFilters();
+  const horizon = apiHorizon(viewHorizon);
   // По умолчанию — весь период прогноза, как в test_submission.csv
   const [params, setParams] = useState<ExportParams>({
     horizon,

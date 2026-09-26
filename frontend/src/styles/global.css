@@ -68,10 +68,20 @@ p {
   font-size: 12px;
 }
 
+.route-select {
+  min-width: 150px;
+}
+
 .date-stepper {
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+.date-stepper__range {
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
 }
 
 .date-stepper__button {

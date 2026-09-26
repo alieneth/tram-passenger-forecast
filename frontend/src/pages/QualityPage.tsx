@@ -18,10 +18,13 @@ import { formatDate } from '../utils/dates';
 import { hasNoItems } from '../utils/empty';
 import { buildFactPoints, meanAbsoluteError } from '../utils/factVsForecast';
 import { formatDecimal } from '../utils/format';
+import { apiHorizon } from '../utils/horizon';
 
 // Экран «Качество модели» (UI-10): доказательство, что модель точнее базовой
 export function QualityPage() {
-  const { horizon } = useFilters();
+  const { horizon: viewHorizon } = useFilters();
+  // Неделя и месяц — ошибка по дням, как у горизонта month
+  const horizon = apiHorizon(viewHorizon);
   const qualityQuery = useModelQuality(horizon);
   const routesQuery = useRoutes();
 

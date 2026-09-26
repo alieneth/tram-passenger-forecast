@@ -1,141 +1,151 @@
-import { useSearchParams } from 'react-router';
-import type { ForecastResponse, Route } from '../api';
+import { useState } from 'react';
+import type { Route } from '../api';
 import { DayFactors } from '../components/DayFactors';
-import { OverviewMap } from '../components/overview/OverviewMap';
+import { MapWorkspace } from '../components/map/MapWorkspace';
 import { OverviewStats } from '../components/overview/OverviewStats';
-import { RouteDetail } from '../components/overview/RouteDetail';
+import { RoutesDaysTable } from '../components/overview/RoutesDaysTable';
 import { RoutesList } from '../components/overview/RoutesList';
+import { RouteWorkspace } from '../components/overview/RouteWorkspace';
 import { Panel } from '../components/Panel';
 import { RoutesHoursTable } from '../components/RoutesHoursTable';
-import { DayOnlyNotice } from '../components/states/DayOnlyNotice';
 import { QueryView } from '../components/states/QueryView';
+import { Tabs } from '../components/Tabs';
+import { DEFAULT_MAP_HOUR } from '../config/constants';
+import { useDayForecast } from '../hooks/useDayForecast';
 import { useFactors } from '../hooks/useFactors';
 import { useFilters } from '../hooks/useFilters';
 import { useForecast } from '../hooks/useForecast';
+import { useMonthCalendar } from '../hooks/useMonthCalendar';
 import { useRoutes } from '../hooks/useRoutes';
-import { formatDate, weekdayShort } from '../utils/dates';
+import { formatDate, monthTitle, weekdayShort } from '../utils/dates';
 import { hasNoItems } from '../utils/empty';
+import { periodFor } from '../utils/horizon';
 
 const EMPTY_HINT = 'Выберите другую дату в пределах ноября–декабря 2025';
-const NO_ROUTES = 'Справочник маршрутов пуст';
 
-// Экран «Обзор» (UI-2, UI-7): за 5 секунд понять, где и когда будет пик
+// Рабочий экран диспетчера (UI-2, UI-7 после Q&A): сплит — слева карта, справа сводка или развёртка
+// выбранного маршрута. Карта не перезагружается при переключении представлений справа
 export function OverviewPage() {
-  const { horizon } = useFilters();
-  if (horizon === 'month') {
-    return <DayOnlyNotice title="Обзор" message="Обзор показывает прогноз на один день по часам" />;
-  }
-  return <OverviewDay />;
-}
-
-// Выбранный маршрут — в адресе (?route=17): карточку можно открыть ссылкой и закрыть кнопкой «Назад»
-function useSelectedRoute(): [number | undefined, (route: number | undefined) => void] {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const raw = searchParams.get('route');
-  const selected = raw === null ? undefined : Number(raw);
-  const select = (route: number | undefined) =>
-    setSearchParams((params) => {
-      if (route === undefined) params.delete('route');
-      else params.set('route', String(route));
-      return params;
-    });
-  return [Number.isInteger(selected) ? selected : undefined, select];
-}
-
-function OverviewDay() {
-  const { date } = useFilters();
   const routesQuery = useRoutes();
-  const forecastQuery = useForecast();
-  const factorsQuery = useFactors(date);
-  const [selectedRoute, selectRoute] = useSelectedRoute();
-  // Повторный клик по выбранному маршруту закрывает карточку
-  const toggleRoute = (route: number) => selectRoute(route === selectedRoute ? undefined : route);
+  return (
+    <QueryView query={routesQuery} isEmpty={hasNoItems} emptyMessage="Справочник маршрутов пуст">
+      {(routes) => <Workspace routes={routes.items} />}
+    </QueryView>
+  );
+}
+
+function Workspace({ routes }: { routes: Route[] }) {
+  const { route, setRoute } = useFilters();
+  const selected = routes.find((item) => item.route === route) ?? null;
+  // Повторный клик по выбранному маршруту — назад к общей картине
+  const toggle = (next: number) => setRoute(next === route ? null : next);
 
   return (
-    <div className="page page--overview">
-      <QueryView query={forecastQuery} isEmpty={hasNoItems} emptyHint={EMPTY_HINT}>
-        {(forecast) => (
-          <OverviewStats forecast={forecast} routesTotal={routesQuery.data?.total} date={date} />
+    <div className="workspace">
+      <div className="workspace__map">
+        <MapWorkspace
+          routes={routes}
+          selectedRoute={route}
+          onSelectRoute={toggle}
+          initialMode="peak"
+          initialHour={DEFAULT_MAP_HOUR}
+          compact
+        />
+      </div>
+      <div className="workspace__pane">
+        {selected ? (
+          <RouteWorkspace key={selected.route} route={selected} onClose={() => setRoute(null)} />
+        ) : (
+          <SummaryPane routes={routes} onSelectRoute={toggle} />
         )}
-      </QueryView>
-
-      <QueryView query={routesQuery} isEmpty={hasNoItems} emptyMessage={NO_ROUTES}>
-        {(routes) => (
-          <>
-            <div className="overview-grid">
-              <Panel title="Карта маршрутов и прогноз пассажиропотока">
-                <OverviewMap
-                  routes={routes.items}
-                  forecastQuery={forecastQuery}
-                  selectedRoute={selectedRoute}
-                  onSelectRoute={toggleRoute}
-                />
-              </Panel>
-              <Panel title="Маршруты">
-                <QueryView query={forecastQuery} isEmpty={hasNoItems} emptyHint={EMPTY_HINT}>
-                  {(forecast) => (
-                    <RoutesList
-                      routes={routes.items}
-                      items={forecast.items}
-                      selectedRoute={selectedRoute}
-                      onSelect={toggleRoute}
-                    />
-                  )}
-                </QueryView>
-              </Panel>
-            </div>
-
-            <SelectedRouteDetail
-              routes={routes.items}
-              forecast={forecastQuery.data}
-              selectedRoute={selectedRoute}
-              onClose={() => selectRoute(undefined)}
-            />
-
-            <Panel title={`Маршруты × часы, ${formatDate(date)}, ${weekdayShort(date)}`}>
-              <QueryView query={forecastQuery} isEmpty={hasNoItems} emptyHint={EMPTY_HINT}>
-                {(forecast) => (
-                  <RoutesHoursTable
-                    routes={routes.items}
-                    items={forecast.items}
-                    selectedRoute={selectedRoute}
-                    onSelectRoute={toggleRoute}
-                  />
-                )}
-              </QueryView>
-            </Panel>
-          </>
-        )}
-      </QueryView>
-
-      <Panel title="Факторы дня">
-        <QueryView query={factorsQuery}>{(factors) => <DayFactors factors={factors} />}</QueryView>
-      </Panel>
+      </div>
     </div>
   );
 }
 
-function SelectedRouteDetail({
+type SummaryView = 'table' | 'list';
+
+function SummaryPane({
   routes,
-  forecast,
-  selectedRoute,
-  onClose,
+  onSelectRoute,
 }: {
   routes: Route[];
-  forecast: ForecastResponse | undefined;
-  selectedRoute: number | undefined;
-  onClose: () => void;
+  onSelectRoute: (route: number) => void;
 }) {
-  if (selectedRoute === undefined || !forecast) return null;
-  const route = routes.find((item) => item.route === selectedRoute);
-  if (!route) return null;
+  const { horizon, date } = useFilters();
+  const [view, setView] = useState<SummaryView>('table');
+  const dayQuery = useDayForecast(date);
+  const periodQuery = useForecast();
+  const factorsQuery = useFactors(date);
+  const calendar = useMonthCalendar(date);
+
+  if (horizon !== 'day') {
+    const period = periodFor(horizon, date);
+    const title =
+      horizon === 'week'
+        ? `Маршруты × дни, неделя ${formatDate(period.date_from).slice(0, 5)}–${formatDate(period.date_to).slice(0, 5)}`
+        : `Маршруты × дни, ${monthTitle(date)}`;
+    return (
+      <Panel title={title}>
+        <QueryView query={periodQuery} isEmpty={hasNoItems} emptyHint={EMPTY_HINT}>
+          {(forecast) => (
+            <RoutesDaysTable
+              routes={routes}
+              items={forecast.items}
+              calendar={calendar.days}
+              selectedRoute={null}
+              onSelectRoute={onSelectRoute}
+            />
+          )}
+        </QueryView>
+        <p className="muted">
+          Выберите маршрут — справа откроется его {horizon === 'week' ? 'неделя' : 'месяц'} по дням.
+        </p>
+      </Panel>
+    );
+  }
+
   return (
-    <RouteDetail
-      // Новый маршрут — карточка открывается с первой вкладки
-      key={route.route}
-      route={route}
-      dayItems={forecast.items.filter((item) => item.route === route.route)}
-      onClose={onClose}
-    />
+    <div className="page">
+      <QueryView query={dayQuery} isEmpty={hasNoItems} emptyHint={EMPTY_HINT}>
+        {(forecast) => (
+          <OverviewStats forecast={forecast} routesTotal={routes.length} date={date} />
+        )}
+      </QueryView>
+      <Panel title={`${formatDate(date)}, ${weekdayShort(date)}`}>
+        <Tabs
+          items={[
+            { id: 'table', label: 'Маршруты × часы' },
+            { id: 'list', label: 'Список маршрутов' },
+          ]}
+          value={view}
+          onChange={setView}
+          label="Представление"
+        />
+        <div className="route-workspace__tab">
+          <QueryView query={dayQuery} isEmpty={hasNoItems} emptyHint={EMPTY_HINT}>
+            {(forecast) =>
+              view === 'table' ? (
+                <RoutesHoursTable
+                  routes={routes}
+                  items={forecast.items}
+                  onSelectRoute={onSelectRoute}
+                />
+              ) : (
+                <RoutesList
+                  routes={routes}
+                  items={forecast.items}
+                  selectedRoute={undefined}
+                  onSelect={onSelectRoute}
+                />
+              )
+            }
+          </QueryView>
+        </div>
+      </Panel>
+      <Panel title="Факторы дня">
+        <QueryView query={factorsQuery}>{(factors) => <DayFactors factors={factors} />}</QueryView>
+      </Panel>
+    </div>
   );
 }

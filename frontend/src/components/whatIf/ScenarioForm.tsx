@@ -3,6 +3,8 @@ import { NEW_ROUTE_LABEL } from '../../config/constants';
 import { HOUR_INTERVALS } from '../../config/intervals';
 import type { ScenarioState } from '../../hooks/useScenarioParams';
 import { formatHour } from '../../utils/format';
+import type { Corrections } from '../../utils/scenario';
+import { CorrectionSliders } from './CorrectionSliders';
 
 interface ScenarioFormProps {
   routes: Route[];
@@ -13,6 +15,7 @@ interface ScenarioFormProps {
   onRouteChange: (route: number) => void;
   onIntervalChange: (id: string) => void;
   onDeltaChange: (delta: number) => void;
+  onCorrectionChange: (key: keyof Corrections, pct: number) => void;
   onReset: () => void;
 }
 
@@ -24,8 +27,11 @@ export function ScenarioForm({
   onRouteChange,
   onIntervalChange,
   onDeltaChange,
+  onCorrectionChange,
   onReset,
 }: ScenarioFormProps) {
+  const changed =
+    state.tramsDelta !== 0 || Object.values(state.correctionsPct).some((pct) => pct !== 0);
   const exits = basePeakTrams + state.tramsDelta;
   return (
     <form className="scenario-form" onSubmit={(event) => event.preventDefault()}>
@@ -98,25 +104,9 @@ export function ScenarioForm({
         </span>
       </div>
 
-      {/* Погода, тип дня и событие меняют сам поток — это пересчёт моделью, а в API такого метода нет */}
-      <fieldset className="scenario-form__model" disabled>
-        <legend className="header__label">Погода, тип дня, событие</legend>
-        <select className="field" aria-label="Погода">
-          <option>По прогнозу</option>
-        </select>
-        <select className="field" aria-label="Тип дня">
-          <option>По календарю</option>
-        </select>
-        <select className="field" aria-label="Событие">
-          <option>Без изменений</option>
-        </select>
-        <span className="muted">
-          Для этих параметров нужен пересчёт прогноза моделью — появится, когда в API будет метод
-          сценария
-        </span>
-      </fieldset>
+      <CorrectionSliders valuesPct={state.correctionsPct} onChange={onCorrectionChange} />
 
-      <button type="button" className="button" disabled={state.tramsDelta === 0} onClick={onReset}>
+      <button type="button" className="button" disabled={!changed} onClick={onReset}>
         Сбросить
       </button>
     </form>

@@ -1,28 +1,17 @@
-import type { ForecastItem, Route } from '../../api';
-import { DISPLAY_HOURS } from '../../config/constants';
-import { useFilters } from '../../hooks/useFilters';
-import { useMonthCalendar } from '../../hooks/useMonthCalendar';
-import { useRouteWeek } from '../../hooks/useRouteWeek';
+import type { ForecastItem } from '../../api';
 import { formatInterval } from '../../utils/decisions';
-import { hasNoItems } from '../../utils/empty';
 import { overloadInterval, peakLoadItem, totalPrediction } from '../../utils/forecast';
 import { formatDecimal, formatHourTime, formatThousands } from '../../utils/format';
 import { Icon } from '../Icon';
-import { DaysHoursTable } from '../route/DaysHoursTable';
-import { QueryView } from '../states/QueryView';
 
-interface FlowTabProps {
-  route: Route;
+interface DayStatsProps {
   dayItems: ForecastItem[];
   waitingDecisions: number;
   onOpenDecisions: () => void;
 }
 
-// Вкладка «Пассажиропоток»: цифры дня, неделя по часам и где пик
-export function FlowTab({ route, dayItems, waitingDecisions, onOpenDecisions }: FlowTabProps) {
-  const { date, setDate } = useFilters();
-  const weekQuery = useRouteWeek(route.route, date);
-  const calendar = useMonthCalendar(date);
+// Цифры дня маршрута и где пик. У пика с превышением — предупреждение, не галочка (экран 1а)
+export function DayStats({ dayItems, waitingDecisions, onOpenDecisions }: DayStatsProps) {
   const peak = peakLoadItem(dayItems);
   const overload = overloadInterval(dayItems);
   const maxTrams = Math.max(0, ...dayItems.map((item) => item.trams_on_line ?? 0));
@@ -45,20 +34,6 @@ export function FlowTab({ route, dayItems, waitingDecisions, onOpenDecisions }: 
           </dd>
         </div>
       </dl>
-
-      <QueryView query={weekQuery} isEmpty={hasNoItems}>
-        {(week) => (
-          <DaysHoursTable
-            items={week.items}
-            calendar={calendar.days}
-            selectedDate={date}
-            hours={DISPLAY_HOURS}
-            onSelectDate={setDate}
-          />
-        )}
-      </QueryView>
-
-      {/* У пика с превышением — значок предупреждения, не галочка (06_opisanie-maketov, экран 1а) */}
       <div className={`peak-strip${overload ? ' peak-strip--warning' : ' peak-strip--ok'}`}>
         <Icon name={overload ? 'warning' : 'check'} size={18} />
         {overload ? (

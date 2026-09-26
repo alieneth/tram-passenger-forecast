@@ -52,3 +52,11 @@ export const ANALOG_ROUTES: readonly number[] = [1, 7, 11, 12];
 // «Факт и прогноз» на экране «Качество модели»: две недели проверочного периода (октябрь 2025)
 export const QUALITY_CHART_FROM = '2025-10-01';
 export const QUALITY_CHART_TO = '2025-10-14';
+
+// Корректирующие коэффициенты на «Что если» (критерий 2в), в процентах к потоку.
+// Событие только добавляет пассажиров (матч, концерт), погода и сезон — в обе стороны
+export const CORRECTION_LIMITS = {
+  weather: { min: -30, max: 30 },
+  event: { min: 0, max: 50 },
+  season: { min: -20, max: 20 },
+} as const;

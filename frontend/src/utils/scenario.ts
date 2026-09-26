@@ -2,12 +2,28 @@ import type { ForecastItem } from '../api';
 import { DISPLAY_HOURS, PASSENGERS_PER_TRAM_NORM } from '../config/constants';
 import { formatHour } from './format';
 
-// Сценарий «что если» по числу выходов. Поток пассажиров считаем неизменным (бизнес-правило):
-// меняется только число трамваев в выбранные часы, а значит — пассажиров на трамвай
+// Сценарий «что если». Два рычага:
+// — число выходов в выбранные часы (поток при этом неизменен — бизнес-правило);
+// — корректирующие коэффициенты на погоду, событие и сезон (критерий 2в): поток × коэффициент.
+// Коэффициенты — поправка диспетчера поверх прогноза модели, а не пересчёт моделью
+export interface Corrections {
+  // Доли: 0.1 — +10% к потоку
+  weather: number;
+  event: number;
+  season: number;
+}
+
+export const NO_CORRECTIONS: Corrections = { weather: 0, event: 0, season: 0 };
+
+export function flowFactor({ weather, event, season }: Corrections): number {
+  return (1 + weather) * (1 + event) * (1 + season);
+}
+
 export interface ScenarioParams {
   hours: readonly number[];
   // На сколько трамваев больше (или меньше) в выбранные часы
   tramsDelta: number;
+  corrections: Corrections;
 }
 
 export interface ScenarioPoint {
@@ -20,8 +36,10 @@ export interface ScenarioPoint {
   // null — в этот час трамваев не останется
   scenario: number | null;
   corridor: [number, number] | null;
-  // Сколько трамваев нужно, чтобы в этот час уложиться в норму
+  // Сколько трамваев нужно, чтобы в этот час уложиться в норму (по потоку сценария)
   tramsForNorm: number;
+  prediction: number;
+  scenarioPassengers: number;
 }
 
 export interface ScenarioSummary {
@@ -32,6 +50,8 @@ export interface ScenarioSummary {
   // Не хватает трамваев до нормы в самый тяжёлый час сценария — столько брать из резерва
   reserveNeeded: number;
   hoursWithoutTrams: number[];
+  passengersBaseline: number;
+  passengersScenario: number;
 }
 
 const round1 = (value: number) => Math.round(value * 10) / 10;
@@ -47,6 +67,8 @@ export function buildScenario(items: ForecastItem[], params: ScenarioParams): Sc
       const trams = item.trams_on_line ?? 0;
       const inScenario = params.hours.includes(hour);
       const tramsAfter = trams + (inScenario ? params.tramsDelta : 0);
+      const factor = flowFactor(params.corrections);
+      const scenarioPassengers = item.prediction * factor;
       return {
         hour,
         label: formatHour(hour),
@@ -54,12 +76,17 @@ export function buildScenario(items: ForecastItem[], params: ScenarioParams): Sc
         trams,
         tramsAfter,
         baseline: round1(item.prediction / trams),
-        scenario: tramsAfter > 0 ? round1(item.prediction / tramsAfter) : null,
+        scenario: tramsAfter > 0 ? round1(scenarioPassengers / tramsAfter) : null,
         corridor:
           tramsAfter > 0
-            ? [round1(item.lower / tramsAfter), round1(item.upper / tramsAfter)]
+            ? [
+                round1((item.lower * factor) / tramsAfter),
+                round1((item.upper * factor) / tramsAfter),
+              ]
             : null,
-        tramsForNorm: Math.ceil(item.prediction / PASSENGERS_PER_TRAM_NORM),
+        tramsForNorm: Math.ceil(scenarioPassengers / PASSENGERS_PER_TRAM_NORM),
+        prediction: item.prediction,
+        scenarioPassengers,
       };
     });
 }
@@ -80,6 +107,10 @@ export function summarize(points: ScenarioPoint[]): ScenarioSummary {
       ...points.map((point) => point.tramsForNorm - Math.max(0, point.tramsAfter)),
     ),
     hoursWithoutTrams: points.filter((point) => point.scenario === null).map((point) => point.hour),
+    passengersBaseline: points.reduce((sum, point) => sum + point.prediction, 0),
+    passengersScenario: Math.round(
+      points.reduce((sum, point) => sum + point.scenarioPassengers, 0),
+    ),
   };
 }
 

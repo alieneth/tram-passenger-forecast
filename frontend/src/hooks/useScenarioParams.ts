@@ -1,6 +1,11 @@
 import { useSearchParams } from 'react-router';
-import { DISPLAY_HOURS } from '../config/constants';
+import { CORRECTION_LIMITS, DISPLAY_HOURS } from '../config/constants';
 import { HOUR_INTERVALS } from '../config/intervals';
+import type { Corrections } from '../utils/scenario';
+
+type CorrectionKey = keyof Corrections;
+// В адресе — проценты: ?weather=10&event=25&season=-5
+const CORRECTION_KEYS: CorrectionKey[] = ['weather', 'event', 'season'];
 
 // Параметры сценария — в адресе: ссылку «В симулятор» из решения можно открыть уже заполненной.
 // ?route=11&from=17&to=18&delta=1 — интервал решения; ?interval=morning — готовый интервал
@@ -10,6 +15,13 @@ export interface ScenarioState {
   intervalId: string;
   customInterval: { from: number; to: number } | null;
   tramsDelta: number;
+  // Поправки в процентах, как в адресе и на ползунках
+  correctionsPct: Record<CorrectionKey, number>;
+}
+
+function clampPct(key: CorrectionKey, value: number | undefined): number {
+  const { min, max } = CORRECTION_LIMITS[key];
+  return Math.min(max, Math.max(min, value ?? 0));
 }
 
 const MAX_HOUR = 23;
@@ -40,6 +52,11 @@ export function useScenarioParams() {
     intervalId: custom ? 'custom' : (preset?.id ?? 'all'),
     customInterval: custom,
     tramsDelta: toInt(searchParams.get('delta')) ?? 0,
+    correctionsPct: {
+      weather: clampPct('weather', toInt(searchParams.get('weather'))),
+      event: clampPct('event', toInt(searchParams.get('event'))),
+      season: clampPct('season', toInt(searchParams.get('season'))),
+    },
   };
 
   const update = (patch: Record<string, string | number | null>) =>
@@ -60,6 +77,8 @@ export function useScenarioParams() {
     setInterval: (id: string) =>
       update(id === 'custom' ? { interval: null } : { interval: id, from: null, to: null }),
     setTramsDelta: (delta: number) => update({ delta: delta === 0 ? null : delta }),
-    reset: () => update({ delta: null }),
+    setCorrection: (key: CorrectionKey, pct: number) => update({ [key]: pct === 0 ? null : pct }),
+    reset: () =>
+      update({ delta: null, ...Object.fromEntries(CORRECTION_KEYS.map((key) => [key, null])) }),
   };
 }

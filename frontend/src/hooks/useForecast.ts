@@ -1,13 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
 import { getForecast, type ForecastQuery } from '../api';
-import { monthRange } from '../utils/dates';
+import { apiHorizon, periodFor } from '../utils/horizon';
 import { useFilters } from './useFilters';
 
-// Прогноз по фильтрам шапки: «День» — по часам за дату, «Месяц» — по дням за весь месяц
+// Прогноз по фильтрам шапки: «День» — по часам за дату, «Неделя» и «Месяц» — по дням за период
 export function useForecast(routes?: number[]) {
   const { horizon, date } = useFilters();
-  const period = horizon === 'day' ? { date_from: date, date_to: date } : monthRange(date);
-  const query: ForecastQuery = { ...period, horizon, route: routes };
+  const query: ForecastQuery = {
+    ...periodFor(horizon, date),
+    horizon: apiHorizon(horizon),
+    route: routes,
+  };
 
   return useQuery({
     queryKey: ['forecast', query],

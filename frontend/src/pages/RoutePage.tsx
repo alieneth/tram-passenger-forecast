@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router';
 import { errorMessage, exportForecast, type Route } from '../api';
 import { Panel } from '../components/Panel';
@@ -7,6 +7,7 @@ import { RouteLabel } from '../components/RouteLabel';
 import { RouteMonthView } from '../components/month/RouteMonthView';
 import { NewRouteSection } from '../components/newRoute/NewRouteSection';
 import { DayForecastPanel } from '../components/route/DayForecastPanel';
+import { RouteWeekView } from '../components/week/RouteWeekView';
 import { DaysHoursTable } from '../components/route/DaysHoursTable';
 import { FactorContributions } from '../components/route/FactorContributions';
 import { EmptyState } from '../components/states/EmptyState';
@@ -18,9 +19,10 @@ import { useFilters } from '../hooks/useFilters';
 import { useMonthCalendar } from '../hooks/useMonthCalendar';
 import { useRouteMonth } from '../hooks/useRouteMonth';
 import { useRoutes } from '../hooks/useRoutes';
-import { monthRange, monthTitle } from '../utils/dates';
+import { monthTitle } from '../utils/dates';
 import { saveFile } from '../utils/download';
 import { hasNoItems } from '../utils/empty';
+import { apiHorizon, periodFor } from '../utils/horizon';
 
 // Экран «Маршрут» (UI-4): «дни × часы», прогноз дня с коридором, «Почему такой прогноз?»
 export function RoutePage() {
@@ -67,7 +69,9 @@ function UnknownRoute({ route, first }: { route: string; first: number | undefin
 
 function RouteDetails({ route, routes }: { route: Route; routes: Route[] }) {
   const navigate = useNavigate();
-  const { horizon, date, setDate } = useFilters();
+  const { horizon, date, setDate, setRoute } = useFilters();
+  // Открытый маршрут — общий контекст: на Обзоре, в Решениях и «Что если» он останется выбранным
+  useEffect(() => setRoute(route.route), [route.route, setRoute]);
   const [intervalId, setIntervalId] = useState(HOUR_INTERVALS[0]?.id ?? 'all');
   const [compareEnabled, setCompareEnabled] = useState(true);
   const interval = HOUR_INTERVALS.find((item) => item.id === intervalId) ?? HOUR_INTERVALS[0];
@@ -77,13 +81,13 @@ function RouteDetails({ route, routes }: { route: Route; routes: Route[] }) {
   const calendar = useMonthCalendar(date);
   const factorsQuery = useFactors(date, route.route);
   const download = useMutation({
-    // Срез: «День» — по часам за дату, «Месяц» — по дням за месяц
+    // Срез: «День» — по часам за дату, «Неделя» и «Месяц» — по дням за период
     mutationFn: () =>
       exportForecast({
         format: 'csv',
         route: [route.route],
-        horizon,
-        ...(horizon === 'day' ? { date_from: date, date_to: date } : monthRange(date)),
+        horizon: apiHorizon(horizon),
+        ...periodFor(horizon, date),
       }),
     onSuccess: ({ blob, filename }) => saveFile(blob, filename),
   });
@@ -157,9 +161,13 @@ function RouteDetails({ route, routes }: { route: Route; routes: Route[] }) {
       </div>
       {route.is_new && <NewRouteSection route={route} routes={routes} />}
 
-      {horizon === 'month' ? (
-        <RouteMonthView route={route} />
-      ) : (
+      {horizon === 'month' && <RouteMonthView route={route} />}
+      {horizon === 'week' && (
+        <Panel title={`Маршрут ${route.route} · неделя по дням`}>
+          <RouteWeekView route={route} />
+        </Panel>
+      )}
+      {horizon === 'day' && (
         <div className="route-grid">
           <Panel title={`Дни × часы, ${monthTitle(date)}`}>
             <QueryView

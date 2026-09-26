@@ -1,9 +1,10 @@
-import type { Horizon } from '../../api';
 import { useFilters } from '../../hooks/useFilters';
+import type { ViewHorizon } from '../../utils/horizon';
 
-// Горизонты только «День | Месяц» — «Год» не требуется
-const HORIZONS: { value: Horizon; label: string }[] = [
+// День — по часам, неделя и месяц — по дням. Год — по желанию, не делаем
+const HORIZONS: { value: ViewHorizon; label: string }[] = [
   { value: 'day', label: 'День' },
+  { value: 'week', label: 'Неделя' },
   { value: 'month', label: 'Месяц' },
 ];
 

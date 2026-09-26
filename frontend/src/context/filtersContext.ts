@@ -1,12 +1,15 @@
 import { createContext } from 'react';
-import type { Horizon } from '../api';
+import type { ViewHorizon } from '../utils/horizon';
 
-// Общие фильтры шапки: горизонт «День | Месяц» и дата. Их читают все экраны.
+// Общий контекст диспетчера: горизонт, дата и маршрут, с которым он работает. Маршрут живёт здесь,
+// а не в одном экране — переходы между экранами и горизонтами не теряют контекст (Q&A 26.09)
 export interface Filters {
-  horizon: Horizon;
+  horizon: ViewHorizon;
   date: string;
-  setHorizon: (horizon: Horizon) => void;
+  route: number | null;
+  setHorizon: (horizon: ViewHorizon) => void;
   setDate: (date: string) => void;
+  setRoute: (route: number | null) => void;
 }
 
 export const FiltersContext = createContext<Filters | null>(null);

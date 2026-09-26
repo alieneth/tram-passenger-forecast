@@ -1,7 +1,10 @@
 import { FORECAST_DATE_MAX, FORECAST_DATE_MIN } from '../../config/constants';
 import { useFilters } from '../../hooks/useFilters';
-import { addDays, datesInRange, monthTitle } from '../../utils/dates';
+import { addDays, datesInRange, formatDate, monthTitle } from '../../utils/dates';
+import { periodFor } from '../../utils/horizon';
 import { Icon } from '../Icon';
+
+const DAYS_IN_WEEK = 7;
 
 const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
 
@@ -30,15 +33,17 @@ export function DateSelect() {
     );
   }
 
-  // Стрелки ‹ › — диспетчер листает соседние дни, не открывая календарь
+  // Стрелки ‹ › — диспетчер листает соседние дни (на «Неделе» — недели), не открывая календарь
+  const step = horizon === 'week' ? DAYS_IN_WEEK : 1;
+  const week = horizon === 'week' ? periodFor('week', date) : null;
   return (
     <div className="date-stepper">
       <button
         type="button"
         className="button date-stepper__button"
-        aria-label="Предыдущий день"
+        aria-label={horizon === 'week' ? 'Предыдущая неделя' : 'Предыдущий день'}
         disabled={date <= FORECAST_DATE_MIN}
-        onClick={() => setDate(addDays(date, -1))}
+        onClick={() => setDate(addDays(date, -step))}
       >
         <Icon name="chevronLeft" size={16} />
       </button>
@@ -54,12 +59,17 @@ export function DateSelect() {
       <button
         type="button"
         className="button date-stepper__button"
-        aria-label="Следующий день"
+        aria-label={horizon === 'week' ? 'Следующая неделя' : 'Следующий день'}
         disabled={date >= FORECAST_DATE_MAX}
-        onClick={() => setDate(addDays(date, 1))}
+        onClick={() => setDate(addDays(date, step))}
       >
         <Icon name="chevronRight" size={16} />
       </button>
+      {week && (
+        <span className="date-stepper__range">
+          {formatDate(week.date_from).slice(0, 5)}–{formatDate(week.date_to).slice(0, 5)}
+        </span>
+      )}
     </div>
   );
 }

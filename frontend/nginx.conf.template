@@ -1,0 +1,36 @@
+server {
+    listen 80;
+    server_name _;
+    root /usr/share/nginx/html;
+
+    # API — на бэкенд (адрес из переменной API_UPSTREAM), браузер ходит на тот же адрес, что и за страницей
+    location /api/ {
+        proxy_pass ${API_UPSTREAM};
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 60s;
+    }
+
+    # Swagger бэкенда — по той же схеме, ссылка с экрана «Экспорт и API»
+    location ~ ^/(swagger-ui|v3/api-docs) {
+        proxy_pass ${API_UPSTREAM};
+        proxy_set_header Host $host;
+    }
+
+    # Файлы сборки с хэшем в имени кэшируем надолго, index.html — никогда
+    location /assets/ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        try_files $uri =404;
+    }
+
+    # SPA: любые пути приложения (/route/17, /decisions) отдают index.html
+    location / {
+        add_header Cache-Control "no-cache";
+        try_files $uri $uri/ /index.html;
+    }
+
+    gzip on;
+    gzip_types text/css application/javascript application/json image/svg+xml;
+}

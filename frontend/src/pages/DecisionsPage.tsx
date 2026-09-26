@@ -4,7 +4,6 @@ import type { DecisionList } from '../api';
 import { DecisionJournal } from '../components/decisions/DecisionJournal';
 import { DecisionListItem } from '../components/decisions/DecisionListItem';
 import { Panel } from '../components/Panel';
-import { DayOnlyNotice } from '../components/states/DayOnlyNotice';
 import { EmptyState } from '../components/states/EmptyState';
 import { QueryView } from '../components/states/QueryView';
 import { Tabs } from '../components/Tabs';
@@ -29,30 +28,27 @@ const EMPTY_MESSAGES: Record<DecisionTab, string> = {
   closed: 'Закрытых и просроченных решений нет',
 };
 
-// Экран «Решения» (UI-8): предложения по всем маршрутам на дату и журнал действий
+// Экран «Решения» (UI-8): предложения по всем маршрутам на дату и журнал действий.
+// Решения всегда на конкретный день — горизонт в шапке на экран не влияет
 export function DecisionsPage() {
-  const { horizon } = useFilters();
-  if (horizon === 'month') {
-    return <DayOnlyNotice title="Решения" message="Решения формируются на конкретный день" />;
-  }
-  return <DecisionsDay />;
-}
-
-function DecisionsDay() {
-  const { date } = useFilters();
+  const { date, route: contextRoute, setRoute: setContextRoute } = useFilters();
   const [searchParams, setSearchParams] = useSearchParams();
-  const routeParam = searchParams.get('route');
+  // Без ?route — маршрут, с которым диспетчер уже работает (общий контекст шапки)
+  const routeParam =
+    searchParams.get('route') ?? (contextRoute === null ? null : String(contextRoute));
   const route = routeParam === null ? undefined : Number(routeParam);
   const routesQuery = useRoutes();
   const decisionsQuery = useDecisionsForDate(date, Number.isInteger(route) ? route : undefined);
   const [tab, setTab] = useState<DecisionTab>('new');
 
-  const setRoute = (value: string) =>
+  const setRoute = (value: string) => {
+    setContextRoute(value === '' ? null : Number(value));
     setSearchParams((params) => {
       if (value === '') params.delete('route');
       else params.set('route', value);
       return params;
     });
+  };
 
   return (
     <div className="decisions-grid">

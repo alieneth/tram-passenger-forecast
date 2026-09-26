@@ -1,5 +1,10 @@
 import { PASSENGERS_PER_TRAM_NORM } from '../../config/constants';
-import { formatDecimal, formatHour } from '../../utils/format';
+import { formatDecimal, formatHour, formatThousands } from '../../utils/format';
+
+const formatSignedPct = (ratio: number) => {
+  const pct = Math.round(ratio * 100);
+  return `${pct > 0 ? '+' : pct < 0 ? '−' : ''}${Math.abs(pct)}%`;
+};
 import { plural } from '../../utils/plural';
 import type { ScenarioSummary } from '../../utils/scenario';
 import { StatCard } from '../StatCard';
@@ -42,6 +47,13 @@ export function ScenarioCards({ summary }: { summary: ScenarioSummary }) {
           }
         />
       </div>
+      {summary.passengersScenario !== summary.passengersBaseline && (
+        <p className="muted">
+          Пассажиров за день: {formatThousands(summary.passengersBaseline)} →{' '}
+          {formatThousands(summary.passengersScenario)} (
+          {formatSignedPct(summary.passengersScenario / summary.passengersBaseline - 1)})
+        </p>
+      )}
       {summary.hoursWithoutTrams.length > 0 && (
         <p className="text-up">
           В часы {summary.hoursWithoutTrams.map((hour) => `${formatHour(hour)}:00`).join(', ')} на

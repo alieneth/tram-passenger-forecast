@@ -15,7 +15,7 @@ import type { NameType, ValueType } from 'recharts/types/component/DefaultToolti
 import { PASSENGERS_PER_TRAM_NORM } from '../../config/constants';
 import { formatDecimal, formatHourTime } from '../../utils/format';
 import { plural } from '../../utils/plural';
-import type { ScenarioPoint } from '../../utils/scenario';
+import type { Corrections, ScenarioPoint } from '../../utils/scenario';
 import { CHART_COLORS } from '../route/chartColors';
 
 const CHART_HEIGHT_PX = 300;
@@ -46,12 +46,31 @@ function ScenarioTooltip({ active, payload }: TooltipContentProps<ValueType, Nam
 }
 
 // «Исходный прогноз и сценарий»: пассажиров на трамвай по часам с нормой и коридором сценария
+const CORRECTION_NAMES = { weather: 'погода', event: 'событие', season: 'сезон' } as const;
+
+// «+1 выход, погода +10%» — что именно изменено в сценарии
+function scenarioLabel(tramsDelta: number, correctionsPct: Record<keyof Corrections, number>) {
+  const parts: string[] = [];
+  if (tramsDelta !== 0) {
+    parts.push(
+      `${tramsDelta > 0 ? '+' : ''}${tramsDelta} ${plural(tramsDelta, ['выход', 'выхода', 'выходов'])}`,
+    );
+  }
+  for (const key of Object.keys(CORRECTION_NAMES) as (keyof Corrections)[]) {
+    const pct = correctionsPct[key];
+    if (pct !== 0) parts.push(`${CORRECTION_NAMES[key]} ${pct > 0 ? '+' : '−'}${Math.abs(pct)}%`);
+  }
+  return parts.length ? `Сценарий (${parts.join(', ')})` : 'Сценарий (без изменений)';
+}
+
 export function ScenarioChart({
   points,
   tramsDelta,
+  correctionsPct,
 }: {
   points: ScenarioPoint[];
   tramsDelta: number;
+  correctionsPct: Record<keyof Corrections, number>;
 }) {
   const changed = points.filter((point) => point.inScenario);
   const partial = changed.length > 0 && changed.length < points.length;
@@ -67,9 +86,7 @@ export function ScenarioChart({
         </span>
         <span className="chart-legend__item">
           <span className="chart-legend__key chart-legend__key--forecast" aria-hidden="true" />
-          {tramsDelta === 0
-            ? 'Сценарий (без изменений)'
-            : `Сценарий (${tramsDelta > 0 ? '+' : ''}${tramsDelta} ${plural(tramsDelta, ['выход', 'выхода', 'выходов'])})`}
+          {scenarioLabel(tramsDelta, correctionsPct)}
         </span>
         <span className="chart-legend__item">
           <span className="chart-legend__key chart-legend__key--corridor" aria-hidden="true" />

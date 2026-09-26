@@ -1,8 +1,9 @@
-import { IS_MOCK_MODE } from '../../api';
 import { Icon } from '../Icon';
+import { DataSourceBadge } from './DataSourceBadge';
 import { DateSelect } from './DateSelect';
 import { HealthIndicator } from './HealthIndicator';
 import { HorizonToggle } from './HorizonToggle';
+import { RouteSelect } from './RouteSelect';
 
 export function Header() {
   return (
@@ -22,14 +23,11 @@ export function Header() {
           <HorizonToggle />
         </div>
         <DateSelect />
+        <RouteSelect />
       </div>
       <div className="header__status">
         <HealthIndicator />
-        {IS_MOCK_MODE && (
-          <span className="badge badge--warning" title="VITE_API_URL не задан">
-            Мок-данные
-          </span>
-        )}
+        <DataSourceBadge />
       </div>
     </header>
   );

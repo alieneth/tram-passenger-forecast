@@ -1,5 +1,6 @@
 // Единственная точка доступа к данным. Экраны не знают, откуда данные — из API или из моков.
-import { IS_MOCK_MODE } from './config';
+import { IS_MOCK_MODE, MOCK_FALLBACK } from './config';
+import { markMocked, shouldFallback } from './fallback';
 import {
   buildQuery,
   getFile,
@@ -22,8 +23,9 @@ import type {
   operations,
 } from './types';
 
-// Моки грузятся отдельным чанком и только в мок-режиме — в сборку с реальным API они не попадают
+// Моки грузятся отдельным чанком — только в мок-режиме или когда реальный метод пришлось подменить
 const loadMock = () => import('../mocks/handlers');
+type MockHandlers = Awaited<ReturnType<typeof loadMock>>;
 
 // Параметры запросов — прямо из контракта, без ручного дублирования
 export type RoutesQuery = NonNullable<operations['getRoutes']['parameters']['query']>;
@@ -37,10 +39,38 @@ export type ModelQualityQuery = operations['getModelQuality']['parameters']['que
 
 export type { DownloadedFile };
 
+// Моки, реальный API или реальный API с подменой — выбор в одном месте
+async function call<T>(
+  method: string,
+  real: () => Promise<T>,
+  mock: (handlers: MockHandlers) => Promise<T>,
+  // Успешный ответ, который в гибридном режиме тоже значит «ещё не готово» (пустой справочник)
+  notReadyYet: (result: T) => boolean = () => false,
+): Promise<T> {
+  if (IS_MOCK_MODE) return mock(await loadMock());
+  try {
+    const result = await real();
+    if (MOCK_FALLBACK && notReadyYet(result)) {
+      markMocked(method, true);
+      return mock(await loadMock());
+    }
+    if (MOCK_FALLBACK) markMocked(method, false);
+    return result;
+  } catch (error) {
+    if (!MOCK_FALLBACK || !shouldFallback(error)) throw error;
+    markMocked(method, true);
+    return mock(await loadMock());
+  }
+}
+
+// Маршрутов в проекте всегда 10 — пустой справочник значит, что бэкенд его ещё не загрузил
 export function getRoutes(query: RoutesQuery = {}, signal?: AbortSignal): Promise<RouteList> {
-  return IS_MOCK_MODE
-    ? loadMock().then((mock) => mock.getRoutes(query))
-    : getJson('/routes', query, signal);
+  return call(
+    'routes',
+    () => getJson<RouteList>('/routes', query, signal),
+    (mock) => mock.getRoutes(query),
+    (routes) => routes.total === 0 && query.is_new === undefined,
+  );
 }
 
 export function getRouteGeometry(
@@ -48,44 +78,56 @@ export function getRouteGeometry(
   query: GeometryQuery = {},
   signal?: AbortSignal,
 ): Promise<RouteGeometry> {
-  return IS_MOCK_MODE
-    ? loadMock().then((mock) => mock.getRouteGeometry(route, query))
-    : getJson(`/routes/${route}/geometry`, query, signal);
+  return call(
+    'geometry',
+    () => getJson(`/routes/${route}/geometry`, query, signal),
+    (mock) => mock.getRouteGeometry(route, query),
+  );
 }
 
 export function getForecast(query: ForecastQuery, signal?: AbortSignal): Promise<ForecastResponse> {
-  return IS_MOCK_MODE
-    ? loadMock().then((mock) => mock.getForecast(query))
-    : getJson('/forecast', query, signal);
+  return call(
+    'forecast',
+    () => getJson('/forecast', query, signal),
+    (mock) => mock.getForecast(query),
+  );
 }
 
 export function getActuals(query: ActualsQuery, signal?: AbortSignal): Promise<ActualsResponse> {
-  return IS_MOCK_MODE
-    ? loadMock().then((mock) => mock.getActuals(query))
-    : getJson('/actuals', query, signal);
+  return call(
+    'actuals',
+    () => getJson('/actuals', query, signal),
+    (mock) => mock.getActuals(query),
+  );
 }
 
 export function getFactors(query: FactorsQuery, signal?: AbortSignal): Promise<FactorsResponse> {
-  return IS_MOCK_MODE
-    ? loadMock().then((mock) => mock.getFactors(query))
-    : getJson('/factors', query, signal);
+  return call(
+    'factors',
+    () => getJson('/factors', query, signal),
+    (mock) => mock.getFactors(query),
+  );
 }
 
 export function exportForecast(query: ExportQuery, signal?: AbortSignal): Promise<DownloadedFile> {
   const extension = query.format === 'xlsx' ? 'xlsx' : 'csv';
   const fallbackFilename = `forecast_${query.date_from}_${query.date_to}.${extension}`;
-  return IS_MOCK_MODE
-    ? loadMock().then((mock) => mock.exportForecast(query, fallbackFilename))
-    : getFile('/export', query, fallbackFilename, signal);
+  return call(
+    'export',
+    () => getFile('/export', query, fallbackFilename, signal),
+    (mock) => mock.exportForecast(query, fallbackFilename),
+  );
 }
 
 // 503 «БД недоступна» приходит с телом Health — показываем его как состояние, а не как ошибку
 const HEALTH_DOWN_STATUS = 503;
 
 export function getHealth(signal?: AbortSignal): Promise<Health> {
-  return IS_MOCK_MODE
-    ? loadMock().then((mock) => mock.getHealth())
-    : getJson('/health', {}, signal, [HEALTH_DOWN_STATUS]);
+  return call(
+    'health',
+    () => getJson('/health', {}, signal, [HEALTH_DOWN_STATUS]),
+    (mock) => mock.getHealth(),
+  );
 }
 
 // Относительный адрес запроса — для примера на экране «Экспорт и API»
@@ -100,9 +142,11 @@ export function getDecisions(
   query: DecisionsQuery = {},
   signal?: AbortSignal,
 ): Promise<DecisionList> {
-  return IS_MOCK_MODE
-    ? loadMock().then((mock) => mock.getDecisions(query))
-    : getJson('/decisions', query, signal);
+  return call(
+    'decisions',
+    () => getJson('/decisions', query, signal),
+    (mock) => mock.getDecisions(query),
+  );
 }
 
 // Принять / отклонить / отметить исполнение. Причина обязательна для rejected и not_executed
@@ -110,17 +154,21 @@ export function updateDecisionStatus(
   decisionId: number,
   update: DecisionStatusUpdate,
 ): Promise<DecisionStatusResult> {
-  return IS_MOCK_MODE
-    ? loadMock().then((mock) => mock.updateDecisionStatus(decisionId, update))
-    : sendJson('PATCH', `/decisions/${decisionId}`, update);
+  return call(
+    'decisions',
+    () => sendJson('PATCH', `/decisions/${decisionId}`, update),
+    (mock) => mock.updateDecisionStatus(decisionId, update),
+  );
 }
 
-// MAE нашей и базовой модели на сентябре–октябре; у маршрута без истории — метод аналогов
+// MAE нашей и базовой модели на сентябре–октябре
 export function getModelQuality(
   query: ModelQualityQuery,
   signal?: AbortSignal,
 ): Promise<ModelQuality> {
-  return IS_MOCK_MODE
-    ? loadMock().then((mock) => mock.getModelQuality(query))
-    : getJson('/model/quality', query, signal);
+  return call(
+    'model/quality',
+    () => getJson('/model/quality', query, signal),
+    (mock) => mock.getModelQuality(query),
+  );
 }
