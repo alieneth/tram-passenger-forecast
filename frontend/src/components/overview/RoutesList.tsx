@@ -1,0 +1,64 @@
+import type { ForecastItem, Route } from '../../api';
+import { DISPLAY_HOURS, NEW_ROUTE_LABEL } from '../../config/constants';
+import { itemsByRoute, peakLoadItem } from '../../utils/forecast';
+import { formatNumber } from '../../utils/format';
+import { LOAD_COLORS, loadLevel } from '../../utils/intensity';
+import { Icon } from '../Icon';
+import { Sparkline } from '../Sparkline';
+
+interface RoutesListProps {
+  routes: Route[];
+  items: ForecastItem[];
+  selectedRoute: number | undefined;
+  onSelect: (route: number) => void;
+}
+
+// Список маршрутов справа от карты: самые загруженные сверху, у каждого — своё значение пика
+export function RoutesList({ routes, items, selectedRoute, onSelect }: RoutesListProps) {
+  const byRoute = itemsByRoute(items);
+  const rows = routes
+    .map((route) => {
+      const routeItems = byRoute.get(route.route) ?? [];
+      const byHour = new Map(routeItems.map((item) => [item.hour, item.prediction]));
+      return {
+        route,
+        peakLoad: peakLoadItem(routeItems),
+        peakPassengers: Math.max(0, ...routeItems.map((item) => item.prediction)),
+        profile: DISPLAY_HOURS.map((hour) => byHour.get(hour) ?? 0),
+      };
+    })
+    .sort(
+      (a, b) => (b.peakLoad?.passengers_per_tram ?? 0) - (a.peakLoad?.passengers_per_tram ?? 0),
+    );
+
+  return (
+    <ul className="routes-list">
+      {rows.map(({ route, peakLoad, peakPassengers, profile }) => (
+        <li key={route.route}>
+          <button
+            type="button"
+            className={`routes-list__row${route.route === selectedRoute ? ' routes-list__row--selected' : ''}`}
+            aria-pressed={route.route === selectedRoute}
+            onClick={() => onSelect(route.route)}
+          >
+            <span
+              className="routes-list__badge"
+              style={{ borderColor: LOAD_COLORS[loadLevel(peakLoad)] }}
+            >
+              {route.route}
+            </span>
+            <span className="routes-list__name">
+              Маршрут {route.route}
+              {route.is_new && <span className="badge badge--new">{NEW_ROUTE_LABEL}</span>}
+            </span>
+            <span className="routes-list__value">
+              {formatNumber(peakPassengers)} <span className="muted">пасс./ч в пик</span>
+            </span>
+            <Sparkline values={profile} />
+            <Icon name="chevronRight" size={16} />
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+}

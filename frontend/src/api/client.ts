@@ -1,9 +1,18 @@
 // Единственная точка доступа к данным. Экраны не знают, откуда данные — из API или из моков.
 import { IS_MOCK_MODE } from './config';
-import { buildQuery, getFile, getJson, type DownloadedFile, type QueryParams } from './http';
+import {
+  buildQuery,
+  getFile,
+  getJson,
+  sendJson,
+  type DownloadedFile,
+  type QueryParams,
+} from './http';
 import type {
   ActualsResponse,
   DecisionList,
+  DecisionStatusResult,
+  DecisionStatusUpdate,
   FactorsResponse,
   ForecastResponse,
   Health,
@@ -92,4 +101,14 @@ export function getDecisions(
   return IS_MOCK_MODE
     ? loadMock().then((mock) => mock.getDecisions(query))
     : getJson('/decisions', query, signal);
+}
+
+// Принять / отклонить / отметить исполнение. Причина обязательна для rejected и not_executed
+export function updateDecisionStatus(
+  decisionId: number,
+  update: DecisionStatusUpdate,
+): Promise<DecisionStatusResult> {
+  return IS_MOCK_MODE
+    ? loadMock().then((mock) => mock.updateDecisionStatus(decisionId, update))
+    : sendJson('PATCH', `/decisions/${decisionId}`, update);
 }

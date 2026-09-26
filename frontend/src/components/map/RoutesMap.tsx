@@ -47,9 +47,13 @@ interface Hover {
   height: number;
 }
 
-function createLabel(mapRoute: MapRoute, showLoad: boolean): HTMLElement {
+function createLabel(mapRoute: MapRoute, showLoad: boolean, dimmed: boolean): HTMLElement {
   const element = document.createElement('div');
-  element.className = `map-label${mapRoute.route.is_new ? ' map-label--new' : ''}`;
+  element.className = [
+    'map-label',
+    mapRoute.route.is_new ? 'map-label--new' : '',
+    dimmed ? 'map-label--dimmed' : '',
+  ].join(' ');
   element.style.borderColor = routeColor(mapRoute, showLoad);
   element.textContent = mapRoute.route.is_new
     ? `${mapRoute.route.route} · новый`
@@ -152,7 +156,15 @@ export function RoutesMap({
       const position = labelPosition(mapRoute);
       if (!position) return [];
       return [
-        new Marker({ element: createLabel(mapRoute, showLoad), anchor: 'left', offset: [8, 0] })
+        new Marker({
+          element: createLabel(
+            mapRoute,
+            showLoad,
+            selectedRoute !== undefined && selectedRoute !== mapRoute.route.route,
+          ),
+          anchor: 'left',
+          offset: [8, 0],
+        })
           .setLngLat(position)
           .addTo(map),
       ];

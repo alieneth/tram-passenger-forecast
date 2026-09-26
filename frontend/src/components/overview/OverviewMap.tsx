@@ -1,6 +1,5 @@
 import type { UseQueryResult } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { useNavigate } from 'react-router';
 import type { ForecastResponse, Route } from '../../api';
 import { useRouteGeometries } from '../../hooks/useRouteGeometries';
 import { itemsByRoute, peakLoadItem } from '../../utils/forecast';
@@ -15,11 +14,14 @@ import { NoGeometryList } from '../map/NoGeometryList';
 export function OverviewMap({
   routes,
   forecastQuery,
+  selectedRoute,
+  onSelectRoute,
 }: {
   routes: Route[];
   forecastQuery: UseQueryResult<ForecastResponse>;
+  selectedRoute?: number;
+  onSelectRoute: (route: number) => void;
 }) {
-  const navigate = useNavigate();
   const items = forecastQuery.data?.items;
   const { geometries, isPending: geometriesPending, withoutGeometry } = useRouteGeometries(routes);
   const notice = mapNotice(forecastQuery, {
@@ -38,7 +40,12 @@ export function OverviewMap({
   return (
     <div className="overview-map">
       <div className="overview-map__canvas">
-        <LazyRoutesMap routes={mapRoutes} onRouteClick={(route) => navigate(`/route/${route}`)} />
+        {/* Выбранный маршрут подсвечен, остальные приглушены (экран 1а) */}
+        <LazyRoutesMap
+          routes={mapRoutes}
+          selectedRoute={selectedRoute}
+          onRouteClick={onSelectRoute}
+        />
         <div className="map-overlay map-overlay--bottom-left">
           <MapLegend compact />
         </div>

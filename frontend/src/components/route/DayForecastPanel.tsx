@@ -23,7 +23,16 @@ function compareLabel(comparison: Comparison): string {
   return `Неделю назад, ${formatDate(comparison.date)} (${kind})`;
 }
 
-export function DayForecastPanel({
+export function DayForecastPanel(props: DayForecastPanelProps) {
+  return (
+    <Panel title={`Прогноз по часам на ${formatDate(props.date)}`}>
+      <DayForecastContent {...props} />
+    </Panel>
+  );
+}
+
+// Сам график со сводкой — без панели: его же показывает вкладка «График» карточки маршрута на Обзоре
+export function DayForecastContent({
   route,
   date,
   items,
@@ -38,7 +47,7 @@ export function DayForecastPanel({
   const maxLoad = Math.max(0, ...points.map((point) => point.item.passengers_per_tram ?? 0));
 
   return (
-    <Panel title={`Прогноз по часам на ${formatDate(date)}`}>
+    <>
       {points.length === 0 ? (
         <EmptyState message="Нет прогноза за выбранную дату" hint="Выберите другую дату" />
       ) : (
@@ -82,6 +91,6 @@ export function DayForecastPanel({
           </details>
         </>
       )}
-    </Panel>
+    </>
   );
 }

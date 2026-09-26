@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router';
 import type { ForecastItem, Route } from '../api';
 import { DISPLAY_HOURS, NEW_ROUTE_LABEL } from '../config/constants';
 import { itemsByRouteAndHour } from '../utils/forecast';
@@ -6,8 +5,17 @@ import { formatHour, formatHourTime, formatNumber } from '../utils/format';
 import { intensityColor } from '../utils/intensity';
 
 // Тепловая таблица «маршруты × часы»: цвет — пассажиров в час относительно максимума таблицы
-export function RoutesHoursTable({ routes, items }: { routes: Route[]; items: ForecastItem[] }) {
-  const navigate = useNavigate();
+export function RoutesHoursTable({
+  routes,
+  items,
+  selectedRoute,
+  onSelectRoute,
+}: {
+  routes: Route[];
+  items: ForecastItem[];
+  selectedRoute?: number;
+  onSelectRoute: (route: number) => void;
+}) {
   const grid = itemsByRouteAndHour(items);
   const max = Math.max(1, ...items.map((item) => item.prediction));
 
@@ -28,8 +36,12 @@ export function RoutesHoursTable({ routes, items }: { routes: Route[]; items: Fo
           {routes.map((route) => (
             <tr
               key={route.route}
-              className={route.is_new ? 'heat-table__row--new' : undefined}
-              onClick={() => navigate(`/route/${route.route}`)}
+              className={[
+                route.is_new ? 'heat-table__row--new' : '',
+                route.route === selectedRoute ? 'heat-table__row--selected' : '',
+              ].join(' ')}
+              aria-selected={route.route === selectedRoute}
+              onClick={() => onSelectRoute(route.route)}
             >
               <th
                 scope="row"

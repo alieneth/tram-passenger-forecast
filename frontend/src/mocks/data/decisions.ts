@@ -1,7 +1,8 @@
 // Мок-решения строятся из того же мок-прогноза: на каждый маршрут, где в какой-то час пассажиров
 // на трамвай больше нормы, — предложение перебросить выходы с маршрута того же депо (БП-08),
 // а без донора в депо — выпуск из резерва. Так карточка «Решения ждут» не противоречит карте.
-import type { Decision, ForecastItem } from '../../api/types';
+import type { Decision, DecisionStatusCode, ForecastItem } from '../../api/types';
+import { parseDate } from './calendar';
 import { allForecastItems } from './forecast';
 import { routesMock } from './routes';
 
@@ -10,6 +11,21 @@ const NORM = 150;
 const PREP_MINUTES = 40;
 const CREATED_HOUR = '08:00:00';
 const MAX_DONOR_LOAD = 110;
+// id решения стабилен между запросами: номер дня × 100 + порядковый номер за день
+const IDS_PER_DAY = 100;
+
+// Названия статусов — по ТЗ 10.1 (в API приходят из decision_status.status_name)
+export const STATUS_NAMES: Record<DecisionStatusCode, string> = {
+  generated: 'Сформировано',
+  awaiting: 'Ожидает решения',
+  updated: 'Актуализировано',
+  accepted: 'Принято',
+  rejected: 'Отклонено',
+  expired: 'Просрочено',
+  executed: 'Исполнено',
+  not_executed: 'Не исполнено',
+  closed: 'Закрыто',
+};
 
 function round1(value: number): number {
   return Math.round(value * 10) / 10;
@@ -43,11 +59,27 @@ function deadline(date: string, hourFrom: number): string {
   return `${date}T${hh}:${mm}:00`;
 }
 
+const cache = new Map<string, Decision[]>();
+
+// Обратное к схеме id: по номеру решения — дата, за которую оно сформировано
+export function decisionDate(decisionId: number): string {
+  const day = Math.floor(decisionId / IDS_PER_DAY);
+  return new Date(day * 86_400_000).toISOString().slice(0, 10);
+}
+
 export function decisionsFor(date: string): Decision[] {
+  const cached = cache.get(date);
+  if (cached) return cached;
+  const decisions = buildDecisions(date);
+  cache.set(date, decisions);
+  return decisions;
+}
+
+function buildDecisions(date: string): Decision[] {
   const dayItems = allForecastItems().filter((item) => item.date === date);
   const routes = [...new Set(dayItems.map((item) => item.route))];
   const decisions: Decision[] = [];
-  let nextId = 1;
+  let nextId = Math.round(parseDate(date).getTime() / 86_400_000) * IDS_PER_DAY + 1;
 
   for (const route of routes) {
     const interval = overloadInterval(dayItems.filter((item) => item.route === route));
@@ -74,7 +106,7 @@ export function decisionsFor(date: string): Decision[] {
     const donorTrams = Math.max(0, ...donorItems.map((item) => item.trams_on_line ?? 0));
     const donorLoad = Math.max(0, ...donorItems.map((item) => item.passengers_per_tram ?? 0));
 
-    decisions.push({
+    const main: Decision = {
       decision_id: nextId++,
       parent_decision_id: null,
       decision_type: donor === undefined ? 'reserve' : 'transfer',
@@ -97,9 +129,25 @@ export function decisionsFor(date: string): Decision[] {
       same_depot: donor !== undefined || depot !== null,
       deadline_at: deadline(date, hourFrom),
       status_code: 'awaiting',
-      status_name: 'Ожидает решения',
+      status_name: STATUS_NAMES.awaiting,
       created_at: `${date}T${CREATED_HOUR}`,
-    });
+    };
+    decisions.push(main);
+
+    // У переброски — запасной вариант: один вагон из резерва депо (как в примере контракта)
+    if (main.decision_type === 'transfer') {
+      decisions.push({
+        ...main,
+        decision_id: nextId++,
+        parent_decision_id: main.decision_id,
+        decision_type: 'reserve',
+        donor_route: null,
+        trams_delta: 1,
+        load_after: round1(passengers / (trams + 1)),
+        donor_load_before: null,
+        donor_load_after: null,
+      });
+    }
   }
   return decisions;
 }

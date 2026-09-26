@@ -10,6 +10,7 @@ import './styles/global.css';
 import './styles/map.css';
 import './styles/route.css';
 import './styles/export.css';
+import './styles/overview.css';
 
 const MAX_RETRIES = 2;
 

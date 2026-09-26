@@ -130,3 +130,14 @@ export function formatDayMonth(date: string): string {
 export function weekdayIndexFromMonday(date: string): number {
   return (parseIsoDate(date).getUTCDay() + 6) % 7;
 }
+
+// Неделя (пн–вс) вокруг даты, обрезанная периодом [min, max]
+export function weekRange(
+  date: string,
+  min: string,
+  max: string,
+): { date_from: string; date_to: string } {
+  const monday = addDays(date, -weekdayIndexFromMonday(date));
+  const sunday = addDays(monday, 6);
+  return { date_from: clampDate(monday, min, max), date_to: clampDate(sunday, min, max) };
+}

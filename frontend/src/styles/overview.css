@@ -1,0 +1,277 @@
+/* Обзор: список маршрутов, карточка маршрута с вкладками, карточка решения (UI-7) */
+.routes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.routes-list__row {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto auto 16px;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-raised);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.routes-list__row:hover {
+  border-color: #60a5fa;
+}
+
+.routes-list__row--selected {
+  border-color: #60a5fa;
+  box-shadow: inset 3px 0 0 #60a5fa;
+}
+
+.routes-list__badge {
+  display: grid;
+  place-items: center;
+  height: 30px;
+  border: 2px solid;
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+.routes-list__name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.routes-list__value {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.routes-list__value .muted {
+  font-weight: 400;
+  font-size: 12px;
+}
+
+.sparkline polyline {
+  stroke: #60a5fa;
+}
+
+@media (max-width: 1400px) {
+  .routes-list__row {
+    grid-template-columns: 40px minmax(0, 1fr) auto 16px;
+  }
+
+  .routes-list__row .sparkline {
+    display: none;
+  }
+}
+
+.map-label--dimmed {
+  opacity: 0.35;
+}
+
+.heat-table__row--selected th {
+  color: #60a5fa;
+}
+
+.heat-table__row--selected td {
+  outline: 2px solid #60a5fa;
+  outline-offset: -1px;
+}
+
+/* --- Карточка маршрута --- */
+.route-detail__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.route-detail__body {
+  margin-top: 12px;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-top: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.tabs__tab {
+  padding: 8px 16px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.tabs__tab--active {
+  border-bottom-color: #60a5fa;
+  color: var(--text);
+}
+
+.flow-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.flow-tab .chart-summary {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+}
+
+.peak-strip {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.peak-strip--warning {
+  border-color: var(--warning);
+  color: var(--warning);
+}
+
+.peak-strip--warning > span {
+  color: var(--text);
+}
+
+.peak-strip--ok {
+  color: var(--ok);
+}
+
+.peak-strip .button {
+  margin-left: auto;
+}
+
+/* --- Карточка решения --- */
+.decisions-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.decision {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-raised);
+}
+
+.decision--waiting {
+  border-left-color: var(--danger);
+}
+
+.decision p {
+  margin: 0;
+}
+
+.decision__header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.decision__icon {
+  color: var(--danger);
+}
+
+.decision__status {
+  margin-left: auto;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.decision__status--awaiting,
+.decision__status--updated {
+  border-color: var(--warning);
+  color: var(--warning);
+}
+
+.decision__status--accepted,
+.decision__status--executed {
+  border-color: var(--ok);
+  color: var(--ok);
+}
+
+.decision__status--rejected,
+.decision__status--not_executed,
+.decision__status--expired {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.decision__label {
+  font-weight: 600;
+}
+
+.decision__check {
+  color: var(--ok);
+}
+
+.decision__warn {
+  color: var(--warning);
+}
+
+.decision__actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.decision__link {
+  color: #60a5fa;
+}
+
+.decision__reason {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.decision__alternative {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 6px;
+  padding: 8px 10px;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  color: var(--muted);
+}
+
+.button--success {
+  border-color: var(--ok);
+  background: #16a34a;
+  color: #fff;
+}
+
+.field--textarea {
+  width: 100%;
+  height: auto;
+  min-height: 64px;
+  padding: 8px 12px;
+  resize: vertical;
+}

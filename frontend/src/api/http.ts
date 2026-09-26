@@ -29,10 +29,11 @@ async function request(
   signal?: AbortSignal,
   // Статусы, при которых тело — обычный ответ, а не ошибка (GET /health отдаёт Health и с 503)
   acceptStatuses: readonly number[] = [],
+  init: RequestInit = {},
 ): Promise<Response> {
   let response: Response;
   try {
-    response = await fetch(buildUrl(path, params), { signal });
+    response = await fetch(buildUrl(path, params), { ...init, signal });
   } catch (cause) {
     if (cause instanceof DOMException && cause.name === 'AbortError') throw cause;
     throw ApiError.client('NETWORK_ERROR');
@@ -80,4 +81,22 @@ export async function getFile(
     blob: await response.blob(),
     filename: parseFilename(response.headers.get('Content-Disposition'), fallbackFilename),
   };
+}
+
+// Изменение данных (PATCH решения): тело — JSON, ответ — JSON
+export async function sendJson<T>(
+  method: 'PATCH' | 'POST',
+  path: string,
+  body: unknown,
+): Promise<T> {
+  const response = await request(path, {}, undefined, [], {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  try {
+    return (await response.json()) as T;
+  } catch {
+    throw ApiError.client('UNEXPECTED_RESPONSE', response.status);
+  }
 }

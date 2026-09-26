@@ -14,7 +14,11 @@ import { ApiError } from '../api/errors';
 import type {
   ActualItem,
   ActualsResponse,
+  Decision,
   DecisionList,
+  DecisionStatusCode,
+  DecisionStatusResult,
+  DecisionStatusUpdate,
   FactorsResponse,
   ForecastItem,
   Health,
@@ -23,7 +27,7 @@ import type {
   RouteList,
 } from '../api/types';
 import { datesBetween } from './data/calendar';
-import { decisionsFor } from './data/decisions';
+import { STATUS_NAMES, decisionDate, decisionsFor } from './data/decisions';
 import { factorsFor } from './data/factors';
 import {
   ACTUALS_FROM,
@@ -208,16 +212,94 @@ export function getFactors(query: FactorsQuery): Promise<FactorsResponse> {
   return respond({ ...factors, events });
 }
 
+// Изменённые статусы решений живут в памяти вкладки — как будто их сохранил бэкенд
+const statusChanges = new Map<number, DecisionStatusResult>();
+// Мок-диспетчер, от имени которого меняются статусы
+const MOCK_USER = 'dispatcher';
+
+function withStatus(decision: Decision): Decision {
+  const change = statusChanges.get(decision.decision_id);
+  return change
+    ? { ...decision, status_code: change.status_code, status_name: change.status_name }
+    : decision;
+}
+
 export function getDecisions(query: DecisionsQuery): Promise<DecisionList> {
   const dates = query.date ? [query.date] : datesBetween(FORECAST_FROM, FORECAST_TO);
   const items = dates
     .flatMap(decisionsFor)
+    .map(withStatus)
     .filter(
       (item) =>
         (query.route === undefined || item.route === query.route) &&
         (!query.status?.length || query.status.includes(item.status_code)),
     );
   return respond({ items, total: items.length });
+}
+
+// Переходы — как в контракте: awaiting, updated → accepted, rejected; accepted → executed, not_executed
+const ALLOWED_TRANSITIONS: Partial<Record<DecisionStatusCode, DecisionStatusCode[]>> = {
+  awaiting: ['accepted', 'rejected'],
+  updated: ['accepted', 'rejected'],
+  accepted: ['executed', 'not_executed'],
+};
+const REASON_REQUIRED: DecisionStatusCode[] = ['rejected', 'not_executed'];
+// Время в моке — «сейчас» на дату решения, а не реальные часы: иначе все решения 2025 года просрочены
+const MOCK_CHANGED_TIME = 'T09:00:00';
+
+function findDecision(decisionId: number): Decision | undefined {
+  const found = decisionsFor(decisionDate(decisionId)).find(
+    (item) => item.decision_id === decisionId,
+  );
+  return found && withStatus(found);
+}
+
+function setStatus(decision: Decision, status: DecisionStatusCode, reason: string | null) {
+  const result: DecisionStatusResult = {
+    decision_id: decision.decision_id,
+    status_code: status,
+    status_name: STATUS_NAMES[status],
+    changed_at: `${decision.date}${MOCK_CHANGED_TIME}`,
+    changed_by: MOCK_USER,
+    reason,
+  };
+  statusChanges.set(decision.decision_id, result);
+  return result;
+}
+
+export function updateDecisionStatus(
+  decisionId: number,
+  update: DecisionStatusUpdate,
+): Promise<DecisionStatusResult> {
+  const decision = findDecision(decisionId);
+  if (!decision) return fail(404, 'DECISION_NOT_FOUND', `Решение ${decisionId} не найдено`);
+  const reason = update.reason?.trim() || null;
+  if (REASON_REQUIRED.includes(update.status_code) && !reason) {
+    return validationError('reason', 'Укажите причину');
+  }
+  if (!ALLOWED_TRANSITIONS[decision.status_code]?.includes(update.status_code)) {
+    return fail(
+      409,
+      'INVALID_STATUS_TRANSITION',
+      `Нельзя перевести решение из статуса ${decision.status_code} в ${update.status_code}`,
+    );
+  }
+  const result = setStatus(decision, update.status_code, reason);
+  // Принят один вариант — остальные варианты этого решения закрываются
+  if (update.status_code === 'accepted') {
+    const rootId = decision.parent_decision_id ?? decision.decision_id;
+    decisionsFor(decision.date)
+      .map(withStatus)
+      .filter(
+        (item) =>
+          item.decision_id !== decision.decision_id &&
+          (item.decision_id === rootId || item.parent_decision_id === rootId) &&
+          // Закрываем только ещё открытые варианты — отклонённый остаётся в истории отклонённым
+          ['awaiting', 'updated'].includes(item.status_code),
+      )
+      .forEach((item) => setStatus(item, 'closed', null));
+  }
+  return respond(result);
 }
 
 export function getHealth(): Promise<Health> {

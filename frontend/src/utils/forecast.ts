@@ -57,3 +57,17 @@ export function itemsByRoute(items: ForecastItem[]): Map<number, ForecastItem[]>
   }
   return result;
 }
+
+// Непрерывный интервал часов выше нормы вокруг самого загруженного часа (null — норма не превышена)
+export function overloadInterval(
+  items: ForecastItem[],
+): { hour_from: number; hour_to: number } | null {
+  const over = new Set(items.filter(isOverNorm).map((item) => item.hour));
+  const peak = peakLoadItem(items.filter(isOverNorm));
+  if (!peak || peak.hour === null || peak.hour === undefined) return null;
+  let from = peak.hour;
+  let to = peak.hour;
+  while (over.has(from - 1)) from -= 1;
+  while (over.has(to + 1)) to += 1;
+  return { hour_from: from, hour_to: to };
+}
