@@ -1,0 +1,32 @@
+server:
+  port: ${API_PORT:8080}
+
+spring:
+  application:
+    name: tram-forecast-backend
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+    default-property-inclusion: non_absent
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:tram}
+    username: ${DB_USER:tram}
+    password: ${DB_PASSWORD:change_me}
+    hikari:
+      maximum-pool-size: 10
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc.time_zone: Europe/Moscow
+
+app:
+  passengers-per-tram-norm: ${PASSENGERS_PER_TRAM_NORM:150}
+  tram-prep-minutes: ${TRAM_PREP_MINUTES:40}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
