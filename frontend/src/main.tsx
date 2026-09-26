@@ -13,6 +13,7 @@ import './styles/export.css';
 import './styles/overview.css';
 import './styles/decisions.css';
 import './styles/quality.css';
+import './styles/whatIf.css';
 
 const MAX_RETRIES = 2;
 

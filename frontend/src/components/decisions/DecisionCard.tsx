@@ -99,7 +99,10 @@ export function DecisionCard({ decision, alternatives, showHeader = true }: Deci
           >
             Отклонить
           </button>
-          <Link className="decision__link" to={`/what-if?decision=${decision.decision_id}`}>
+          <Link
+            className="decision__link"
+            to={`/what-if?route=${decision.route}&from=${decision.hour_from}&to=${decision.hour_to}&delta=${decision.trams_delta}`}
+          >
             В симулятор →
           </Link>
         </div>
