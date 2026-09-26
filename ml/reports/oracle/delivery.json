@@ -1,0 +1,43 @@
+{
+  "candidates": {
+    "development_selected": {
+      "rows": 13725,
+      "submission_sha256": "bdb9500efe9d9e20198b01dc2102a93674e37af46d65415e0c7ffc2d002db292"
+    },
+    "validation_selected": {
+      "rows": 13725,
+      "submission_sha256": "4c97ed9f5b687bd0b6bea9bb0dcba89afc807e9990187d858d49fef8a3c13bbe"
+    },
+    "restored": {
+      "rows": 13725,
+      "submission_sha256": "89a710f9f2f22a8f93287d886158d34d236c3a6501f63e28967471ed4e559ff5"
+    }
+  },
+  "restoration_check": [
+    {
+      "repair": false,
+      "gap_days": 4,
+      "score_clean": 0.8961935374263996,
+      "score_original": 0.8958483147708561,
+      "mae_clean": 102.3839605734767
+    },
+    {
+      "repair": true,
+      "gap_days": 4,
+      "score_clean": 0.8967940605447227,
+      "score_original": 0.8964486065617069,
+      "mae_clean": 101.79166666666667
+    }
+  ],
+  "gap_days": 4,
+  "repair_improved_october": true,
+  "limitations": [
+    "Oracle exogenous data; unavailable at a real forecasting origin",
+    "Gap causes unknown: imputation is a scenario, not recovered observations",
+    "Repair compared on October only; labels of October unchanged",
+    "Intervals calibrated empirically; no guaranteed future coverage",
+    "Year horizon not supported by this 2025-only oracle bundle"
+  ],
+  "database_written": false,
+  "pushed": false
+}

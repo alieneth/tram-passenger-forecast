@@ -1,0 +1,53 @@
+{
+  "selected": {
+    "variant": "night_zero",
+    "repair": false,
+    "candidate_gap_days": 0,
+    "mae": 148.15755675029868,
+    "wape_score": 0.8147734900190349
+  },
+  "development_candidates": [
+    {
+      "variant": "night_zero",
+      "repair": false,
+      "candidate_gap_days": 0,
+      "mae": 148.15755675029868,
+      "wape_score": 0.8147734900190349
+    },
+    {
+      "variant": "night_zero_with_repair",
+      "repair": true,
+      "candidate_gap_days": 0,
+      "mae": 148.15755675029868,
+      "wape_score": 0.8147734900190349
+    }
+  ],
+  "validation_clean_target": {
+    "mae": 104.2432452944748,
+    "wape_score": 0.8922708044027893
+  },
+  "validation_original_labels": {
+    "mae": 104.61027625986642,
+    "wape_score": 0.8919324902361766
+  },
+  "baseline_clean_mae": 133.06438176363443,
+  "intervals": {
+    "nominal_coverage": 0.8,
+    "calibration": "2025-09",
+    "evaluation": "2025-10",
+    "hourly_coverage": 0.8124253285543608,
+    "daily_coverage": 0.7777777777777778,
+    "limitation": "Temporal distribution shift; nominal coverage is not a guarantee"
+  },
+  "night_policy": {
+    "zero_hours": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "hour5": "unchanged"
+  },
+  "route5": "not scored; zero submission placeholder, no forecast rows in database",
+  "validation_role": "previously inspected period; no new independent test"
+}

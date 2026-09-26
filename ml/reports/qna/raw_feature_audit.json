@@ -1,0 +1,41 @@
+{
+  "inputs": {
+    "train.csv": [
+      8160068959,
+      1789376644000000000
+    ],
+    "test.csv": [
+      2231502820,
+      1789376648000000000
+    ]
+  },
+  "schema_version": 2,
+  "seconds": 87.43829130000086,
+  "audit": {
+    "train": {
+      "passed": true,
+      "mismatch_keys": 0,
+      "raw_boardings": 46912710,
+      "label_boardings": 46912710
+    },
+    "test": {
+      "passed": true,
+      "mismatch_keys": 0,
+      "raw_boardings": 12754481,
+      "label_boardings": 12754481
+    }
+  },
+  "cutoff": "2025-10-31",
+  "features": [
+    "exits_observed",
+    "pass_share",
+    "concession_share",
+    "validation_gap_seconds"
+  ],
+  "limitations": [
+    "Выходы наблюдаются только при успешных валидациях",
+    "Тарифные группы определены явными строковыми правилами",
+    "pass_route предназначен для взаиморасчётов; хеш карты не идентификатор человека",
+    "Интервалы валидаций не являются скоростью или headway"
+  ]
+}

@@ -32,12 +32,11 @@ RAW_SCHEMA = {
 }
 RAW_FEATURES = [
     "exits_observed",
-    "metro_share",
-    "mcc_share",
     "pass_share",
     "concession_share",
     "validation_gap_seconds",
 ]
+FEATURE_SCHEMA_VERSION = 2
 
 
 def build_raw_features(config: Config, refresh: bool = False) -> pd.DataFrame:
@@ -49,10 +48,13 @@ def build_raw_features(config: Config, refresh: bool = False) -> pd.DataFrame:
     signature = {str(p): [p.stat().st_size, p.stat().st_mtime_ns] for p in paths}
     if target.exists() and manifest_path.exists() and not refresh:
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-        if manifest.get("inputs") == signature:
+        if (
+            manifest.get("inputs") == signature
+            and manifest.get("schema_version") == FEATURE_SCHEMA_VERSION
+        ):
             return pd.read_csv(target, sep=";", parse_dates=["date"])
     start = perf_counter()
-    LOGGER.info("Агрегация выходов, тарифов и пересадок из обоих raw-файлов")
+    LOGGER.info("Агрегация выходов и тарифов; pass_route и хеш карты не используются")
     with duckdb.connect(config={"threads": config.threads, "memory_limit": "1GB"}) as conn:
         conn.read_csv(
             [str(p) for p in paths],
@@ -72,8 +74,6 @@ def build_raw_features(config: Config, refresh: bool = False) -> pd.DataFrame:
             SELECT CAST(regexp_extract(ngpt_route, '^([0-9]+)', 1) AS INTEGER) AS route,
               CAST(tran_date_time AS TIMESTAMP) AS ts,
               NULLIF(trim(bus_exit_no), '') AS bus_exit_no,
-              contains(coalesce(pass_route,''), 'Мосметро')::INTEGER AS metro,
-              contains(coalesce(pass_route,''), 'МЦК')::INTEGER AS mcc,
               regexp_matches(coalesce(good_type,''), '(дней|день|суток|месяц|год)')::INTEGER AS pass,
               regexp_matches(coalesce(good_type,''), '(СКМ|СКМО|льгот|социал)')::INTEGER AS concession
             FROM raw_input
@@ -82,14 +82,13 @@ def build_raw_features(config: Config, refresh: bool = False) -> pd.DataFrame:
               AND CAST(tran_date_time AS TIMESTAMP) < TIMESTAMP '2025-11-01'
           ), by_exit AS (
             SELECT route, CAST(ts AS DATE) AS date, hour(ts)::INTEGER AS hour, bus_exit_no,
-              count(*)::BIGINT AS n, sum(metro) AS metro, sum(mcc) AS mcc,
+              count(*)::BIGINT AS n,
               sum(pass) AS pass, sum(concession) AS concession,
               CASE WHEN count(*)>1 THEN epoch(max(ts)-min(ts))/(count(*)-1) ELSE NULL END AS gap
             FROM valid GROUP BY route, date, hour, bus_exit_no
           )
           SELECT route, date, hour, sum(n)::BIGINT AS boardings,
             count(bus_exit_no)::INTEGER AS exits_observed,
-            sum(metro)/sum(n) AS metro_share, sum(mcc)/sum(n) AS mcc_share,
             sum(pass)/sum(n) AS pass_share, sum(concession)/sum(n) AS concession_share,
             coalesce(median(gap),0) AS validation_gap_seconds
           FROM by_exit GROUP BY route, date, hour ORDER BY route, date, hour
@@ -107,6 +106,7 @@ def build_raw_features(config: Config, refresh: bool = False) -> pd.DataFrame:
     hourly.to_csv(target, sep=";", index=False, date_format="%Y-%m-%d")
     manifest = {
         "inputs": signature,
+        "schema_version": FEATURE_SCHEMA_VERSION,
         "seconds": perf_counter() - start,
         "audit": audits,
         "cutoff": "2025-10-31",
@@ -114,6 +114,7 @@ def build_raw_features(config: Config, refresh: bool = False) -> pd.DataFrame:
         "limitations": [
             "Выходы наблюдаются только при успешных валидациях",
             "Тарифные группы определены явными строковыми правилами",
+            "pass_route предназначен для взаиморасчётов; хеш карты не идентификатор человека",
             "Интервалы валидаций не являются скоростью или headway",
         ],
     }

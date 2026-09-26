@@ -5,7 +5,7 @@
     "executed_cells": 10,
     "image_outputs": 7,
     "errors": 0,
-    "sha256": "4fb40b87cbbfc2704b626c8e81d50cc5286ca4b1021153571a5377a410bb320a"
+    "sha256": "343b2960d34087c2d65691c3d09fcf9b4f13687ffecbc1ba22ecf6be2d5ed649"
   },
   {
     "notebook": "02_validation_and_external_sources.ipynb",
@@ -13,6 +13,14 @@
     "executed_cells": 9,
     "image_outputs": 6,
     "errors": 0,
-    "sha256": "9b8d99a9720c5fe2adca87529bdf814c67ddc3fc82c4607d18523172d34cd384"
+    "sha256": "79e3ec9e9cea302fb8d30bbc7778b67857e1c2b64516b17f35f494d8228629ec"
+  },
+  {
+    "notebook": "03_qna_validation.ipynb",
+    "code_cells": 6,
+    "executed_cells": 6,
+    "image_outputs": 4,
+    "errors": 0,
+    "sha256": "f062be171c0a172bb33bcc3dea0cbaecbf22ebb03448dc5d8eeea8e32e4aafc7"
   }
 ]

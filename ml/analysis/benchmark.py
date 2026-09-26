@@ -1,5 +1,6 @@
 """Измерение Python-инференса; показатель API RPS этим тестом не оценивается."""
 
+import argparse
 import json
 import logging
 import os
@@ -22,12 +23,27 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def main() -> None:
     setup_logging()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--release", choices=["champion", "qna"], default="champion")
+    args = parser.parse_args()
+    predict_function = forecast
+    loader = load_bundle
     directory = Path(os.getenv("ML_CHAMPION_DIR", str(ROOT / "artifacts/champion")))
+    output = ROOT / "reports/performance.json"
+    if args.release == "qna":
+        from ml.qna.__main__ import load_local_bundle
+        from ml.qna.serving import forecast as qna_forecast
+
+        loader = load_local_bundle
+        predict_function = qna_forecast
+        directory = ROOT / "artifacts/qna_final"
+        output = ROOT / "reports/qna/performance.json"
     start = perf_counter()
-    bundle = load_bundle(directory)
+    bundle = loader(directory)
     load_ms = (perf_counter() - start) * 1000
     result = {
         "scope": "Python features + prediction + postprocessing; excludes API, CSV and database",
+        "release": args.release,
         "environment": {
             "python": platform.python_version(),
             "os": platform.platform(),
@@ -44,15 +60,15 @@ def main() -> None:
     process = psutil.Process()
     for label, start_date, end_date in [
         ("one_day", "2025-11-14", "2025-11-14"),
-        ("complete_submission", "2025-11-01", "2025-12-31"),
+        ("complete_horizon", "2025-11-01", "2025-12-31"),
     ]:
         for _ in range(WARMUPS):
-            frame = forecast(bundle, start_date, end_date)
+            frame = predict_function(bundle, start_date, end_date)
         timings = []
         rss = []
         for _ in range(REPEATS):
             started = perf_counter()
-            frame = forecast(bundle, start_date, end_date)
+            frame = predict_function(bundle, start_date, end_date)
             timings.append((perf_counter() - started) * 1000)
             rss.append(process.memory_info().rss / (1024**2))
         result["benchmarks"].append(
@@ -66,7 +82,7 @@ def main() -> None:
                 "max_observed_rss_mb": max(rss),
             }
         )
-    output = ROOT / "reports/performance.json"
+    output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(result, indent=2), encoding="utf-8")
     logging.info("Измерения сохранены: %s", output)
 

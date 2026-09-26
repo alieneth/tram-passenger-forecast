@@ -1,5 +1,8 @@
 # Модель: метод, валидация и ограничения
 
+Область этого отчёта — предыдущий зафиксированный выпуск `ml.champion`.
+Изменения после экспертной сессии и метрики нового выпуска: [QNA_UPDATE.md](QNA_UPDATE.md).
+
 Воспроизводимость сохранённой и повторно обученной модели: [verification.json](reports/champion/verification.json), [ошибки по маршрутам](reports/champion/validation_by_route.csv), [важности признаков](reports/champion/feature_importance.csv).
 
 ## Как получается прогноз
