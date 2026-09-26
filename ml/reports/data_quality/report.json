@@ -1,0 +1,1371 @@
+{
+  "files": {
+    "train.csv": {
+      "rows": 49051926,
+      "tran_no_missing": 0,
+      "tran_no_approx_distinct": 349650,
+      "device_no_missing": 0,
+      "device_no_approx_distinct": 3929,
+      "tran_date_time_missing": 0,
+      "tran_date_time_approx_distinct": 14566742,
+      "begin_date_time_missing": 4794872,
+      "begin_date_time_approx_distinct": 556473,
+      "input_date_time_missing": 0,
+      "input_date_time_approx_distinct": 11799720,
+      "crd_hashcode_missing": 0,
+      "crd_hashcode_approx_distinct": 4355560,
+      "validation_result_missing": 0,
+      "validation_result_approx_distinct": 17,
+      "tran_type_id_missing": 0,
+      "tran_type_id_approx_distinct": 10,
+      "place_id_missing": 155,
+      "place_id_approx_distinct": 6,
+      "good_type_missing": 49,
+      "good_type_approx_distinct": 249,
+      "pass_route_missing": 22516456,
+      "pass_route_approx_distinct": 259,
+      "ngpt_route_missing": 0,
+      "ngpt_route_approx_distinct": 10,
+      "bus_exit_no_missing": 32,
+      "bus_exit_no_approx_distinct": 65,
+      "garage_number_missing": 383141,
+      "garage_number_approx_distinct": 509,
+      "tran_no_invalid_integer": 0,
+      "device_no_invalid_integer": 0,
+      "validation_result_invalid_integer": 0,
+      "tran_type_id_invalid_integer": 0,
+      "place_id_invalid_integer": 0,
+      "bus_exit_no_invalid_integer": 0,
+      "garage_number_invalid_integer": 0,
+      "tran_date_time_invalid_timestamp": 0,
+      "begin_date_time_invalid_timestamp": 0,
+      "input_date_time_invalid_timestamp": 0,
+      "input_before_transaction": 103,
+      "begin_after_transaction": 11776878,
+      "unexpected_card_hash_format": 0
+    },
+    "test.csv": {
+      "rows": 13391571,
+      "tran_no_missing": 0,
+      "tran_no_approx_distinct": 206489,
+      "device_no_missing": 0,
+      "device_no_approx_distinct": 3627,
+      "tran_date_time_missing": 0,
+      "tran_date_time_approx_distinct": 4158609,
+      "begin_date_time_missing": 1346639,
+      "begin_date_time_approx_distinct": 126912,
+      "input_date_time_missing": 0,
+      "input_date_time_approx_distinct": 3632080,
+      "crd_hashcode_missing": 0,
+      "crd_hashcode_approx_distinct": 1986958,
+      "validation_result_missing": 0,
+      "validation_result_approx_distinct": 18,
+      "tran_type_id_missing": 0,
+      "tran_type_id_approx_distinct": 9,
+      "place_id_missing": 0,
+      "place_id_approx_distinct": 5,
+      "good_type_missing": 23,
+      "good_type_approx_distinct": 243,
+      "pass_route_missing": 6037285,
+      "pass_route_approx_distinct": 192,
+      "ngpt_route_missing": 0,
+      "ngpt_route_approx_distinct": 11,
+      "bus_exit_no_missing": 26,
+      "bus_exit_no_approx_distinct": 60,
+      "garage_number_missing": 48309,
+      "garage_number_approx_distinct": 467,
+      "tran_no_invalid_integer": 0,
+      "device_no_invalid_integer": 0,
+      "validation_result_invalid_integer": 0,
+      "tran_type_id_invalid_integer": 0,
+      "place_id_invalid_integer": 0,
+      "bus_exit_no_invalid_integer": 0,
+      "garage_number_invalid_integer": 0,
+      "tran_date_time_invalid_timestamp": 0,
+      "begin_date_time_invalid_timestamp": 0,
+      "input_date_time_invalid_timestamp": 0,
+      "input_before_transaction": 0,
+      "begin_after_transaction": 3314417,
+      "unexpected_card_hash_format": 0
+    }
+  },
+  "targets": {
+    "routes": [
+      {
+        "route": 1,
+        "supplied_hours": 6204,
+        "grid_hours": 7296,
+        "absent_hours": 1092,
+        "zero_days": 0,
+        "max_hour": 2645,
+        "p99_hour": 1976.1000000000004,
+        "median_day": 19129.5,
+        "max_day": 27083,
+        "anomaly_candidates": 7
+      },
+      {
+        "route": 7,
+        "supplied_hours": 6600,
+        "grid_hours": 7296,
+        "absent_hours": 696,
+        "zero_days": 0,
+        "max_hour": 5055,
+        "p99_hour": 2846.0,
+        "median_day": 23799.5,
+        "max_day": 50676,
+        "anomaly_candidates": 0
+      },
+      {
+        "route": 11,
+        "supplied_hours": 6416,
+        "grid_hours": 7296,
+        "absent_hours": 880,
+        "zero_days": 0,
+        "max_hour": 3944,
+        "p99_hour": 3357.05,
+        "median_day": 31419.0,
+        "max_day": 42500,
+        "anomaly_candidates": 6
+      },
+      {
+        "route": 12,
+        "supplied_hours": 6629,
+        "grid_hours": 7296,
+        "absent_hours": 667,
+        "zero_days": 0,
+        "max_hour": 4340,
+        "p99_hour": 3643.250000000001,
+        "median_day": 34516.5,
+        "max_day": 42083,
+        "anomaly_candidates": 3
+      },
+      {
+        "route": 17,
+        "supplied_hours": 6677,
+        "grid_hours": 7296,
+        "absent_hours": 619,
+        "zero_days": 0,
+        "max_hour": 5827,
+        "p99_hour": 5271.150000000001,
+        "median_day": 50689.0,
+        "max_day": 59718,
+        "anomaly_candidates": 35
+      },
+      {
+        "route": 25,
+        "supplied_hours": 5904,
+        "grid_hours": 7296,
+        "absent_hours": 1392,
+        "zero_days": 0,
+        "max_hour": 1626,
+        "p99_hour": 907.0500000000002,
+        "median_day": 6670.0,
+        "max_day": 14219,
+        "anomaly_candidates": 15
+      },
+      {
+        "route": 26,
+        "supplied_hours": 6592,
+        "grid_hours": 7296,
+        "absent_hours": 704,
+        "zero_days": 0,
+        "max_hour": 3656,
+        "p99_hour": 2193.1500000000005,
+        "median_day": 16990.0,
+        "max_day": 32205,
+        "anomaly_candidates": 4
+      },
+      {
+        "route": 28,
+        "supplied_hours": 6116,
+        "grid_hours": 7296,
+        "absent_hours": 1180,
+        "zero_days": 0,
+        "max_hour": 1783,
+        "p99_hour": 1215.0,
+        "median_day": 9628.0,
+        "max_day": 15738,
+        "anomaly_candidates": 1
+      },
+      {
+        "route": 50,
+        "supplied_hours": 6413,
+        "grid_hours": 7296,
+        "absent_hours": 883,
+        "zero_days": 1,
+        "max_hour": 4276,
+        "p99_hour": 2859.0,
+        "median_day": 23990.0,
+        "max_day": 39898,
+        "anomaly_candidates": 9
+      }
+    ],
+    "anomaly_threshold": 8.0,
+    "anomaly_reference": "Jan-Aug route/weekday/hour median and MAD; no rows removed",
+    "route5_success_history": false,
+    "label_duplicate_keys": 0
+  },
+  "field_scan_seconds": 124.42105050000828,
+  "exact_duplicates": {
+    "groups": 0,
+    "extra_rows": 0,
+    "max_copies": 0,
+    "method": "hash prefilter then exact equality on all 14 fields"
+  },
+  "raw_route_status": [
+    {
+      "ngpt_route": "25 трамвай",
+      "validation_result": "1",
+      "rows": 1988187,
+      "vehicles": 128,
+      "devices": 853,
+      "places": 5
+    },
+    {
+      "ngpt_route": "17 трамвай",
+      "validation_result": "40",
+      "rows": 7360,
+      "vehicles": 128,
+      "devices": 841,
+      "places": 4
+    },
+    {
+      "ngpt_route": "17 трамвай",
+      "validation_result": "23",
+      "rows": 2661,
+      "vehicles": 128,
+      "devices": 742,
+      "places": 4
+    },
+    {
+      "ngpt_route": "17 трамвай",
+      "validation_result": "32",
+      "rows": 1590,
+      "vehicles": 128,
+      "devices": 636,
+      "places": 4
+    },
+    {
+      "ngpt_route": "26 трамвай",
+      "validation_result": "50",
+      "rows": 996,
+      "vehicles": 127,
+      "devices": 513,
+      "places": 2
+    },
+    {
+      "ngpt_route": "26 трамвай",
+      "validation_result": "33",
+      "rows": 33537,
+      "vehicles": 132,
+      "devices": 847,
+      "places": 4
+    },
+    {
+      "ngpt_route": "26 трамвай",
+      "validation_result": "10",
+      "rows": 32183,
+      "vehicles": 132,
+      "devices": 847,
+      "places": 4
+    },
+    {
+      "ngpt_route": "26 трамвай",
+      "validation_result": "61",
+      "rows": 2923,
+      "vehicles": 130,
+      "devices": 732,
+      "places": 4
+    },
+    {
+      "ngpt_route": "1 трамвай",
+      "validation_result": "33",
+      "rows": 34963,
+      "vehicles": 134,
+      "devices": 858,
+      "places": 5
+    },
+    {
+      "ngpt_route": "1 трамвай",
+      "validation_result": "10",
+      "rows": 29754,
+      "vehicles": 134,
+      "devices": 858,
+      "places": 4
+    },
+    {
+      "ngpt_route": "1 трамвай",
+      "validation_result": "50",
+      "rows": 1433,
+      "vehicles": 132,
+      "devices": 602,
+      "places": 4
+    },
+    {
+      "ngpt_route": "1 трамвай",
+      "validation_result": "70",
+      "rows": 2017,
+      "vehicles": 128,
+      "devices": 554,
+      "places": 3
+    },
+    {
+      "ngpt_route": "1 трамвай",
+      "validation_result": "61",
+      "rows": 1954,
+      "vehicles": 132,
+      "devices": 664,
+      "places": 4
+    },
+    {
+      "ngpt_route": "12 трамвай",
+      "validation_result": "31",
+      "rows": 66214,
+      "vehicles": 130,
+      "devices": 812,
+      "places": 4
+    },
+    {
+      "ngpt_route": "12 трамвай",
+      "validation_result": "60",
+      "rows": 1120,
+      "vehicles": 122,
+      "devices": 453,
+      "places": 3
+    },
+    {
+      "ngpt_route": "50 трамвай",
+      "validation_result": "61",
+      "rows": 2686,
+      "vehicles": 179,
+      "devices": 776,
+      "places": 4
+    },
+    {
+      "ngpt_route": "50 трамвай",
+      "validation_result": "33",
+      "rows": 37144,
+      "vehicles": 237,
+      "devices": 1410,
+      "places": 4
+    },
+    {
+      "ngpt_route": "50 трамвай",
+      "validation_result": "10",
+      "rows": 34227,
+      "vehicles": 237,
+      "devices": 1393,
+      "places": 4
+    },
+    {
+      "ngpt_route": "50 трамвай",
+      "validation_result": "50",
+      "rows": 1628,
+      "vehicles": 189,
+      "devices": 688,
+      "places": 4
+    },
+    {
+      "ngpt_route": "28 трамвай",
+      "validation_result": "31",
+      "rows": 18202,
+      "vehicles": 108,
+      "devices": 580,
+      "places": 2
+    },
+    {
+      "ngpt_route": "11 трамвай",
+      "validation_result": "1",
+      "rows": 8942570,
+      "vehicles": 200,
+      "devices": 1293,
+      "places": 5
+    },
+    {
+      "ngpt_route": "11 трамвай",
+      "validation_result": "80",
+      "rows": 375,
+      "vehicles": 136,
+      "devices": 277,
+      "places": 3
+    },
+    {
+      "ngpt_route": "11 трамвай",
+      "validation_result": "20",
+      "rows": 433,
+      "vehicles": 146,
+      "devices": 338,
+      "places": 4
+    },
+    {
+      "ngpt_route": "7 трамвай",
+      "validation_result": "1",
+      "rows": 6493818,
+      "vehicles": 129,
+      "devices": 859,
+      "places": 4
+    },
+    {
+      "ngpt_route": "7 трамвай",
+      "validation_result": "80",
+      "rows": 225,
+      "vehicles": 92,
+      "devices": 163,
+      "places": 3
+    },
+    {
+      "ngpt_route": "26 трамвай",
+      "validation_result": "90",
+      "rows": 109982,
+      "vehicles": 132,
+      "devices": 848,
+      "places": 4
+    },
+    {
+      "ngpt_route": "1 трамвай",
+      "validation_result": "90",
+      "rows": 103724,
+      "vehicles": 134,
+      "devices": 859,
+      "places": 4
+    },
+    {
+      "ngpt_route": "50 трамвай",
+      "validation_result": "90",
+      "rows": 133043,
+      "vehicles": 237,
+      "devices": 1442,
+      "places": 4
+    },
+    {
+      "ngpt_route": "26 трамвай",
+      "validation_result": "70",
+      "rows": 1287,
+      "vehicles": 120,
+      "devices": 446,
+      "places": 3
+    },
+    {
+      "ngpt_route": "50 трамвай",
+      "validation_result": "70",
+      "rows": 2723,
+      "vehicles": 150,
+      "devices": 601,
+      "places": 4
+    },
+    {
+      "ngpt_route": "28 трамвай",
+      "validation_result": "60",
+      "rows": 415,
+      "vehicles": 81,
+      "devices": 209,
+      "places": 1
+    },
+    {
+      "ngpt_route": "7 трамвай",
+      "validation_result": "20",
+      "rows": 329,
+      "vehicles": 111,
+      "devices": 244,
+      "places": 3
+    },
+    {
+      "ngpt_route": "25 трамвай",
+      "validation_result": "20",
+      "rows": 85,
+      "vehicles": 61,
+      "devices": 80,
+      "places": 2
+    },
+    {
+      "ngpt_route": "25 трамвай",
+      "validation_result": "80",
+      "rows": 134,
+      "vehicles": 58,
+      "devices": 89,
+      "places": 3
+    },
+    {
+      "ngpt_route": "12 трамвай",
+      "validation_result": "30",
+      "rows": 7,
+      "vehicles": 7,
+      "devices": 7,
+      "places": 1
+    },
+    {
+      "ngpt_route": "17 трамвай",
+      "validation_result": "41",
+      "rows": 6,
+      "vehicles": 4,
+      "devices": 5,
+      "places": 1
+    },
+    {
+      "ngpt_route": "25 трамвай",
+      "validation_result": "40",
+      "rows": 2029,
+      "vehicles": 126,
+      "devices": 703,
+      "places": 4
+    },
+    {
+      "ngpt_route": "25 трамвай",
+      "validation_result": "23",
+      "rows": 334,
+      "vehicles": 108,
+      "devices": 242,
+      "places": 1
+    },
+    {
+      "ngpt_route": "17 трамвай",
+      "validation_result": "1",
+      "rows": 14099563,
+      "vehicles": 128,
+      "devices": 853,
+      "places": 5
+    },
+    {
+      "ngpt_route": "17 трамвай",
+      "validation_result": "20",
+      "rows": 820,
+      "vehicles": 126,
+      "devices": 453,
+      "places": 3
+    },
+    {
+      "ngpt_route": "17 трамвай",
+      "validation_result": "80",
+      "rows": 631,
+      "vehicles": 117,
+      "devices": 324,
+      "places": 2
+    },
+    {
+      "ngpt_route": "26 трамвай",
+      "validation_result": "31",
+      "rows": 33354,
+      "vehicles": 132,
+      "devices": 847,
+      "places": 4
+    },
+    {
+      "ngpt_route": "1 трамвай",
+      "validation_result": "31",
+      "rows": 34298,
+      "vehicles": 134,
+      "devices": 855,
+      "places": 5
+    },
+    {
+      "ngpt_route": "1 трамвай",
+      "validation_result": "60",
+      "rows": 558,
+      "vehicles": 121,
+      "devices": 280,
+      "places": 1
+    },
+    {
+      "ngpt_route": "12 трамвай",
+      "validation_result": "10",
+      "rows": 57978,
+      "vehicles": 131,
+      "devices": 812,
+      "places": 4
+    },
+    {
+      "ngpt_route": "12 трамвай",
+      "validation_result": "33",
+      "rows": 67624,
+      "vehicles": 130,
+      "devices": 813,
+      "places": 4
+    },
+    {
+      "ngpt_route": "12 трамвай",
+      "validation_result": "61",
+      "rows": 5095,
+      "vehicles": 128,
+      "devices": 766,
+      "places": 4
+    },
+    {
+      "ngpt_route": "12 трамвай",
+      "validation_result": "50",
+      "rows": 2816,
+      "vehicles": 125,
+      "devices": 706,
+      "places": 4
+    },
+    {
+      "ngpt_route": "12 трамвай",
+      "validation_result": "70",
+      "rows": 5244,
+      "vehicles": 123,
+      "devices": 684,
+      "places": 3
+    },
+    {
+      "ngpt_route": "50 трамвай",
+      "validation_result": "31",
+      "rows": 32873,
+      "vehicles": 236,
+      "devices": 1397,
+      "places": 4
+    },
+    {
+      "ngpt_route": "50 трамвай",
+      "validation_result": "60",
+      "rows": 705,
+      "vehicles": 131,
+      "devices": 368,
+      "places": 4
+    },
+    {
+      "ngpt_route": "28 трамвай",
+      "validation_result": "33",
+      "rows": 24847,
+      "vehicles": 108,
+      "devices": 584,
+      "places": 1
+    },
+    {
+      "ngpt_route": "28 трамвай",
+      "validation_result": "10",
+      "rows": 27209,
+      "vehicles": 109,
+      "devices": 583,
+      "places": 3
+    },
+    {
+      "ngpt_route": "28 трамвай",
+      "validation_result": "50",
+      "rows": 1005,
+      "vehicles": 98,
+      "devices": 390,
+      "places": 1
+    },
+    {
+      "ngpt_route": "28 трамвай",
+      "validation_result": "61",
+      "rows": 1259,
+      "vehicles": 94,
+      "devices": 388,
+      "places": 1
+    },
+    {
+      "ngpt_route": "11 трамвай",
+      "validation_result": "40",
+      "rows": 4325,
+      "vehicles": 188,
+      "devices": 1026,
+      "places": 4
+    },
+    {
+      "ngpt_route": "11 трамвай",
+      "validation_result": "23",
+      "rows": 1669,
+      "vehicles": 171,
+      "devices": 725,
+      "places": 4
+    },
+    {
+      "ngpt_route": "11 трамвай",
+      "validation_result": "32",
+      "rows": 1042,
+      "vehicles": 165,
+      "devices": 563,
+      "places": 4
+    },
+    {
+      "ngpt_route": "7 трамвай",
+      "validation_result": "23",
+      "rows": 1417,
+      "vehicles": 128,
+      "devices": 618,
+      "places": 4
+    },
+    {
+      "ngpt_route": "7 трамвай",
+      "validation_result": "40",
+      "rows": 3430,
+      "vehicles": 128,
+      "devices": 808,
+      "places": 4
+    },
+    {
+      "ngpt_route": "7 трамвай",
+      "validation_result": "32",
+      "rows": 884,
+      "vehicles": 128,
+      "devices": 482,
+      "places": 4
+    },
+    {
+      "ngpt_route": "12 трамвай",
+      "validation_result": "90",
+      "rows": 208435,
+      "vehicles": 131,
+      "devices": 821,
+      "places": 4
+    },
+    {
+      "ngpt_route": "28 трамвай",
+      "validation_result": "90",
+      "rows": 96553,
+      "vehicles": 108,
+      "devices": 590,
+      "places": 2
+    },
+    {
+      "ngpt_route": "26 трамвай",
+      "validation_result": "60",
+      "rows": 401,
+      "vehicles": 108,
+      "devices": 247,
+      "places": 3
+    },
+    {
+      "ngpt_route": "28 трамвай",
+      "validation_result": "70",
+      "rows": 1921,
+      "vehicles": 95,
+      "devices": 365,
+      "places": 1
+    },
+    {
+      "ngpt_route": "25 трамвай",
+      "validation_result": "32",
+      "rows": 294,
+      "vehicles": 108,
+      "devices": 197,
+      "places": 1
+    },
+    {
+      "ngpt_route": "50 трамвай",
+      "validation_result": "30",
+      "rows": 5,
+      "vehicles": 5,
+      "devices": 5,
+      "places": 2
+    },
+    {
+      "ngpt_route": "11 трамвай",
+      "validation_result": "41",
+      "rows": 1,
+      "vehicles": 1,
+      "devices": 1,
+      "places": 1
+    },
+    {
+      "ngpt_route": "25 трамвай",
+      "validation_result": "41",
+      "rows": 1,
+      "vehicles": 1,
+      "devices": 1,
+      "places": 1
+    },
+    {
+      "ngpt_route": "7 трамвай",
+      "validation_result": "41",
+      "rows": 5,
+      "vehicles": 5,
+      "devices": 5,
+      "places": 1
+    },
+    {
+      "ngpt_route": "5 трамвай",
+      "validation_result": "30",
+      "rows": 1,
+      "vehicles": 0,
+      "devices": 1,
+      "places": 1
+    },
+    {
+      "ngpt_route": "1 трамвай",
+      "validation_result": "30",
+      "rows": 5,
+      "vehicles": 3,
+      "devices": 5,
+      "places": 1
+    },
+    {
+      "ngpt_route": "26 трамвай",
+      "validation_result": "30",
+      "rows": 3,
+      "vehicles": 3,
+      "devices": 3,
+      "places": 1
+    },
+    {
+      "ngpt_route": "25 трамвай",
+      "validation_result": "33",
+      "rows": 13871,
+      "vehicles": 128,
+      "devices": 847,
+      "places": 4
+    },
+    {
+      "ngpt_route": "25 трамвай",
+      "validation_result": "50",
+      "rows": 437,
+      "vehicles": 115,
+      "devices": 274,
+      "places": 3
+    },
+    {
+      "ngpt_route": "25 трамвай",
+      "validation_result": "10",
+      "rows": 14873,
+      "vehicles": 128,
+      "devices": 844,
+      "places": 4
+    },
+    {
+      "ngpt_route": "25 трамвай",
+      "validation_result": "61",
+      "rows": 1172,
+      "vehicles": 125,
+      "devices": 507,
+      "places": 3
+    },
+    {
+      "ngpt_route": "25 трамвай",
+      "validation_result": "70",
+      "rows": 639,
+      "vehicles": 93,
+      "devices": 276,
+      "places": 1
+    },
+    {
+      "ngpt_route": "17 трамвай",
+      "validation_result": "31",
+      "rows": 98156,
+      "vehicles": 128,
+      "devices": 852,
+      "places": 4
+    },
+    {
+      "ngpt_route": "17 трамвай",
+      "validation_result": "60",
+      "rows": 1747,
+      "vehicles": 128,
+      "devices": 591,
+      "places": 4
+    },
+    {
+      "ngpt_route": "26 трамвай",
+      "validation_result": "1",
+      "rows": 4879704,
+      "vehicles": 132,
+      "devices": 848,
+      "places": 4
+    },
+    {
+      "ngpt_route": "26 трамвай",
+      "validation_result": "20",
+      "rows": 203,
+      "vehicles": 102,
+      "devices": 172,
+      "places": 3
+    },
+    {
+      "ngpt_route": "1 трамвай",
+      "validation_result": "1",
+      "rows": 5122042,
+      "vehicles": 134,
+      "devices": 859,
+      "places": 5
+    },
+    {
+      "ngpt_route": "1 трамвай",
+      "validation_result": "80",
+      "rows": 155,
+      "vehicles": 75,
+      "devices": 121,
+      "places": 2
+    },
+    {
+      "ngpt_route": "12 трамвай",
+      "validation_result": "40",
+      "rows": 4543,
+      "vehicles": 127,
+      "devices": 759,
+      "places": 4
+    },
+    {
+      "ngpt_route": "12 трамвай",
+      "validation_result": "32",
+      "rows": 1096,
+      "vehicles": 123,
+      "devices": 517,
+      "places": 3
+    },
+    {
+      "ngpt_route": "12 трамвай",
+      "validation_result": "23",
+      "rows": 1956,
+      "vehicles": 126,
+      "devices": 662,
+      "places": 3
+    },
+    {
+      "ngpt_route": "50 трамвай",
+      "validation_result": "1",
+      "rows": 6027350,
+      "vehicles": 237,
+      "devices": 1473,
+      "places": 5
+    },
+    {
+      "ngpt_route": "50 трамвай",
+      "validation_result": "80",
+      "rows": 178,
+      "vehicles": 93,
+      "devices": 138,
+      "places": 4
+    },
+    {
+      "ngpt_route": "50 трамвай",
+      "validation_result": "20",
+      "rows": 253,
+      "vehicles": 116,
+      "devices": 208,
+      "places": 4
+    },
+    {
+      "ngpt_route": "28 трамвай",
+      "validation_result": "40",
+      "rows": 2050,
+      "vehicles": 105,
+      "devices": 484,
+      "places": 1
+    },
+    {
+      "ngpt_route": "28 трамвай",
+      "validation_result": "23",
+      "rows": 707,
+      "vehicles": 92,
+      "devices": 320,
+      "places": 1
+    },
+    {
+      "ngpt_route": "11 трамвай",
+      "validation_result": "10",
+      "rows": 59743,
+      "vehicles": 198,
+      "devices": 1253,
+      "places": 4
+    },
+    {
+      "ngpt_route": "11 трамвай",
+      "validation_result": "33",
+      "rows": 65912,
+      "vehicles": 199,
+      "devices": 1253,
+      "places": 4
+    },
+    {
+      "ngpt_route": "11 трамвай",
+      "validation_result": "50",
+      "rows": 2696,
+      "vehicles": 184,
+      "devices": 894,
+      "places": 4
+    },
+    {
+      "ngpt_route": "11 трамвай",
+      "validation_result": "61",
+      "rows": 3953,
+      "vehicles": 190,
+      "devices": 986,
+      "places": 4
+    },
+    {
+      "ngpt_route": "11 трамвай",
+      "validation_result": "70",
+      "rows": 5276,
+      "vehicles": 157,
+      "devices": 794,
+      "places": 3
+    },
+    {
+      "ngpt_route": "7 трамвай",
+      "validation_result": "10",
+      "rows": 34990,
+      "vehicles": 129,
+      "devices": 856,
+      "places": 4
+    },
+    {
+      "ngpt_route": "7 трамвай",
+      "validation_result": "33",
+      "rows": 49043,
+      "vehicles": 129,
+      "devices": 853,
+      "places": 4
+    },
+    {
+      "ngpt_route": "7 трамвай",
+      "validation_result": "50",
+      "rows": 1704,
+      "vehicles": 128,
+      "devices": 662,
+      "places": 4
+    },
+    {
+      "ngpt_route": "7 трамвай",
+      "validation_result": "61",
+      "rows": 2714,
+      "vehicles": 129,
+      "devices": 739,
+      "places": 4
+    },
+    {
+      "ngpt_route": "7 трамвай",
+      "validation_result": "70",
+      "rows": 2855,
+      "vehicles": 122,
+      "devices": 634,
+      "places": 4
+    },
+    {
+      "ngpt_route": "25 трамвай",
+      "validation_result": "90",
+      "rows": 56364,
+      "vehicles": 128,
+      "devices": 852,
+      "places": 4
+    },
+    {
+      "ngpt_route": "11 трамвай",
+      "validation_result": "90",
+      "rows": 201871,
+      "vehicles": 200,
+      "devices": 1276,
+      "places": 4
+    },
+    {
+      "ngpt_route": "7 трамвай",
+      "validation_result": "90",
+      "rows": 133807,
+      "vehicles": 129,
+      "devices": 854,
+      "places": 4
+    },
+    {
+      "ngpt_route": "1 трамвай",
+      "validation_result": "20",
+      "rows": 230,
+      "vehicles": 102,
+      "devices": 189,
+      "places": 2
+    },
+    {
+      "ngpt_route": "28 трамвай",
+      "validation_result": "32",
+      "rows": 263,
+      "vehicles": 84,
+      "devices": 183,
+      "places": 1
+    },
+    {
+      "ngpt_route": "26 трамвай",
+      "validation_result": "80",
+      "rows": 210,
+      "vehicles": 86,
+      "devices": 150,
+      "places": 1
+    },
+    {
+      "ngpt_route": "17 трамвай",
+      "validation_result": "30",
+      "rows": 30,
+      "vehicles": 21,
+      "devices": 23,
+      "places": 1
+    },
+    {
+      "ngpt_route": "12 трамвай",
+      "validation_result": "41",
+      "rows": 2,
+      "vehicles": 1,
+      "devices": 1,
+      "places": 1
+    },
+    {
+      "ngpt_route": "28 трамвай",
+      "validation_result": "41",
+      "rows": 1,
+      "vehicles": 1,
+      "devices": 1,
+      "places": 1
+    },
+    {
+      "ngpt_route": "25 трамвай",
+      "validation_result": "31",
+      "rows": 12919,
+      "vehicles": 128,
+      "devices": 846,
+      "places": 4
+    },
+    {
+      "ngpt_route": "17 трамвай",
+      "validation_result": "50",
+      "rows": 5056,
+      "vehicles": 128,
+      "devices": 823,
+      "places": 4
+    },
+    {
+      "ngpt_route": "17 трамвай",
+      "validation_result": "61",
+      "rows": 6602,
+      "vehicles": 128,
+      "devices": 830,
+      "places": 4
+    },
+    {
+      "ngpt_route": "17 трамвай",
+      "validation_result": "10",
+      "rows": 90838,
+      "vehicles": 128,
+      "devices": 852,
+      "places": 4
+    },
+    {
+      "ngpt_route": "17 трамвай",
+      "validation_result": "33",
+      "rows": 114780,
+      "vehicles": 128,
+      "devices": 852,
+      "places": 4
+    },
+    {
+      "ngpt_route": "17 трамвай",
+      "validation_result": "70",
+      "rows": 10429,
+      "vehicles": 128,
+      "devices": 794,
+      "places": 3
+    },
+    {
+      "ngpt_route": "26 трамвай",
+      "validation_result": "40",
+      "rows": 2602,
+      "vehicles": 132,
+      "devices": 744,
+      "places": 3
+    },
+    {
+      "ngpt_route": "26 трамвай",
+      "validation_result": "23",
+      "rows": 831,
+      "vehicles": 131,
+      "devices": 453,
+      "places": 3
+    },
+    {
+      "ngpt_route": "1 трамвай",
+      "validation_result": "40",
+      "rows": 2159,
+      "vehicles": 132,
+      "devices": 707,
+      "places": 3
+    },
+    {
+      "ngpt_route": "1 трамвай",
+      "validation_result": "32",
+      "rows": 369,
+      "vehicles": 112,
+      "devices": 262,
+      "places": 2
+    },
+    {
+      "ngpt_route": "1 трамвай",
+      "validation_result": "23",
+      "rows": 924,
+      "vehicles": 130,
+      "devices": 495,
+      "places": 3
+    },
+    {
+      "ngpt_route": "12 трамвай",
+      "validation_result": "1",
+      "rows": 9339264,
+      "vehicles": 131,
+      "devices": 824,
+      "places": 4
+    },
+    {
+      "ngpt_route": "12 трамвай",
+      "validation_result": "20",
+      "rows": 423,
+      "vehicles": 118,
+      "devices": 304,
+      "places": 3
+    },
+    {
+      "ngpt_route": "50 трамвай",
+      "validation_result": "40",
+      "rows": 4460,
+      "vehicles": 208,
+      "devices": 928,
+      "places": 4
+    },
+    {
+      "ngpt_route": "50 трамвай",
+      "validation_result": "23",
+      "rows": 1047,
+      "vehicles": 178,
+      "devices": 561,
+      "places": 4
+    },
+    {
+      "ngpt_route": "50 трамвай",
+      "validation_result": "32",
+      "rows": 733,
+      "vehicles": 166,
+      "devices": 449,
+      "places": 4
+    },
+    {
+      "ngpt_route": "28 трамвай",
+      "validation_result": "1",
+      "rows": 2775255,
+      "vehicles": 109,
+      "devices": 612,
+      "places": 3
+    },
+    {
+      "ngpt_route": "28 трамвай",
+      "validation_result": "80",
+      "rows": 197,
+      "vehicles": 70,
+      "devices": 146,
+      "places": 1
+    },
+    {
+      "ngpt_route": "11 трамвай",
+      "validation_result": "31",
+      "rows": 63854,
+      "vehicles": 198,
+      "devices": 1263,
+      "places": 4
+    },
+    {
+      "ngpt_route": "7 трамвай",
+      "validation_result": "31",
+      "rows": 45268,
+      "vehicles": 129,
+      "devices": 852,
+      "places": 4
+    },
+    {
+      "ngpt_route": "7 трамвай",
+      "validation_result": "60",
+      "rows": 678,
+      "vehicles": 118,
+      "devices": 344,
+      "places": 1
+    },
+    {
+      "ngpt_route": "17 трамвай",
+      "validation_result": "90",
+      "rows": 360862,
+      "vehicles": 128,
+      "devices": 852,
+      "places": 4
+    },
+    {
+      "ngpt_route": "26 трамвай",
+      "validation_result": "32",
+      "rows": 651,
+      "vehicles": 126,
+      "devices": 388,
+      "places": 2
+    },
+    {
+      "ngpt_route": "12 трамвай",
+      "validation_result": "80",
+      "rows": 366,
+      "vehicles": 107,
+      "devices": 247,
+      "places": 3
+    },
+    {
+      "ngpt_route": "11 трамвай",
+      "validation_result": "60",
+      "rows": 1154,
+      "vehicles": 159,
+      "devices": 507,
+      "places": 4
+    },
+    {
+      "ngpt_route": "25 трамвай",
+      "validation_result": "60",
+      "rows": 238,
+      "vehicles": 84,
+      "devices": 144,
+      "places": 3
+    },
+    {
+      "ngpt_route": "28 трамвай",
+      "validation_result": "20",
+      "rows": 118,
+      "vehicles": 55,
+      "devices": 98,
+      "places": 1
+    },
+    {
+      "ngpt_route": "11 трамвай",
+      "validation_result": "30",
+      "rows": 15,
+      "vehicles": 10,
+      "devices": 12,
+      "places": 2
+    },
+    {
+      "ngpt_route": "1 трамвай",
+      "validation_result": "41",
+      "rows": 3,
+      "vehicles": 3,
+      "devices": 3,
+      "places": 1
+    },
+    {
+      "ngpt_route": "50 трамвай",
+      "validation_result": "41",
+      "rows": 3,
+      "vehicles": 3,
+      "devices": 3,
+      "places": 2
+    },
+    {
+      "ngpt_route": "26 трамвай",
+      "validation_result": "41",
+      "rows": 2,
+      "vehicles": 2,
+      "devices": 2,
+      "places": 1
+    },
+    {
+      "ngpt_route": "7 трамвай",
+      "validation_result": "30",
+      "rows": 20,
+      "vehicles": 6,
+      "devices": 7,
+      "places": 1
+    },
+    {
+      "ngpt_route": "25 трамвай",
+      "validation_result": "30",
+      "rows": 12,
+      "vehicles": 12,
+      "devices": 12,
+      "places": 2
+    }
+  ],
+  "seconds": 222.88649309999892,
+  "policy": "Counts reproduce labels; anomalies and duplicates are reported, not removed"
+}

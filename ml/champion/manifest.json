@@ -1,0 +1,58 @@
+{
+  "source_commit": "163eb36c876d789daed624d017ee5873649cc10d",
+  "platform_score_user_report": 0.88,
+  "local_score": 0.8920614645158826,
+  "original_windows_submission_sha256": "0fcac1502fa3423e51d784bf731a2526e18f5b3d2d58c21d7776be06eee6942f",
+  "files": {
+    "bundle.joblib": {
+      "sha256": "20a216dd445b76f49fbd3219ee382a11bda86ed95051f5a92e2dd6352da80283",
+      "bytes": 1114018,
+      "url": "https://raw.githubusercontent.com/IvanCot/ml_solution/163eb36c876d789daed624d017ee5873649cc10d/artifacts/bundle.joblib"
+    },
+    "submission.csv": {
+      "sha256": "05fca06eb4027f1969b5a8eae514998997f7b3ac544236949ca1ac7b137ea2ea",
+      "bytes": 293541,
+      "url": "https://raw.githubusercontent.com/IvanCot/ml_solution/163eb36c876d789daed624d017ee5873649cc10d/artifacts/submission.csv"
+    },
+    "metrics.json": {
+      "sha256": "2b564835c08b9625ccc2a056bb2336e5f02fa0c291350d57887bfd865865618e",
+      "bytes": 6851,
+      "url": "https://raw.githubusercontent.com/IvanCot/ml_solution/163eb36c876d789daed624d017ee5873649cc10d/artifacts/metrics.json"
+    },
+    "external_provenance.json": {
+      "sha256": "972dce852475763b5282652d5acf63403eb677438b8309eb325bd75e6bf62eb9",
+      "bytes": 38840,
+      "url": "https://raw.githubusercontent.com/IvanCot/ml_solution/163eb36c876d789daed624d017ee5873649cc10d/artifacts/external_provenance.json"
+    },
+    "external_ablation.csv": {
+      "sha256": "896e3e7112e381e46f653d68234c4044998a13728673d5fa761f7132e21ea1e5",
+      "bytes": 1730,
+      "url": "https://raw.githubusercontent.com/IvanCot/ml_solution/163eb36c876d789daed624d017ee5873649cc10d/artifacts/external_ablation.csv"
+    },
+    "external_blend.json": {
+      "sha256": "746fdedb94fe8e2bb7e695ed67521dfc96efbb64a68ac9cfd932fa851a7cae94",
+      "bytes": 984,
+      "url": "https://raw.githubusercontent.com/IvanCot/ml_solution/163eb36c876d789daed624d017ee5873649cc10d/artifacts/external_blend.json"
+    },
+    "calendar_signal.json": {
+      "sha256": "018a7a9c9dc7ca479ab41262cfb26dbd3f479875463e293382f2fec30fe669a6",
+      "bytes": 3710,
+      "url": "https://raw.githubusercontent.com/IvanCot/ml_solution/163eb36c876d789daed624d017ee5873649cc10d/artifacts/calendar_signal.json"
+    },
+    "accident_source.json": {
+      "sha256": "971ed35e034f9795f10453f5c0cee2a543ff53515c6e1a17b2cb8285445e697a",
+      "bytes": 346,
+      "url": "https://raw.githubusercontent.com/IvanCot/ml_solution/163eb36c876d789daed624d017ee5873649cc10d/artifacts/accident_source.json"
+    },
+    "accident_ablation.csv": {
+      "sha256": "e51eee2a82b86290cb4e40c69a82b71b1c406772e9a444aee64c9d5096c9c684",
+      "bytes": 237,
+      "url": "https://raw.githubusercontent.com/IvanCot/ml_solution/163eb36c876d789daed624d017ee5873649cc10d/artifacts/accident_ablation.csv"
+    },
+    "run_manifest.json": {
+      "sha256": "4a84dab40f652913b95aed301ee498efdec81b4d019e64d0f8648ad95a421dd2",
+      "bytes": 2781,
+      "url": "https://raw.githubusercontent.com/IvanCot/ml_solution/163eb36c876d789daed624d017ee5873649cc10d/artifacts/run_manifest.json"
+    }
+  }
+}
