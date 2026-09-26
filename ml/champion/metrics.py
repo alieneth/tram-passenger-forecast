@@ -1,4 +1,4 @@
-"""MAE and diagnostic WAPE. Official platform metric awaits confirmation."""
+"""MAE и WAPE-score по формуле конкурсных критериев."""
 
 from typing import Any
 

@@ -96,7 +96,6 @@ def verify(directory: Path) -> dict[str, Any]:
         "prediction_sum": int(actual.prediction.sum()),
         "route5_prediction_sum": int(actual.loc[actual.route == 5, "prediction"].sum()),
         "weather_policy": "monthly averages 2022-2024, no realised 2025 weather",
-        "platform_score": "approximately 0.88, reported by user",
     }
     (directory / "verification.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
     LOGGER.info("Проверено: %s", result)

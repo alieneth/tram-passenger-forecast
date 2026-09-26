@@ -1,0 +1,3 @@
+# Одинаковые байты аналитических входов и ноутбуков для проверки SHA256 на разных ОС.
+/reports/eda/*.csv text eol=lf
+/notebooks/*.ipynb text eol=lf

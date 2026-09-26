@@ -1,0 +1,18 @@
+[
+  {
+    "notebook": "01_data_quality_and_eda.ipynb",
+    "code_cells": 10,
+    "executed_cells": 10,
+    "image_outputs": 7,
+    "errors": 0,
+    "sha256": "4fb40b87cbbfc2704b626c8e81d50cc5286ca4b1021153571a5377a410bb320a"
+  },
+  {
+    "notebook": "02_validation_and_external_sources.ipynb",
+    "code_cells": 9,
+    "executed_cells": 9,
+    "image_outputs": 6,
+    "errors": 0,
+    "sha256": "9b8d99a9720c5fe2adca87529bdf814c67ddc3fc82c4607d18523172d34cd384"
+  }
+]

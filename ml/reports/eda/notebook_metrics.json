@@ -1,0 +1,8 @@
+{
+  "hourly_mae": 104.48542805100182,
+  "hourly_wape_score": 0.8920614645158826,
+  "baseline_mae": 133.29883675692497,
+  "model_mae_route_day": 1662.9435336976321,
+  "baseline_mae_route_day": 2497.9204466486053,
+  "scope": "route-day sums, not hourly submission metric"
+}

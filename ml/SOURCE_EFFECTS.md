@@ -42,7 +42,7 @@
 
 Код: [source_effect_experiment.py](champion/source_effect_experiment.py). Таблицы: [scores.csv](reports/champion/source_effects/scores.csv), [протокол](reports/champion/source_effects/protocol.json), [проверка](reports/champion/source_effects/verification.json).
 
-Из корня командного репозитория после настройки ML_DATA_DIR и ML_CACHE_DIR на исходные labels и сохранённый исторический кэш:
+Из корня репозитория после настройки ML_DATA_DIR и ML_CACHE_DIR на исходные labels и сохранённый исторический кэш:
 
 ```bash
 python -m ml.champion.source_effect_experiment

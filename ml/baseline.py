@@ -26,7 +26,7 @@ def complete_history(labels: pd.DataFrame, start: str, end: str) -> pd.DataFrame
         names=KEYS,
     ).to_frame(index=False)
     result = grid.merge(labels, on=KEYS, how="left", validate="one_to_one")
-    # Полностью отсутствующий маршрут не получает выдуманную нулевую историю.
+    # Отсутствие истории не доказывает нулевой спрос.
     result["boardings"] = result.boardings.fillna(0).astype("int64")
     return result
 

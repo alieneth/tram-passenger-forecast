@@ -1,4 +1,4 @@
-# Tested Python 3.12 environment; for Python 3.11 use requirements.txt
+# Проверенное окружение Python 3.12; синтаксис кода совместим с Python 3.11+.
 numpy==2.5.3
 pandas==3.0.6
 lightgbm==4.7.0

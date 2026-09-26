@@ -54,7 +54,7 @@ class ModelVersion:
 
 def validate_rows(frame: pd.DataFrame) -> pd.DataFrame:
     if frame.empty or set(frame.columns) != set(FORECAST_COLUMNS):
-        raise ValueError("Нужны ровно пользовательские колонки forecast и непустой пакет")
+        raise ValueError("Нужны ровно входные колонки forecast и непустой пакет")
     data = frame[FORECAST_COLUMNS].copy()
     required = [c for c in FORECAST_COLUMNS if c not in {"hour", "trams_on_line"}]
     if data[required].isna().any().any():

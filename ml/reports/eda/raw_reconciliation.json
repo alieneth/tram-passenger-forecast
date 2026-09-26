@@ -1,0 +1,45 @@
+{
+  "files": {
+    "train": {
+      "raw_rows": 49051926,
+      "successful_rows": 46913233,
+      "rejected_rows": 2138693,
+      "source_bytes": 8160068959,
+      "source_mtime_ns": 1789376644000000000,
+      "min_date": "2025-01-01",
+      "max_date": "2025-09-01",
+      "seconds": 51.762,
+      "successes_outside_file_period": 523
+    },
+    "test": {
+      "raw_rows": 13391571,
+      "successful_rows": 12754520,
+      "rejected_rows": 637051,
+      "source_bytes": 2231502820,
+      "source_mtime_ns": 1789376648000000000,
+      "min_date": "2025-09-01",
+      "max_date": "2025-11-01",
+      "seconds": 14.004,
+      "successes_outside_file_period": 562
+    }
+  },
+  "repartitioned": {
+    "train": {
+      "passed": true,
+      "mismatch_keys": 0,
+      "raw_boardings": 46912710,
+      "label_boardings": 46912710,
+      "label_rows": 46234
+    },
+    "test": {
+      "passed": true,
+      "mismatch_keys": 0,
+      "raw_boardings": 12754481,
+      "label_boardings": 12754481,
+      "label_rows": 11317
+    }
+  },
+  "excluded_successes": 562,
+  "passed": true,
+  "scope": "Full raw row counts and target reconciliation; not a duplicate/card audit"
+}
