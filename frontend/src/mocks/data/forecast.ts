@@ -179,13 +179,22 @@ function buildAll<T>(from: string, to: string, build: (setup: RouteSetup, date: 
   return ROUTES.flatMap((setup) => datesBetween(from, to).flatMap((date) => build(setup, date)));
 }
 
-// Считаем один раз при первом обращении: 10 маршрутов × 61 день × 24 часа = 14 640 строк,
-// ровно столько, сколько в test_submission.csv
+// Прогноз модели на сентябрь–октябрь (проверка на истории): по нему строится «Факт и прогноз»
+// на экране «Качество модели». У маршрута без истории такого прогноза нет — сравнивать не с чем
+function toBacktestItems(setup: RouteSetup, date: string): ForecastItem[] {
+  return setup.isAnalog ? [] : toForecastItems(setup, date);
+}
+
+// Считаем один раз при первом обращении. Прогноз ноября–декабря: 10 маршрутов × 61 день × 24 часа =
+// 14 640 строк, ровно столько, сколько в test_submission.csv; плюс проверка на сентябре–октябре
 let forecastCache: ForecastItem[] | null = null;
 let actualsCache: ActualItem[] | null = null;
 
 export function allForecastItems(): ForecastItem[] {
-  forecastCache ??= buildAll(FORECAST_FROM, FORECAST_TO, toForecastItems);
+  forecastCache ??= [
+    ...buildAll(ACTUALS_FROM, ACTUALS_TO, toBacktestItems),
+    ...buildAll(FORECAST_FROM, FORECAST_TO, toForecastItems),
+  ];
   return forecastCache;
 }
 

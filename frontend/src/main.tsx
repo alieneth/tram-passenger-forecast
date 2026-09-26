@@ -12,6 +12,7 @@ import './styles/route.css';
 import './styles/export.css';
 import './styles/overview.css';
 import './styles/decisions.css';
+import './styles/quality.css';
 
 const MAX_RETRIES = 2;
 

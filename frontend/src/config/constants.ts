@@ -48,3 +48,7 @@ export const HEALTH_REFRESH_MS = 60 * 1000;
 // (CLAUDE.md, раздел 4). Когда в API появится метод аналогов (таблица route_analog), список и
 // сходство будут приходить оттуда
 export const ANALOG_ROUTES: readonly number[] = [1, 7, 11, 12];
+
+// «Факт и прогноз» на экране «Качество модели»: две недели проверочного периода (октябрь 2025)
+export const QUALITY_CHART_FROM = '2025-10-01';
+export const QUALITY_CHART_TO = '2025-10-14';
