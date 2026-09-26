@@ -42,11 +42,24 @@
 
 ## Запуск
 
-_Будет добавлено: `docker compose up`._
+```bash
+cp .env.example .env
+docker compose up -d
+```
+
+API поднимется на `http://localhost:8080/api/v1`, PostgreSQL — на `localhost:5432`. Схема создаётся
+автоматически из `sql/01_create_tables.sql` при первом запуске (на пустом volume).
+
+Загрузка train/test в БД (~62 млн строк, см. [`backend/db/README.md`](backend/db/README.md)):
+
+```bash
+docker compose run --rm loader
+```
 
 ## API
 
-_Будет добавлено: ссылка на Swagger и `docs/openapi.yaml`._
+Контракт — [`docs/openapi.yaml`](docs/openapi.yaml) (OpenAPI 3.0.3). Реализовано пока: `GET /health`,
+`GET /routes`, `GET /routes/{route}/geometry` — см. [`backend/README.md`](backend/README.md).
 
 ## Производительность
 
