@@ -1,0 +1,39 @@
+# Датасет и внешние данные — не в git
+data/*
+!data/README.md
+
+# Артефакты моделей и выгрузки
+ml/artifacts/
+*.parquet
+*.duckdb
+submission*.csv
+
+# Секреты
+.env
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+.ruff_cache/
+
+# Java
+target/
+build/
+.gradle/
+*.class
+
+# Frontend
+node_modules/
+dist/
+.vite/
+
+# IDE и система
+.idea/
+.vscode/
+*.iml
+.DS_Store
