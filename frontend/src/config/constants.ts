@@ -37,3 +37,6 @@ export const DEFAULT_MAP_HOUR = 8;
 export const ACTUALS_DATE_MAX = '2025-10-31';
 // Сравнение на графике маршрута: тот же день недели неделей раньше
 export const COMPARE_DAYS_BACK = 7;
+
+// График «Пассажиров в день» на горизонте «Месяц»: факт с сентября, прогноз — ноябрь–декабрь
+export const MONTH_CHART_ACTUALS_FROM = '2025-09-01';

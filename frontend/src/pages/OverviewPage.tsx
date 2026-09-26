@@ -8,6 +8,7 @@ import { NoGeometryList } from '../components/map/NoGeometryList';
 import { DayFactors } from '../components/DayFactors';
 import { Panel } from '../components/Panel';
 import { RoutesHoursTable } from '../components/RoutesHoursTable';
+import { DayOnlyNotice } from '../components/states/DayOnlyNotice';
 import { QueryView } from '../components/states/QueryView';
 import { StatCard } from '../components/StatCard';
 import { useFactors } from '../hooks/useFactors';
@@ -28,6 +29,14 @@ import { formatHourTime, formatThousands } from '../utils/format';
 const EMPTY_HINT = 'Выберите другую дату в пределах ноября–декабря 2025';
 
 export function OverviewPage() {
+  const { horizon } = useFilters();
+  if (horizon === 'month') {
+    return <DayOnlyNotice title="Обзор" message="Обзор показывает прогноз на один день по часам" />;
+  }
+  return <OverviewDay />;
+}
+
+function OverviewDay() {
   const { date } = useFilters();
   const routesQuery = useRoutes();
   const forecastQuery = useForecast();

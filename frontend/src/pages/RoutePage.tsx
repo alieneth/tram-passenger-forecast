@@ -4,6 +4,7 @@ import { Link, Navigate, useNavigate, useParams } from 'react-router';
 import { errorMessage, exportForecast, type Route } from '../api';
 import { Panel } from '../components/Panel';
 import { RouteLabel } from '../components/RouteLabel';
+import { RouteMonthView } from '../components/month/RouteMonthView';
 import { DayForecastPanel } from '../components/route/DayForecastPanel';
 import { DaysHoursTable } from '../components/route/DaysHoursTable';
 import { FactorContributions } from '../components/route/FactorContributions';
@@ -16,7 +17,7 @@ import { useFilters } from '../hooks/useFilters';
 import { useMonthCalendar } from '../hooks/useMonthCalendar';
 import { useRouteMonth } from '../hooks/useRouteMonth';
 import { useRoutes } from '../hooks/useRoutes';
-import { monthTitle } from '../utils/dates';
+import { monthRange, monthTitle } from '../utils/dates';
 import { saveFile } from '../utils/download';
 
 // Экран «Маршрут» (UI-4): «дни × часы», прогноз дня с коридором, «Почему такой прогноз?»
@@ -40,7 +41,7 @@ export function RoutePage() {
 
 function RouteDetails({ route, routes }: { route: Route; routes: Route[] }) {
   const navigate = useNavigate();
-  const { horizon, date, setDate, setHorizon } = useFilters();
+  const { horizon, date, setDate } = useFilters();
   const [intervalId, setIntervalId] = useState(HOUR_INTERVALS[0]?.id ?? 'all');
   const [compareEnabled, setCompareEnabled] = useState(true);
   const interval = HOUR_INTERVALS.find((item) => item.id === intervalId) ?? HOUR_INTERVALS[0];
@@ -50,13 +51,13 @@ function RouteDetails({ route, routes }: { route: Route; routes: Route[] }) {
   const calendar = useMonthCalendar(date);
   const factorsQuery = useFactors(date, route.route);
   const download = useMutation({
+    // Срез: «День» — по часам за дату, «Месяц» — по дням за месяц
     mutationFn: () =>
       exportForecast({
         format: 'csv',
         route: [route.route],
-        date_from: date,
-        date_to: date,
-        horizon: 'day',
+        horizon,
+        ...(horizon === 'day' ? { date_from: date, date_to: date } : monthRange(date)),
       }),
     onSuccess: ({ blob, filename }) => saveFile(blob, filename),
   });
@@ -79,31 +80,35 @@ function RouteDetails({ route, routes }: { route: Route; routes: Route[] }) {
             ))}
           </select>
         </label>
-        <label className="toolbar__field">
-          <span className="header__label">Интервал</span>
-          <select
-            className="field"
-            value={intervalId}
-            onChange={(event) => setIntervalId(event.target.value)}
-          >
-            {HOUR_INTERVALS.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="toolbar__field">
-          <span className="header__label">Сравнить с</span>
-          <select
-            className="field"
-            value={compareEnabled ? 'week' : 'none'}
-            onChange={(event) => setCompareEnabled(event.target.value === 'week')}
-          >
-            <option value="week">неделю назад</option>
-            <option value="none">без сравнения</option>
-          </select>
-        </label>
+        {horizon === 'day' && (
+          <>
+            <label className="toolbar__field">
+              <span className="header__label">Интервал</span>
+              <select
+                className="field"
+                value={intervalId}
+                onChange={(event) => setIntervalId(event.target.value)}
+              >
+                {HOUR_INTERVALS.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="toolbar__field">
+              <span className="header__label">Сравнить с</span>
+              <select
+                className="field"
+                value={compareEnabled ? 'week' : 'none'}
+                onChange={(event) => setCompareEnabled(event.target.value === 'week')}
+              >
+                <option value="week">неделю назад</option>
+                <option value="none">без сравнения</option>
+              </select>
+            </label>
+          </>
+        )}
         <div className="toolbar__actions">
           <button
             type="button"
@@ -132,12 +137,7 @@ function RouteDetails({ route, routes }: { route: Route; routes: Route[] }) {
       )}
 
       {horizon === 'month' ? (
-        <Panel title={`Маршрут ${route.route}: ${monthTitle(date)}`}>
-          <EmptyState message="Календарь месяца по дням — задача UI-5" />
-          <button type="button" className="button" onClick={() => setHorizon('day')}>
-            Переключить на «День»
-          </button>
-        </Panel>
+        <RouteMonthView route={route} />
       ) : (
         <div className="route-grid">
           <Panel title={`Дни × часы, ${monthTitle(date)}`}>

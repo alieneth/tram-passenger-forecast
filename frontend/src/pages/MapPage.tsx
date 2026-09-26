@@ -7,8 +7,7 @@ import { MapLegend } from '../components/map/MapLegend';
 import { toMapRoutes } from '../components/map/mapData';
 import { NoGeometryList } from '../components/map/NoGeometryList';
 import { TimeSlider } from '../components/map/TimeSlider';
-import { Panel } from '../components/Panel';
-import { EmptyState } from '../components/states/EmptyState';
+import { DayOnlyNotice } from '../components/states/DayOnlyNotice';
 import { QueryView } from '../components/states/QueryView';
 import { DEFAULT_MAP_HOUR, DISPLAY_HOURS } from '../config/constants';
 import { useFactors } from '../hooks/useFactors';
@@ -23,23 +22,11 @@ import { WEATHER_KIND_LABELS, eventLabel, weatherText } from '../utils/weather';
 
 // Экран «Карта» (UI-3): тепловая карта маршрутов по часам, слои, «Проиграть день»
 export function MapPage() {
-  const { horizon, setHorizon } = useFilters();
+  const { horizon } = useFilters();
   const routesQuery = useRoutes();
 
   if (horizon === 'month') {
-    return (
-      <div className="page">
-        <Panel title="Карта">
-          <EmptyState
-            message="Карта показывает прогноз по часам"
-            hint="Для горизонта «Месяц» откройте экран «Маршрут»"
-          />
-          <button type="button" className="button" onClick={() => setHorizon('day')}>
-            Переключить на «День»
-          </button>
-        </Panel>
-      </div>
-    );
+    return <DayOnlyNotice title="Карта" message="Карта показывает прогноз по часам" />;
   }
 
   return (

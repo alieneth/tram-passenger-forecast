@@ -84,3 +84,49 @@ export function weekdayShort(date: string): string {
 export function dayOfMonth(date: string): string {
   return date.slice(8, 10);
 }
+
+const MONTH_SHORT = [
+  'янв',
+  'фев',
+  'мар',
+  'апр',
+  'мая',
+  'июн',
+  'июл',
+  'авг',
+  'сен',
+  'окт',
+  'ноя',
+  'дек',
+];
+const MONTH_GENITIVE = [
+  'января',
+  'февраля',
+  'марта',
+  'апреля',
+  'мая',
+  'июня',
+  'июля',
+  'августа',
+  'сентября',
+  'октября',
+  'ноября',
+  'декабря',
+];
+
+// «1 сен» — подписи оси графика по дням
+export function formatDayMonthShort(date: string): string {
+  const parsed = parseIsoDate(date);
+  return `${parsed.getUTCDate()} ${MONTH_SHORT[parsed.getUTCMonth()]}`;
+}
+
+// «4 ноября»
+export function formatDayMonth(date: string): string {
+  const parsed = parseIsoDate(date);
+  return `${parsed.getUTCDate()} ${MONTH_GENITIVE[parsed.getUTCMonth()]}`;
+}
+
+// Номер дня недели с понедельника: 0 — пн … 6 — вс (для сетки календаря)
+export function weekdayIndexFromMonday(date: string): number {
+  return (parseIsoDate(date).getUTCDay() + 6) % 7;
+}

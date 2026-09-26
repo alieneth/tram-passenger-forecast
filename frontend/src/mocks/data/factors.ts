@@ -49,14 +49,31 @@ function round1(value: number): number {
 }
 
 // Условная погода: плавное похолодание от сентября к декабрю, осадки через день-два
+// Прогноз погоды есть только на ~16 дней после расчёта (31.10.2025); дальше — климатическая норма.
+// Так соблюдается правило «без утечки из будущего»: фактическую погоду ноября–декабря не отдаём
+const WEATHER_FORECAST_UNTIL = '2025-11-16';
+const CLIMATE_PRECIPITATION_MM = 1.8;
+
 function weather(date: string): NonNullable<FactorsResponse['weather']> {
   const day = parseDate(date).getTime() / 86_400_000;
   const fromSeptember =
     (parseDate(date).getTime() - parseDate('2025-09-01').getTime()) / 86_400_000;
-  const mean = 16 - fromSeptember * 0.19 + 2.5 * Math.sin(day * 0.9);
+  const trend = 16 - fromSeptember * 0.19;
+
+  if (date > WEATHER_FORECAST_UNTIL) {
+    // Норма — плавная, без суточных колебаний
+    return {
+      data_kind: 'climate_norm',
+      temperature_min: round1(trend - 3),
+      temperature_max: round1(trend + 2),
+      precipitation_mm: CLIMATE_PRECIPITATION_MM,
+      snowfall_cm: trend < 0 ? round1(CLIMATE_PRECIPITATION_MM * 0.8) : 0,
+    };
+  }
+
+  const mean = trend + 2.5 * Math.sin(day * 0.9);
   const precipitation = Math.max(0, round1(4 * Math.sin(day * 2.3)));
   return {
-    // Для дней прогноза — прогноз погоды на момент расчёта, без утечки фактической погоды
     data_kind: 'forecast',
     temperature_min: round1(mean - 3),
     temperature_max: round1(mean + 2),
