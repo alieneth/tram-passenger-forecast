@@ -1,0 +1,10 @@
+data/
+.git/
+**/target/
+**/node_modules/
+**/dist/
+**/.vite/
+ml/artifacts/
+*.parquet
+*.duckdb
+.env

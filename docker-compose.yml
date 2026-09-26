@@ -1,0 +1,68 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ${DB_NAME:-tram}
+      POSTGRES_USER: ${DB_USER:-tram}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-change_me}
+      TZ: ${TZ:-Europe/Moscow}
+    ports:
+      # 5432 на хосте часто занят другими локальными Postgres — снаружи 5433, внутри сети всё равно 5432.
+      - "5433:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      # Схема создаётся автоматически один раз при первом запуске (на пустом volume).
+      - ./sql/01_create_tables.sql:/docker-entrypoint-initdb.d/01_create_tables.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-tram} -d ${DB_NAME:-tram}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-tram}
+      DB_USER: ${DB_USER:-tram}
+      DB_PASSWORD: ${DB_PASSWORD:-change_me}
+      API_PORT: 8080
+      PASSENGERS_PER_TRAM_NORM: ${PASSENGERS_PER_TRAM_NORM:-150}
+      TRAM_PREP_MINUTES: ${TRAM_PREP_MINUTES:-40}
+      TZ: ${TZ:-Europe/Moscow}
+    ports:
+      - "${API_PORT:-8080}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    # НФТ организаторов: один контейнер API — 2–4 vCPU / 2–4 ГБ. Значения по умолчанию — верхняя
+    # граница диапазона; перед нагрузочным тестом подстроить и зафиксировать результат в README.
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 4G
+
+  # Разовая загрузка train.csv/test.csv в БД (DATA-1): docker compose run --rm loader
+  loader:
+    image: postgres:16
+    profiles: ["tools"]
+    environment:
+      PGHOST: db
+      PGPORT: 5432
+      PGDATABASE: ${DB_NAME:-tram}
+      PGUSER: ${DB_USER:-tram}
+      PGPASSWORD: ${DB_PASSWORD:-change_me}
+    volumes:
+      - ./data:/data:ro
+      - ./backend/db:/scripts:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    entrypoint: ["sh", "/scripts/load_validations.sh"]
+
+volumes:
+  db_data:
