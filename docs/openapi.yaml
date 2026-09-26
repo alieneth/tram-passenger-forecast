@@ -1,0 +1,704 @@
+openapi: 3.0.3
+info:
+  title: ИИ-прогноз пассажиропотока трамваев — API
+  version: 1.0.0
+  description: |
+    REST API сервиса прогноза пассажиропотока трамваев (Хакатон Московского транспорта).
+    Реализация — Java 21, Spring Boot. Прогнозы рассчитываются заранее (ml/) и читаются из таблицы forecast.
+    Поля JSON — snake_case. Даты — YYYY-MM-DD, дата и время — YYYY-MM-DDTHH:MM:SS (московское время).
+    Подробное описание алгоритмов — в Confluence «API. ИИ-прогноз пассажиропотока трамваев».
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local
+  - url: http://api:8080/api/v1
+    description: Docker
+tags:
+  - name: Справочники
+  - name: Прогноз
+  - name: Данные
+  - name: Модель
+  - name: Решения
+  - name: Служебные
+
+paths:
+  /routes:
+    get:
+      tags: [Справочники]
+      operationId: getRoutes
+      summary: Получить список маршрутов
+      parameters:
+        - name: is_new
+          in: query
+          required: false
+          description: true — только новые маршруты без истории, false — только с историей
+          schema: { type: boolean }
+      responses:
+        '200':
+          description: Список маршрутов
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RouteList' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /routes/{route}/geometry:
+    get:
+      tags: [Справочники]
+      operationId: getRouteGeometry
+      summary: Получить трассу маршрута (остановки с координатами)
+      parameters:
+        - $ref: '#/components/parameters/RoutePath'
+        - name: direction_id
+          in: query
+          required: false
+          description: Направление 0 или 1; если не передано — оба
+          schema: { type: integer, enum: [0, 1] }
+      responses:
+        '200':
+          description: Остановки маршрута по направлениям
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RouteGeometry' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /forecast:
+    get:
+      tags: [Прогноз]
+      operationId: getForecast
+      summary: Получить прогноз (день — по часам, месяц — по дням)
+      description: Из этого метода фронтенд строит таблицы «маршруты × часы», «дни × часы» и окраску карты.
+      parameters:
+        - $ref: '#/components/parameters/RouteQuery'
+        - $ref: '#/components/parameters/DateFrom'
+        - name: date_to
+          in: query
+          required: false
+          description: Конец периода; по умолчанию = date_from; период не больше 62 дней
+          schema: { type: string, format: date }
+        - $ref: '#/components/parameters/Horizon'
+        - name: hour_from
+          in: query
+          required: false
+          description: Начальный час (только для day), по умолчанию 0
+          schema: { type: integer, minimum: 0, maximum: 23, default: 0 }
+        - name: hour_to
+          in: query
+          required: false
+          description: Конечный час (только для day), по умолчанию 23
+          schema: { type: integer, minimum: 0, maximum: 23, default: 23 }
+      responses:
+        '200':
+          description: Прогноз
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ForecastResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+        '503': { $ref: '#/components/responses/NotReady' }
+
+  /actuals:
+    get:
+      tags: [Данные]
+      operationId: getActuals
+      summary: Получить факт пассажиропотока (январь–октябрь 2025)
+      parameters:
+        - $ref: '#/components/parameters/RouteQuery'
+        - $ref: '#/components/parameters/DateFrom'
+        - name: date_to
+          in: query
+          required: true
+          description: Конец периода; не больше 92 дней от начала
+          schema: { type: string, format: date }
+        - name: granularity
+          in: query
+          required: false
+          schema: { type: string, enum: [hour, day], default: hour }
+      responses:
+        '200':
+          description: Фактические значения
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ActualsResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /factors:
+    get:
+      tags: [Данные]
+      operationId: getFactors
+      summary: Получить факторы дня и вклад факторов в прогноз
+      parameters:
+        - name: date
+          in: query
+          required: true
+          schema: { type: string, format: date }
+        - name: route
+          in: query
+          required: false
+          description: Если передан — добавляются вклад факторов и события рядом с маршрутом
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Факторы дня
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FactorsResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /export:
+    get:
+      tags: [Прогноз]
+      operationId: exportForecast
+      summary: Выгрузить прогноз (CSV, XLSX, формат сабмита)
+      description: |
+        CSV — разделитель «;», UTF-8, числа без разделителей разрядов.
+        submission — ровно route;date;hour;prediction, как test_submission.csv (только horizon=day).
+      parameters:
+        - name: format
+          in: query
+          required: true
+          schema: { type: string, enum: [csv, xlsx, submission] }
+        - $ref: '#/components/parameters/RouteQuery'
+        - $ref: '#/components/parameters/DateFrom'
+        - name: date_to
+          in: query
+          required: true
+          schema: { type: string, format: date }
+        - $ref: '#/components/parameters/Horizon'
+      responses:
+        '200':
+          description: Файл с прогнозом
+          headers:
+            Content-Disposition:
+              schema: { type: string }
+              example: attachment; filename=forecast_2025-11-01_2025-12-31.csv
+          content:
+            text/csv:
+              schema: { type: string }
+              example: |
+                route;date;hour;prediction
+                1;2025-11-01;5;142
+                1;2025-11-01;6;566
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema: { type: string, format: binary }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+        '503': { $ref: '#/components/responses/NotReady' }
+
+  /validations:
+    post:
+      tags: [Данные]
+      operationId: ingestValidations
+      summary: Принять валидации (потоковый приём, до 5000 записей)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ValidationBatch' }
+      responses:
+        '200':
+          description: Результат приёма (некорректные записи не сохраняются и перечисляются в errors)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/IngestResult' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /health:
+    get:
+      tags: [Служебные]
+      operationId: getHealth
+      summary: Проверить работоспособность
+      responses:
+        '200':
+          description: Сервис работает
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Health' }
+        '503':
+          description: БД недоступна
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Health' }
+
+  /model/quality:
+    get:
+      tags: [Модель]
+      operationId: getModelQuality
+      summary: Получить качество модели (MAE нашей и базовой модели)
+      parameters:
+        - $ref: '#/components/parameters/HorizonRequired'
+        - name: model_version
+          in: query
+          required: false
+          description: Версия модели; по умолчанию активная
+          schema: { type: string }
+      responses:
+        '200':
+          description: Качество модели
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ModelQuality' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/InternalError' }
+        '503': { $ref: '#/components/responses/NotReady' }
+
+  /decisions:
+    get:
+      tags: [Решения]
+      operationId: getDecisions
+      summary: Получить список решений
+      description: Перед выдачей просроченные решения (awaiting, updated с истёкшим deadline_at) переводятся в expired.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items: { $ref: '#/components/schemas/DecisionStatusCode' }
+        - name: date
+          in: query
+          required: false
+          schema: { type: string, format: date }
+        - name: route
+          in: query
+          required: false
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Список решений
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DecisionList' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /decisions/{decision_id}:
+    patch:
+      tags: [Решения]
+      operationId: updateDecisionStatus
+      summary: Изменить статус решения (принять, отклонить, исполнено)
+      description: |
+        Допустимые переходы: awaiting, updated → accepted, rejected; accepted → executed, not_executed.
+        При принятии одного варианта остальные варианты этого решения переводятся в closed.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: decision_id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DecisionStatusUpdate' }
+            example:
+              status_code: rejected
+              reason: Нет резерва в депо
+      responses:
+        '200':
+          description: Статус изменён
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DecisionStatusResult' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: Роль «Диспетчер» — для решений; роль ingest — для приёма валидаций
+
+  parameters:
+    RoutePath:
+      name: route
+      in: path
+      required: true
+      description: Номер маршрута
+      schema: { type: integer, example: 17 }
+    RouteQuery:
+      name: route
+      in: query
+      required: false
+      description: Номер маршрута; можно несколько (route=1&route=7). Если не передан — все
+      style: form
+      explode: true
+      schema:
+        type: array
+        items: { type: integer }
+    DateFrom:
+      name: date_from
+      in: query
+      required: true
+      schema: { type: string, format: date, example: '2025-11-14' }
+    Horizon:
+      name: horizon
+      in: query
+      required: false
+      schema: { $ref: '#/components/schemas/Horizon' }
+    HorizonRequired:
+      name: horizon
+      in: query
+      required: true
+      schema: { $ref: '#/components/schemas/Horizon' }
+
+  responses:
+    BadRequest:
+      description: VALIDATION_ERROR — некорректные параметры запроса
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example:
+            code: VALIDATION_ERROR
+            message: Некорректные параметры запроса
+            details:
+              - field: date_from
+                message: Дата должна быть в формате YYYY-MM-DD
+    Unauthorized:
+      description: UNAUTHORIZED — токен не передан или недействителен
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { code: UNAUTHORIZED, message: Требуется авторизация }
+    Forbidden:
+      description: FORBIDDEN — нет роли для операции
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { code: FORBIDDEN, message: Недостаточно прав для выполнения операции }
+    NotFound:
+      description: ROUTE_NOT_FOUND, GEOMETRY_NOT_FOUND, FORECAST_NOT_FOUND, ACTUALS_NOT_FOUND, DATE_NOT_IN_CALENDAR, DECISION_NOT_FOUND, MODEL_VERSION_NOT_FOUND
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { code: ROUTE_NOT_FOUND, message: Маршрут 99 не найден }
+    Conflict:
+      description: INVALID_STATUS_TRANSITION, DECISION_EXPIRED
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { code: INVALID_STATUS_TRANSITION, message: Нельзя перевести решение из статуса rejected в accepted }
+    InternalError:
+      description: INTERNAL_ERROR — внутренняя ошибка сервиса
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { code: INTERNAL_ERROR, message: Внутренняя ошибка. Повторите запрос позже }
+    NotReady:
+      description: FORECAST_NOT_READY — нет активной версии модели или БД недоступна
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { code: FORECAST_NOT_READY, message: Прогноз ещё не рассчитан. Повторите позже }
+
+  schemas:
+    Horizon:
+      type: string
+      enum: [day, month]
+      default: day
+
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum: [VALIDATION_ERROR, UNAUTHORIZED, FORBIDDEN, ROUTE_NOT_FOUND, GEOMETRY_NOT_FOUND, FORECAST_NOT_FOUND,
+                 ACTUALS_NOT_FOUND, DATE_NOT_IN_CALENDAR, DECISION_NOT_FOUND, MODEL_VERSION_NOT_FOUND,
+                 INVALID_STATUS_TRANSITION, DECISION_EXPIRED, INTERNAL_ERROR, FORECAST_NOT_READY]
+        message: { type: string, description: Текст ошибки для пользователя }
+        details:
+          type: array
+          items:
+            type: object
+            required: [field, message]
+            properties:
+              field: { type: string }
+              message: { type: string }
+
+    Route:
+      type: object
+      required: [route, is_new, has_geometry]
+      properties:
+        route: { type: integer, description: route.route, example: 1 }
+        route_long_name: { type: string, nullable: true, description: route.route_long_name, example: Чертаново Южное - Москворецкий рынок }
+        depot_id: { type: integer, nullable: true, description: route.depot_id, example: 133 }
+        depot_name: { type: string, nullable: true, description: depot.depot_name, example: Трамвайное управление }
+        date_start: { type: string, format: date, nullable: true, description: route.date_start }
+        is_new: { type: boolean, description: route.is_new — новый маршрут без истории }
+        has_geometry: { type: boolean, description: route.has_geometry — есть координаты для карты }
+    RouteList:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Route' }
+        total: { type: integer }
+
+    Stop:
+      type: object
+      required: [stop_sequence, stop_id, stop_name, stop_lat, stop_lon]
+      properties:
+        stop_sequence: { type: integer, description: route_stop.stop_sequence, example: 1 }
+        stop_id: { type: integer, description: stop.stop_id, example: 2594 }
+        stop_name: { type: string, description: stop.stop_name, example: Чертаново Южное }
+        stop_lat: { type: number, description: stop.stop_lat, example: 55.59468 }
+        stop_lon: { type: number, description: stop.stop_lon, example: 37.590884 }
+    RouteGeometry:
+      type: object
+      required: [route, directions]
+      properties:
+        route: { type: integer }
+        route_long_name: { type: string, nullable: true }
+        directions:
+          type: array
+          items:
+            type: object
+            required: [direction_id, stops]
+            properties:
+              direction_id: { type: integer, enum: [0, 1] }
+              stops:
+                type: array
+                items: { $ref: '#/components/schemas/Stop' }
+
+    ForecastItem:
+      type: object
+      required: [route, date, prediction, lower, upper, is_analog]
+      properties:
+        route: { type: integer, description: forecast.route, example: 17 }
+        date: { type: string, format: date, description: forecast.date, example: '2025-11-14' }
+        hour: { type: integer, nullable: true, minimum: 0, maximum: 23, description: forecast.hour; null для month, example: 8 }
+        prediction: { type: integer, description: forecast.prediction — пассажиров за час (day) или за день (month), example: 1859 }
+        lower: { type: integer, description: forecast.lower, example: 1690 }
+        upper: { type: integer, description: forecast.upper, example: 2030 }
+        trams_on_line: { type: integer, nullable: true, description: forecast.trams_on_line, example: 14 }
+        passengers_per_tram: { type: number, nullable: true, description: prediction / trams_on_line, example: 132.8 }
+        is_analog: { type: boolean, description: forecast.is_analog — прогноз по аналогам }
+    ForecastResponse:
+      type: object
+      required: [model_version, horizon, items, generated_at]
+      properties:
+        model_version: { type: string, description: model_version.version_name, example: lgbm-v3 }
+        horizon: { $ref: '#/components/schemas/Horizon' }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/ForecastItem' }
+        generated_at: { type: string, format: date-time, description: forecast.created_at }
+
+    ActualItem:
+      type: object
+      required: [route, date, boardings]
+      properties:
+        route: { type: integer, description: boardings_hourly.route }
+        date: { type: string, format: date, description: boardings_hourly.date }
+        hour: { type: integer, nullable: true, description: boardings_hourly.hour; null для day }
+        boardings: { type: integer, description: boardings_hourly.boardings, example: 581 }
+        trams_on_line: { type: integer, nullable: true, description: boardings_hourly.trams_on_line (только hour) }
+    ActualsResponse:
+      type: object
+      required: [granularity, items]
+      properties:
+        granularity: { type: string, enum: [hour, day] }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/ActualItem' }
+
+    FactorsResponse:
+      type: object
+      required: [date, day_of_week, day_type, is_school_holiday, events]
+      properties:
+        date: { type: string, format: date }
+        day_of_week: { type: integer, minimum: 1, maximum: 7, description: calendar_day.day_of_week }
+        day_type: { type: string, enum: [working, weekend, holiday, shortened], description: calendar_day.day_type }
+        holiday_name: { type: string, nullable: true }
+        is_school_holiday: { type: boolean }
+        special_day_name: { type: string, nullable: true }
+        weather:
+          type: object
+          nullable: true
+          description: Погода за день без утечки — прогноз, выпущенный до даты, или климатическая норма
+          properties:
+            data_kind: { type: string, enum: [forecast, climate_norm] }
+            temperature_min: { type: number }
+            temperature_max: { type: number }
+            precipitation_mm: { type: number }
+            snowfall_cm: { type: number }
+        events:
+          type: array
+          items:
+            type: object
+            required: [event_id, event_type, event_name, start_at, routes]
+            properties:
+              event_id: { type: integer }
+              event_type: { type: string, enum: [match, concert, exhibition, metro_closure, road_closure, other] }
+              event_name: { type: string, example: Матч ЦСКА }
+              start_at: { type: string, format: date-time }
+              routes:
+                type: array
+                items: { type: integer }
+        contributions:
+          type: array
+          description: Только если передан route
+          items:
+            type: object
+            required: [factor_code, factor_name, effect_pct]
+            properties:
+              factor_code: { type: string, example: peak_hour }
+              factor_name: { type: string, example: Час пик }
+              effect_pct: { type: number, example: 38.0 }
+
+    ValidationRecord:
+      type: object
+      required: [tran_no, device_no, tran_date_time, crd_hashcode, validation_result, route]
+      properties:
+        tran_no: { type: integer }
+        device_no: { type: integer }
+        tran_date_time: { type: string, format: date-time }
+        begin_date_time: { type: string, format: date-time, nullable: true }
+        crd_hashcode: { type: string, minLength: 32, maxLength: 32 }
+        validation_result: { type: integer, description: 1 — успешно }
+        tran_type_id: { type: integer, nullable: true }
+        good_type: { type: string, nullable: true }
+        pass_route: { type: string, nullable: true }
+        route: { type: integer }
+        bus_exit_no: { type: integer, nullable: true }
+        garage_number: { type: integer, nullable: true }
+    ValidationBatch:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          minItems: 1
+          maxItems: 5000
+          items: { $ref: '#/components/schemas/ValidationRecord' }
+    IngestResult:
+      type: object
+      required: [accepted, rejected, errors]
+      properties:
+        accepted: { type: integer }
+        rejected: { type: integer }
+        errors:
+          type: array
+          items:
+            type: object
+            required: [index, field, message]
+            properties:
+              index: { type: integer, description: Номер записи в пакете (с 0) }
+              field: { type: string }
+              message: { type: string }
+
+    Health:
+      type: object
+      required: [status, db]
+      properties:
+        status: { type: string, enum: [UP, DEGRADED, DOWN] }
+        db: { type: string, enum: [UP, DOWN] }
+        active_model_version: { type: string, nullable: true }
+        forecast_generated_at: { type: string, format: date-time, nullable: true }
+
+    QualityValues:
+      type: object
+      required: [model_mae, baseline_mae]
+      properties:
+        model_mae: { type: number, description: model_quality.model_mae, example: 38.0 }
+        baseline_mae: { type: number, description: model_quality.baseline_mae, example: 71.0 }
+        improvement_pct: { type: integer, nullable: true, description: (baseline_mae − model_mae) / baseline_mae × 100 }
+    ModelQuality:
+      type: object
+      required: [model_version, horizon, eval_date_from, eval_date_to, overall, by_route]
+      properties:
+        model_version: { type: string }
+        horizon: { $ref: '#/components/schemas/Horizon' }
+        eval_date_from: { type: string, format: date }
+        eval_date_to: { type: string, format: date }
+        overall: { $ref: '#/components/schemas/QualityValues' }
+        by_route:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/QualityValues'
+              - type: object
+                required: [route, method]
+                properties:
+                  route: { type: integer }
+                  method: { type: string, enum: [model, analogs], description: analogs — проверка с исключением }
+
+    DecisionStatusCode:
+      type: string
+      enum: [generated, awaiting, updated, accepted, rejected, expired, executed, not_executed, closed]
+    Decision:
+      type: object
+      required: [decision_id, decision_type, route, date, hour_from, hour_to, trams_delta, norm, load_before,
+                 load_after, excess_pct, same_depot, deadline_at, status_code, status_name, created_at]
+      properties:
+        decision_id: { type: integer }
+        parent_decision_id: { type: integer, nullable: true, description: Основное решение для альтернативы }
+        decision_type: { type: string, enum: [transfer, reserve] }
+        route: { type: integer, description: Маршрут с превышением нормы }
+        donor_route: { type: integer, nullable: true, description: Маршрут-донор; null для reserve }
+        date: { type: string, format: date }
+        hour_from: { type: integer, minimum: 0, maximum: 23 }
+        hour_to: { type: integer, minimum: 0, maximum: 23 }
+        trams_delta: { type: integer }
+        norm: { type: integer, example: 150 }
+        load_before: { type: number, example: 167.0 }
+        load_after: { type: number, example: 146.0 }
+        donor_load_before: { type: number, nullable: true, example: 64.0 }
+        donor_load_after: { type: number, nullable: true, example: 80.0 }
+        excess_pct: { type: integer, description: (load_before / norm − 1) × 100, example: 11 }
+        same_depot: { type: boolean }
+        deadline_at: { type: string, format: date-time }
+        status_code: { $ref: '#/components/schemas/DecisionStatusCode' }
+        status_name: { type: string, example: Ожидает решения }
+        created_at: { type: string, format: date-time }
+    DecisionList:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Decision' }
+        total: { type: integer }
+    DecisionStatusUpdate:
+      type: object
+      required: [status_code]
+      properties:
+        status_code: { type: string, enum: [accepted, rejected, executed, not_executed] }
+        reason: { type: string, maxLength: 500, description: Обязательна для rejected и not_executed }
+    DecisionStatusResult:
+      type: object
+      required: [decision_id, status_code, status_name, changed_at, changed_by]
+      properties:
+        decision_id: { type: integer }
+        status_code: { $ref: '#/components/schemas/DecisionStatusCode' }
+        status_name: { type: string }
+        changed_at: { type: string, format: date-time }
+        changed_by: { type: string }
+        reason: { type: string, nullable: true }
