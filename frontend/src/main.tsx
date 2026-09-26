@@ -7,6 +7,7 @@ import { App } from './App';
 import { QUERY_STALE_TIME_MS } from './config/constants';
 import { FiltersProvider } from './context/FiltersProvider';
 import './styles/global.css';
+import './styles/map.css';
 
 const MAX_RETRIES = 2;
 

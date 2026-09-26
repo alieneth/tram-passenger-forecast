@@ -520,3 +520,33 @@ p {
 .data-table__row--alert td {
   color: var(--danger);
 }
+
+/* Узкий экран (ноутбук, окно в пол-экрана): шапка не должна растягивать страницу вбок */
+@media (max-width: 1200px) {
+  .header {
+    gap: 16px;
+    padding: 0 16px;
+  }
+
+  .header__brand {
+    min-width: 0;
+  }
+
+  .header__title {
+    font-size: 16px;
+  }
+
+  .header__subtitle,
+  .header__status-text {
+    display: none;
+  }
+
+  .overview-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .stat-row,
+  .factors {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

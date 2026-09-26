@@ -24,7 +24,7 @@ export function Header() {
       </div>
       <div className="header__status">
         <span className="status-dot" aria-hidden="true" />
-        Прогноз на ноябрь–декабрь 2025
+        <span className="header__status-text">Прогноз на ноябрь–декабрь 2025</span>
         {IS_MOCK_MODE && (
           <span className="badge badge--warning" title="VITE_API_URL не задан">
             Мок-данные

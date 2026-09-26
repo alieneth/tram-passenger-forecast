@@ -16,3 +16,19 @@ export const NEW_ROUTE_LABEL = 'новый · прогноз по аналога
 
 // Прогноз считается пакетно раз в сутки — чаще перезапрашивать незачем
 export const QUERY_STALE_TIME_MS = 5 * 60 * 1000;
+
+// Загрузка маршрута — пассажиров на трамвай относительно нормы:
+// выше нормы — красный, от 80% нормы — жёлтый, ниже — зелёный
+export const LOAD_WARNING_SHARE = 0.8;
+
+// Карта: центр Москвы и масштаб, при котором видны все маршруты
+export const MAP_CENTER: [lon: number, lat: number] = [37.6173, 55.7558];
+export const MAP_ZOOM = 10;
+export const MAP_FIT_PADDING_PX = 60;
+
+// «Проиграть день»: при скорости ×1 один час шкалы длится столько миллисекунд
+export const PLAYBACK_HOUR_MS = 3000;
+export const PLAYBACK_SPEEDS: readonly number[] = [1, 2, 5, 10];
+
+// Карта открывается на утреннем пике
+export const DEFAULT_MAP_HOUR = 8;

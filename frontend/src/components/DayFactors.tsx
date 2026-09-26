@@ -1,6 +1,6 @@
 import type { FactorsResponse } from '../api';
 import { weekdayName } from '../utils/dates';
-import { formatDecimal, formatTemperature } from '../utils/format';
+import { WEATHER_KIND_LABELS, weatherText } from '../utils/weather';
 
 const DAY_TYPE_LABELS: Record<FactorsResponse['day_type'], string> = {
   working: 'Рабочий день',
@@ -8,26 +8,6 @@ const DAY_TYPE_LABELS: Record<FactorsResponse['day_type'], string> = {
   holiday: 'Праздник',
   shortened: 'Сокращённый день',
 };
-
-// Без утечки из будущего: подписываем, прогноз это погоды или климатическая норма
-const WEATHER_KIND_LABELS = {
-  forecast: 'прогноз погоды',
-  climate_norm: 'климатическая норма',
-} as const;
-
-function weatherText(weather: NonNullable<FactorsResponse['weather']>): string {
-  const parts: string[] = [];
-  if (weather.temperature_min !== undefined && weather.temperature_max !== undefined) {
-    parts.push(
-      `${formatTemperature(weather.temperature_min)} … ${formatTemperature(weather.temperature_max)}`,
-    );
-  }
-  if (weather.snowfall_cm) parts.push(`снег ${formatDecimal(weather.snowfall_cm)} см`);
-  else if (weather.precipitation_mm)
-    parts.push(`осадки ${formatDecimal(weather.precipitation_mm)} мм`);
-  else parts.push('без осадков');
-  return parts.join(', ');
-}
 
 export function DayFactors({ factors }: { factors: FactorsResponse }) {
   const dayType = factors.holiday_name

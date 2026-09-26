@@ -39,3 +39,21 @@ export function itemsByRouteAndHour(items: ForecastItem[]): Map<number, Map<numb
   }
   return result;
 }
+
+// Час с наибольшей загрузкой на трамвай — по нему маршрут красится на Обзоре,
+// поэтому красных маршрутов на карте столько же, сколько в карточке «пиковой нагрузки»
+export function peakLoadItem(items: ForecastItem[]): ForecastItem | undefined {
+  return items.reduce<ForecastItem | undefined>(
+    (peak, item) =>
+      (item.passengers_per_tram ?? -1) > (peak?.passengers_per_tram ?? -1) ? item : peak,
+    undefined,
+  );
+}
+
+export function itemsByRoute(items: ForecastItem[]): Map<number, ForecastItem[]> {
+  const result = new Map<number, ForecastItem[]>();
+  for (const item of items) {
+    result.set(item.route, [...(result.get(item.route) ?? []), item]);
+  }
+  return result;
+}
