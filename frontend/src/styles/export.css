@@ -1,0 +1,161 @@
+/* Экран «Экспорт и API» (UI-6) */
+.export-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: var(--gap);
+  align-items: start;
+}
+
+.export-grid__main,
+.export-grid__side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+
+@media (max-width: 1200px) {
+  .export-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.form-grid .field {
+  width: 100%;
+}
+
+.form-grid__wide {
+  grid-column: 1 / -1;
+}
+
+.period .field {
+  width: auto;
+  flex: 1;
+}
+
+.period {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.export-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.button--small {
+  height: 28px;
+  font-size: 12px;
+}
+
+.button--wide {
+  justify-content: center;
+  width: 100%;
+  margin-top: 12px;
+}
+
+.dropdown {
+  position: relative;
+}
+
+.dropdown__summary {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  cursor: pointer;
+}
+
+.dropdown__summary::-webkit-details-marker {
+  display: none;
+}
+
+.dropdown__panel {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 4px);
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-raised);
+}
+
+code,
+.code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+
+.code {
+  margin: 6px 0 12px;
+  padding: 10px 12px;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #06101d;
+  white-space: pre;
+}
+
+.code--wrap {
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.code--scroll {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.api-example__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.data-table--mono td {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+
+.service-status__title {
+  margin: 16px 0 8px;
+  font-size: 15px;
+}
+
+.perf-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.perf-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-raised);
+}
+
+.perf-tile__value {
+  font-weight: 700;
+  font-size: 20px;
+}

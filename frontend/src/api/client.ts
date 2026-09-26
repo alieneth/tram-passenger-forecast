@@ -1,10 +1,11 @@
 // Единственная точка доступа к данным. Экраны не знают, откуда данные — из API или из моков.
 import { IS_MOCK_MODE } from './config';
-import { getFile, getJson, type DownloadedFile } from './http';
+import { buildQuery, getFile, getJson, type DownloadedFile, type QueryParams } from './http';
 import type {
   ActualsResponse,
   FactorsResponse,
   ForecastResponse,
+  Health,
   RouteGeometry,
   RouteList,
   operations,
@@ -63,4 +64,19 @@ export function exportForecast(query: ExportQuery, signal?: AbortSignal): Promis
   return IS_MOCK_MODE
     ? loadMock().then((mock) => mock.exportForecast(query, fallbackFilename))
     : getFile('/export', query, fallbackFilename, signal);
+}
+
+// 503 «БД недоступна» приходит с телом Health — показываем его как состояние, а не как ошибку
+const HEALTH_DOWN_STATUS = 503;
+
+export function getHealth(signal?: AbortSignal): Promise<Health> {
+  return IS_MOCK_MODE
+    ? loadMock().then((mock) => mock.getHealth())
+    : getJson('/health', {}, signal, [HEALTH_DOWN_STATUS]);
+}
+
+// Относительный адрес запроса — для примера на экране «Экспорт и API»
+export function describeRequest(path: string, params: QueryParams): string {
+  const query = buildQuery(params);
+  return `${path}${query ? `?${query}` : ''}`;
 }

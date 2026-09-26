@@ -5,7 +5,7 @@ type QueryValue = string | number | boolean | ReadonlyArray<string | number> | n
 export type QueryParams = Record<string, QueryValue>;
 
 // Массивы — как в контракте (style: form, explode: true): route=1&route=7
-function buildUrl(path: string, params: QueryParams = {}): string {
+export function buildQuery(params: QueryParams = {}): string {
   const search = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
     if (value === undefined || value === null) continue;
@@ -15,11 +15,21 @@ function buildUrl(path: string, params: QueryParams = {}): string {
       search.append(key, String(value));
     }
   }
-  const query = search.toString();
+  return search.toString();
+}
+
+function buildUrl(path: string, params: QueryParams = {}): string {
+  const query = buildQuery(params);
   return `${API_URL}${path}${query ? `?${query}` : ''}`;
 }
 
-async function request(path: string, params: QueryParams, signal?: AbortSignal): Promise<Response> {
+async function request(
+  path: string,
+  params: QueryParams,
+  signal?: AbortSignal,
+  // Статусы, при которых тело — обычный ответ, а не ошибка (GET /health отдаёт Health и с 503)
+  acceptStatuses: readonly number[] = [],
+): Promise<Response> {
   let response: Response;
   try {
     response = await fetch(buildUrl(path, params), { signal });
@@ -27,7 +37,7 @@ async function request(path: string, params: QueryParams, signal?: AbortSignal):
     if (cause instanceof DOMException && cause.name === 'AbortError') throw cause;
     throw ApiError.client('NETWORK_ERROR');
   }
-  if (response.ok) return response;
+  if (response.ok || acceptStatuses.includes(response.status)) return response;
 
   const body: unknown = await response.json().catch(() => null);
   if (isApiErrorBody(body)) throw ApiError.fromBody(body, response.status);
@@ -38,8 +48,9 @@ export async function getJson<T>(
   path: string,
   params: QueryParams = {},
   signal?: AbortSignal,
+  acceptStatuses: readonly number[] = [],
 ): Promise<T> {
-  const response = await request(path, params, signal);
+  const response = await request(path, params, signal, acceptStatuses);
   try {
     return (await response.json()) as T;
   } catch {

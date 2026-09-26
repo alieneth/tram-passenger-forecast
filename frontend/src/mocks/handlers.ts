@@ -15,6 +15,7 @@ import type {
   ActualsResponse,
   FactorsResponse,
   ForecastItem,
+  Health,
   ForecastResponse,
   RouteGeometry,
   RouteList,
@@ -192,13 +193,25 @@ export function getFactors(query: FactorsQuery): Promise<FactorsResponse> {
   return respond({ ...factors, events });
 }
 
+export function getHealth(): Promise<Health> {
+  return respond({
+    status: 'UP',
+    db: 'UP',
+    active_model_version: MODEL_VERSION,
+    forecast_generated_at: GENERATED_AT,
+  });
+}
+
 // Мок отдаёт CSV и для xlsx: собрать настоящий xlsx без бэкенда незачем
 export async function exportForecast(
   query: ExportQuery,
   filename: string,
 ): Promise<DownloadedFile> {
-  const forecast = await getForecast(query);
   const isSubmission = query.format === 'submission';
+  if (isSubmission && query.horizon === 'month') {
+    return validationError('horizon', 'Для формата submission допустим только horizon=day');
+  }
+  const forecast = await getForecast(query);
   const header = isSubmission
     ? ['route', 'date', 'hour', 'prediction']
     : ['route', 'date', 'hour', 'prediction', 'lower', 'upper'];
