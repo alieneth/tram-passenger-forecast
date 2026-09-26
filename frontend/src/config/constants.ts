@@ -40,3 +40,6 @@ export const COMPARE_DAYS_BACK = 7;
 
 // График «Пассажиров в день» на горизонте «Месяц»: факт с сентября, прогноз — ноябрь–декабрь
 export const MONTH_CHART_ACTUALS_FROM = '2025-09-01';
+
+// Как часто шапка перепроверяет GET /health — чтобы индикатор не врал после сбоя
+export const HEALTH_REFRESH_MS = 60 * 1000;

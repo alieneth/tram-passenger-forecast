@@ -13,15 +13,20 @@ import './styles/export.css';
 
 const MAX_RETRIES = 2;
 
+// Повторяем только то, что может пройти через секунду: сеть и 5xx.
+// 4xx — «нет данных» или ошибка параметров; «прогноз не рассчитан» за секунду не появится
+function shouldRetry(error: unknown): boolean {
+  if (!(error instanceof ApiError)) return true;
+  if (error.code === 'FORECAST_NOT_READY') return false;
+  return error.status === null || error.status >= 500;
+}
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: QUERY_STALE_TIME_MS,
       refetchOnWindowFocus: false,
-      // Ответы 4xx повторять бессмысленно — это «нет данных» или ошибка параметров
-      retry: (failureCount, error) =>
-        !(error instanceof ApiError && error.status !== null && error.status < 500) &&
-        failureCount < MAX_RETRIES,
+      retry: (failureCount, error) => shouldRetry(error) && failureCount < MAX_RETRIES,
     },
   },
 });

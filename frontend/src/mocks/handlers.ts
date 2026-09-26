@@ -25,6 +25,7 @@ import { factorsFor } from './data/factors';
 import { ACTUALS_FROM, FORECAST_TO, allActualItems, allForecastItems } from './data/forecast';
 import { geometryMock } from './data/geometry';
 import { routesMock } from './data/routes';
+import { commonFailure, currentScenario } from './scenario';
 
 // Задержка, чтобы в мок-режиме были видны состояния загрузки
 const MOCK_LATENCY_MS = 250;
@@ -35,11 +36,15 @@ const MODEL_VERSION = 'lgbm-v3';
 const GENERATED_AT = '2025-10-31T23:15:00';
 const CSV_SEPARATOR = ';';
 
+// Общий сбой сценария (?mock=offline, ?mock=server-error) — здесь, чтобы сработал у всех методов
 function respond<T>(data: T): Promise<T> {
-  return new Promise((resolve) =>
-    setTimeout(() => resolve(structuredClone(data)), MOCK_LATENCY_MS),
+  const failure = commonFailure();
+  return new Promise((resolve, reject) =>
+    setTimeout(() => (failure ? reject(failure) : resolve(structuredClone(data))), MOCK_LATENCY_MS),
   );
 }
+
+const notReady = () => fail(503, 'FORECAST_NOT_READY', 'Прогноз ещё не рассчитан. Повторите позже');
 
 function fail(
   status: number,
@@ -47,9 +52,8 @@ function fail(
   message: string,
   details?: ApiError['details'],
 ): Promise<never> {
-  return new Promise((_, reject) =>
-    setTimeout(() => reject(new ApiError(code, message, status, details)), MOCK_LATENCY_MS),
-  );
+  const failure = commonFailure() ?? new ApiError(code, message, status, details);
+  return new Promise((_, reject) => setTimeout(() => reject(failure), MOCK_LATENCY_MS));
 }
 
 function validationError(field: string, message: string): Promise<never> {
@@ -72,6 +76,7 @@ function periodError(from: string, to: string, maxDays: number): Promise<never> 
 }
 
 export function getRoutes(query: RoutesQuery): Promise<RouteList> {
+  if (currentScenario() === 'empty') return respond({ items: [], total: 0 });
   const items =
     query.is_new === undefined
       ? routesMock.items
@@ -82,7 +87,7 @@ export function getRoutes(query: RoutesQuery): Promise<RouteList> {
 export function getRouteGeometry(route: number, query: GeometryQuery): Promise<RouteGeometry> {
   const notFound = ensureRoutesExist([route]);
   if (notFound) return notFound;
-  const geometry = geometryMock[route];
+  const geometry = currentScenario() === 'no-geometry' ? undefined : geometryMock[route];
   if (!geometry) {
     return fail(404, 'GEOMETRY_NOT_FOUND', `Для маршрута ${route} нет координат остановок`);
   }
@@ -129,6 +134,7 @@ export function getForecast(query: ForecastQuery): Promise<ForecastResponse> {
   if (invalid) return invalid;
   const notFound = ensureRoutesExist(query.route);
   if (notFound) return notFound;
+  if (currentScenario() === 'not-ready') return notReady();
 
   const horizon = query.horizon ?? 'day';
   const hourFrom = query.hour_from ?? 0;
@@ -139,7 +145,7 @@ export function getForecast(query: ForecastQuery): Promise<ForecastResponse> {
       (horizon === 'month' || ((item.hour ?? 0) >= hourFrom && (item.hour ?? 0) <= hourTo)),
   );
   const items = horizon === 'day' ? hourly : toDaily(hourly);
-  if (items.length === 0) {
+  if (items.length === 0 || currentScenario() === 'empty') {
     return fail(404, 'FORECAST_NOT_FOUND', 'Нет прогноза за выбранный период');
   }
   return respond({ model_version: MODEL_VERSION, horizon, items, generated_at: GENERATED_AT });
@@ -170,7 +176,7 @@ export function getActuals(query: ActualsQuery): Promise<ActualsResponse> {
   const hourly = allActualItems().filter((item) =>
     inPeriod(item, query.route, query.date_from, query.date_to),
   );
-  if (hourly.length === 0) {
+  if (hourly.length === 0 || currentScenario() === 'empty') {
     return fail(404, 'ACTUALS_NOT_FOUND', 'Нет фактических данных за выбранный период');
   }
   const items = granularity === 'hour' ? hourly : toDailyActuals(hourly);
@@ -194,6 +200,14 @@ export function getFactors(query: FactorsQuery): Promise<FactorsResponse> {
 }
 
 export function getHealth(): Promise<Health> {
+  if (currentScenario() === 'not-ready') {
+    return respond({
+      status: 'DEGRADED',
+      db: 'UP',
+      active_model_version: null,
+      forecast_generated_at: null,
+    });
+  }
   return respond({
     status: 'UP',
     db: 'UP',

@@ -28,6 +28,7 @@ import { FORECAST_DATE_MAX, FORECAST_DATE_MIN } from '../config/constants';
 import { useFilters } from '../hooks/useFilters';
 import { useRoutes } from '../hooks/useRoutes';
 import { saveFile } from '../utils/download';
+import { hasNoItems } from '../utils/empty';
 import { formatNumber } from '../utils/format';
 
 const FILE_FORMATS: { value: FileFormat; label: string }[] = [
@@ -44,7 +45,9 @@ function swaggerUrl(): string {
 export function ExportPage() {
   const routesQuery = useRoutes();
   return (
-    <QueryView query={routesQuery}>{(routes) => <ExportScreen routes={routes.items} />}</QueryView>
+    <QueryView query={routesQuery} isEmpty={hasNoItems} emptyMessage="Справочник маршрутов пуст">
+      {(routes) => <ExportScreen routes={routes.items} />}
+    </QueryView>
   );
 }
 
@@ -205,7 +208,7 @@ function ExportScreen({ routes }: { routes: Route[] }) {
           {previewQuery === null ? (
             <EmptyState message="Нет данных для предпросмотра" hint="Проверьте период и маршруты" />
           ) : (
-            <QueryView query={preview}>
+            <QueryView query={preview} isEmpty={hasNoItems}>
               {(forecast) => (
                 <ExportPreview
                   forecast={forecast}

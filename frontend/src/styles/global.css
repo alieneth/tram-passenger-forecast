@@ -111,10 +111,36 @@ p {
 }
 
 .status-dot {
+  flex: none;
   width: 10px;
   height: 10px;
   border-radius: 50%;
+  background: var(--muted);
+}
+
+.health {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.health--ok .status-dot {
   background: var(--ok);
+}
+
+.health--warning .status-dot {
+  background: var(--warning);
+}
+
+.health--danger .status-dot {
+  background: var(--danger);
+}
+
+/* Проблему показываем текстом всегда, даже на узком экране — цвет не единственный признак */
+.health__problem {
+  max-width: 220px;
+  color: var(--text);
+  font-size: 12px;
 }
 
 .sidebar {
@@ -343,6 +369,13 @@ p {
   color: var(--danger);
 }
 
+.state__details {
+  margin: 0;
+  padding: 0;
+  color: var(--text);
+  list-style: none;
+}
+
 .spinner {
   width: 24px;
   height: 24px;
@@ -549,5 +582,20 @@ p {
   .stat-row,
   .factors {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Совсем узкий экран: в шапке остаётся только логотип — место нужно фильтрам и статусу */
+@media (max-width: 900px) {
+  .header__brand > div {
+    display: none;
+  }
+
+  .header__brand {
+    flex: none;
+  }
+
+  .header__status {
+    margin-left: auto;
   }
 }

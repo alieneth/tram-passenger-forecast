@@ -1,18 +1,22 @@
 import { Suspense } from 'react';
-import { Outlet } from 'react-router';
+import { Outlet, useLocation } from 'react-router';
 import { LoadingState } from '../states/LoadingState';
+import { ScreenErrorBoundary } from '../states/ScreenErrorBoundary';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 
 export function AppLayout() {
+  const { pathname } = useLocation();
   return (
     <div className="app">
       <Header />
       <Sidebar />
       <main className="content">
-        <Suspense fallback={<LoadingState />}>
-          <Outlet />
-        </Suspense>
+        <ScreenErrorBoundary key={pathname}>
+          <Suspense fallback={<LoadingState />}>
+            <Outlet />
+          </Suspense>
+        </ScreenErrorBoundary>
       </main>
     </div>
   );

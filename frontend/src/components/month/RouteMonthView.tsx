@@ -1,4 +1,4 @@
-import type { Route } from '../../api';
+import { errorMessage, type Route } from '../../api';
 import { FORECAST_DATE_MIN, MONTH_CHART_ACTUALS_FROM } from '../../config/constants';
 import { useFilters } from '../../hooks/useFilters';
 import { useMonthCalendar } from '../../hooks/useMonthCalendar';
@@ -6,13 +6,14 @@ import { useRouteDailyActuals, useRouteDailyForecast } from '../../hooks/useRout
 import { buildDailyPoints } from '../../utils/dailyChart';
 import { monthRange, monthTitle } from '../../utils/dates';
 import { formatThousands } from '../../utils/format';
+import { hasNoItems } from '../../utils/empty';
 import { monthTotals } from '../../utils/monthStats';
 import { Panel } from '../Panel';
-import { LoadingState } from '../states/LoadingState';
+import { EmptyState } from '../states/EmptyState';
 import { QueryView } from '../states/QueryView';
 import { DailyChart } from './DailyChart';
 import { MonthCalendar } from './MonthCalendar';
-import { MonthFactors } from './MonthFactors';
+import { MonthFactorsContent } from './MonthFactorsContent';
 
 // Горизонт «Месяц» на экране «Маршрут» (UI-5): календарь, график по дням, факторы месяца
 export function RouteMonthView({ route }: { route: Route }) {
@@ -21,9 +22,6 @@ export function RouteMonthView({ route }: { route: Route }) {
   const forecastQuery = useRouteDailyForecast(route.route);
   const actualsQuery = useRouteDailyActuals(route.route);
   const calendar = useMonthCalendar(date);
-  const monthDays = [...calendar.values()].filter(
-    (day) => day.date >= monthFrom && day.date <= monthTo,
-  );
 
   // Клик по дню — открываем его прогноз по часам
   const openDay = (day: string) => {
@@ -34,17 +32,25 @@ export function RouteMonthView({ route }: { route: Route }) {
   return (
     <div className="route-grid">
       <Panel title={`Маршрут ${route.route} · календарь пассажиропотока, ${monthTitle(date)}`}>
-        <QueryView query={forecastQuery} emptyHint="Выберите месяц в ноябре–декабре 2025">
+        <QueryView
+          query={forecastQuery}
+          isEmpty={hasNoItems}
+          emptyMessage="Нет прогноза за выбранный период"
+          emptyHint="Выберите месяц в ноябре–декабре 2025"
+        >
           {(forecast) => {
             const items = forecast.items.filter(
               (item) => item.date >= monthFrom && item.date <= monthTo,
             );
-            const totals = monthTotals(items, calendar);
+            if (items.length === 0) {
+              return <EmptyState message="Нет прогноза за выбранный месяц" />;
+            }
+            const totals = monthTotals(items, calendar.days);
             return (
               <>
                 <MonthCalendar
                   items={items}
-                  calendar={calendar}
+                  calendar={calendar.days}
                   selectedDate={date}
                   onSelectDate={openDay}
                 />
@@ -76,7 +82,7 @@ export function RouteMonthView({ route }: { route: Route }) {
 
       <div className="route-grid__side">
         <Panel title="Пассажиров в день">
-          <QueryView query={forecastQuery}>
+          <QueryView query={forecastQuery} isEmpty={hasNoItems}>
             {(forecast) => {
               // У маршрута без истории (5) факта нет — 404 ACTUALS_NOT_FOUND, рисуем только прогноз
               const actuals = actualsQuery.data?.items ?? [];
@@ -92,7 +98,7 @@ export function RouteMonthView({ route }: { route: Route }) {
                       lastDate,
                       actuals,
                       forecast.items,
-                      calendar,
+                      calendar.days,
                     )}
                     forecastStart={FORECAST_DATE_MIN}
                     monthFrom={monthFrom}
@@ -100,7 +106,9 @@ export function RouteMonthView({ route }: { route: Route }) {
                     hasActuals={actuals.length > 0}
                   />
                   {actualsQuery.isError && (
-                    <p className="muted">Факт за сентябрь–октябрь: {actualsQuery.error.message}</p>
+                    <p className="muted">
+                      Факт за сентябрь–октябрь: {errorMessage(actualsQuery.error)}
+                    </p>
                   )}
                   {actualsQuery.isPending && <p className="muted">Загружаем факт…</p>}
                 </>
@@ -110,7 +118,7 @@ export function RouteMonthView({ route }: { route: Route }) {
         </Panel>
 
         <Panel title={`Факторы месяца, ${monthTitle(date)}`}>
-          {monthDays.length === 0 ? <LoadingState /> : <MonthFactors days={monthDays} />}
+          <MonthFactorsContent calendar={calendar} monthFrom={monthFrom} monthTo={monthTo} />
         </Panel>
       </div>
     </div>

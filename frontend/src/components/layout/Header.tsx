@@ -1,6 +1,7 @@
 import { IS_MOCK_MODE } from '../../api';
 import { Icon } from '../Icon';
 import { DateSelect } from './DateSelect';
+import { HealthIndicator } from './HealthIndicator';
 import { HorizonToggle } from './HorizonToggle';
 
 export function Header() {
@@ -23,8 +24,7 @@ export function Header() {
         <DateSelect />
       </div>
       <div className="header__status">
-        <span className="status-dot" aria-hidden="true" />
-        <span className="header__status-text">Прогноз на ноябрь–декабрь 2025</span>
+        <HealthIndicator />
         {IS_MOCK_MODE && (
           <span className="badge badge--warning" title="VITE_API_URL не задан">
             Мок-данные

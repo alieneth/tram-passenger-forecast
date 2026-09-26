@@ -19,6 +19,7 @@ import { useRouteMonth } from '../hooks/useRouteMonth';
 import { useRoutes } from '../hooks/useRoutes';
 import { monthRange, monthTitle } from '../utils/dates';
 import { saveFile } from '../utils/download';
+import { hasNoItems } from '../utils/empty';
 
 // Экран «Маршрут» (UI-4): «дни × часы», прогноз дня с коридором, «Почему такой прогноз?»
 export function RoutePage() {
@@ -26,16 +27,40 @@ export function RoutePage() {
   const params = useParams();
 
   return (
-    <QueryView query={routesQuery}>
+    <QueryView
+      query={routesQuery}
+      isEmpty={hasNoItems}
+      emptyMessage="Справочник маршрутов пуст"
+      emptyHint="Маршруты появятся, когда бэкенд загрузит справочник"
+    >
       {(routes) => {
-        const route = routes.items.find((item) => String(item.route) === params.route);
-        if (!route) {
-          const first = routes.items[0];
+        const first = routes.items[0];
+        // Без номера в адресе — открываем первый маршрут
+        if (params.route === undefined) {
           return first ? <Navigate to={`/route/${first.route}`} replace /> : null;
         }
+        const route = routes.items.find((item) => String(item.route) === params.route);
+        // Неизвестный номер — говорим об этом прямо, а не подменяем другим маршрутом
+        if (!route) return <UnknownRoute route={params.route} first={first?.route} />;
         return <RouteDetails route={route} routes={routes.items} />;
       }}
     </QueryView>
+  );
+}
+
+function UnknownRoute({ route, first }: { route: string; first: number | undefined }) {
+  return (
+    <div className="page">
+      <EmptyState
+        message={`Маршрут ${route} не найден`}
+        hint="Маршруты проекта: 1, 5, 7, 11, 12, 17, 25, 26, 28, 50"
+      />
+      {first !== undefined && (
+        <Link className="button" to={`/route/${first}`}>
+          Открыть маршрут {first}
+        </Link>
+      )}
+    </div>
   );
 }
 
@@ -141,21 +166,34 @@ function RouteDetails({ route, routes }: { route: Route; routes: Route[] }) {
       ) : (
         <div className="route-grid">
           <Panel title={`Дни × часы, ${monthTitle(date)}`}>
-            <QueryView query={monthQuery} emptyHint="Выберите дату в ноябре–декабре 2025">
+            <QueryView
+              query={monthQuery}
+              isEmpty={hasNoItems}
+              emptyHint="Выберите дату в ноябре–декабре 2025"
+            >
               {(forecast) => (
                 <DaysHoursTable
                   items={forecast.items}
-                  calendar={calendar}
+                  calendar={calendar.days}
                   selectedDate={date}
                   hours={hours}
                   onSelectDate={setDate}
                 />
               )}
             </QueryView>
+            {calendar.error !== null && (
+              <p className="muted">
+                Типы дней (выходные, праздники) не загрузились: {errorMessage(calendar.error)}
+              </p>
+            )}
           </Panel>
 
           <div className="route-grid__side">
-            <QueryView query={monthQuery} emptyHint="Выберите дату в ноябре–декабре 2025">
+            <QueryView
+              query={monthQuery}
+              isEmpty={hasNoItems}
+              emptyHint="Выберите дату в ноябре–декабре 2025"
+            >
               {(forecast) => (
                 <DayForecastPanel
                   route={route.route}

@@ -5,6 +5,7 @@ import { LayersPanel, type MapLayers } from '../components/map/LayersPanel';
 import { LazyRoutesMap } from '../components/map/LazyRoutesMap';
 import { MapLegend } from '../components/map/MapLegend';
 import { toMapRoutes } from '../components/map/mapData';
+import { mapNotice } from '../components/map/mapNotice';
 import { NoGeometryList } from '../components/map/NoGeometryList';
 import { TimeSlider } from '../components/map/TimeSlider';
 import { DayOnlyNotice } from '../components/states/DayOnlyNotice';
@@ -17,6 +18,7 @@ import { usePlayback } from '../hooks/usePlayback';
 import { useRouteGeometries } from '../hooks/useRouteGeometries';
 import { useRoutes } from '../hooks/useRoutes';
 import { formatDate } from '../utils/dates';
+import { hasNoItems } from '../utils/empty';
 import { itemsByRouteAndHour } from '../utils/forecast';
 import { WEATHER_KIND_LABELS, eventLabel, weatherText } from '../utils/weather';
 
@@ -30,7 +32,9 @@ export function MapPage() {
   }
 
   return (
-    <QueryView query={routesQuery}>{(routes) => <MapScreen routes={routes.items} />}</QueryView>
+    <QueryView query={routesQuery} isEmpty={hasNoItems} emptyMessage="Справочник маршрутов пуст">
+      {(routes) => <MapScreen routes={routes.items} />}
+    </QueryView>
   );
 }
 
@@ -39,7 +43,11 @@ function MapScreen({ routes }: { routes: Route[] }) {
   const { date } = useFilters();
   const forecastQuery = useForecast();
   const factorsQuery = useFactors(date);
-  const { geometries, withoutGeometry } = useRouteGeometries(routes);
+  const { geometries, isPending: geometriesPending, withoutGeometry } = useRouteGeometries(routes);
+  const notice = mapNotice(forecastQuery, {
+    count: geometries.length,
+    isPending: geometriesPending,
+  });
   const playback = usePlayback(DISPLAY_HOURS, DEFAULT_MAP_HOUR);
   const [layers, setLayers] = useState<MapLayers>({ load: true, weather: false, events: false });
 
@@ -82,13 +90,13 @@ function MapScreen({ routes }: { routes: Route[] }) {
               )}
             </div>
           )}
-          {layers.weather && factorsQuery.isError && (
+          {(layers.weather || layers.events) && factorsQuery.isError && (
             <div className="map-card">{errorMessage(factorsQuery.error)}</div>
           )}
         </div>
-        {forecastQuery.isError && (
+        {notice && (
           <div className="map-overlay map-overlay--center" role="status">
-            {errorMessage(forecastQuery.error)}
+            {notice}
           </div>
         )}
         <div className="map-overlay map-overlay--bottom-left">

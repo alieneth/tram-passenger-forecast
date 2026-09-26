@@ -1,5 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
-import { getHealth } from '../../api';
+import { useHealth } from '../../hooks/useHealth';
 import { formatDate } from '../../utils/dates';
 import { QueryView } from '../states/QueryView';
 
@@ -14,10 +13,7 @@ const PERFORMANCE_TARGETS = [
 const STATUS_LABELS = { UP: 'работает', DEGRADED: 'с ограничениями', DOWN: 'недоступен' } as const;
 
 export function ServiceStatus() {
-  const healthQuery = useQuery({
-    queryKey: ['health'],
-    queryFn: ({ signal }) => getHealth(signal),
-  });
+  const healthQuery = useHealth();
 
   return (
     <div className="service-status">
