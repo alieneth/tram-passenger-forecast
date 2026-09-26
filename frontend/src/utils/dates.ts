@@ -61,3 +61,26 @@ export function clampDate(date: string, min: string, max: string): string {
   if (date > max) return max;
   return date;
 }
+
+export function addDays(date: string, days: number): string {
+  const parsed = parseIsoDate(date);
+  parsed.setUTCDate(parsed.getUTCDate() + days);
+  return toIsoDate(parsed);
+}
+
+export function datesInRange(from: string, to: string): string[] {
+  const dates: string[] = [];
+  for (let date = from; date <= to; date = addDays(date, 1)) dates.push(date);
+  return dates;
+}
+
+const WEEKDAY_SHORT = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
+
+// «пт» для 2025-11-14 — только для подписи строк; тип дня (выходной, праздник) берём из API
+export function weekdayShort(date: string): string {
+  return WEEKDAY_SHORT[parseIsoDate(date).getUTCDay()] ?? '';
+}
+
+export function dayOfMonth(date: string): string {
+  return date.slice(8, 10);
+}

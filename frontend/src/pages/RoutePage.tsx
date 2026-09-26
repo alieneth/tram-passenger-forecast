@@ -1,18 +1,25 @@
-import { Navigate, useNavigate, useParams } from 'react-router';
-import type { ForecastItem, Route } from '../api';
+import { useMutation } from '@tanstack/react-query';
+import { useState } from 'react';
+import { Link, Navigate, useNavigate, useParams } from 'react-router';
+import { errorMessage, exportForecast, type Route } from '../api';
 import { Panel } from '../components/Panel';
 import { RouteLabel } from '../components/RouteLabel';
+import { DayForecastPanel } from '../components/route/DayForecastPanel';
+import { DaysHoursTable } from '../components/route/DaysHoursTable';
+import { FactorContributions } from '../components/route/FactorContributions';
+import { EmptyState } from '../components/states/EmptyState';
 import { QueryView } from '../components/states/QueryView';
-import { DISPLAY_HOURS, NEW_ROUTE_LABEL, PASSENGERS_PER_TRAM_NORM } from '../config/constants';
+import { NEW_ROUTE_LABEL } from '../config/constants';
+import { HOUR_INTERVALS } from '../config/intervals';
 import { useFactors } from '../hooks/useFactors';
 import { useFilters } from '../hooks/useFilters';
-import { useForecast } from '../hooks/useForecast';
+import { useMonthCalendar } from '../hooks/useMonthCalendar';
+import { useRouteMonth } from '../hooks/useRouteMonth';
 import { useRoutes } from '../hooks/useRoutes';
-import { formatDate, monthTitle } from '../utils/dates';
-import { isOverNorm } from '../utils/forecast';
-import { formatDecimal, formatHourTime, formatNumber } from '../utils/format';
+import { monthTitle } from '../utils/dates';
+import { saveFile } from '../utils/download';
 
-// Каркас экрана «Маршрут» (UI-4) и горизонта «Месяц» (UI-5): выбор маршрута и прогноз по часам
+// Экран «Маршрут» (UI-4): «дни × часы», прогноз дня с коридором, «Почему такой прогноз?»
 export function RoutePage() {
   const routesQuery = useRoutes();
   const params = useParams();
@@ -33,9 +40,26 @@ export function RoutePage() {
 
 function RouteDetails({ route, routes }: { route: Route; routes: Route[] }) {
   const navigate = useNavigate();
-  const { horizon, date } = useFilters();
-  const forecastQuery = useForecast([route.route]);
+  const { horizon, date, setDate, setHorizon } = useFilters();
+  const [intervalId, setIntervalId] = useState(HOUR_INTERVALS[0]?.id ?? 'all');
+  const [compareEnabled, setCompareEnabled] = useState(true);
+  const interval = HOUR_INTERVALS.find((item) => item.id === intervalId) ?? HOUR_INTERVALS[0];
+  const hours = interval?.hours ?? [];
+
+  const monthQuery = useRouteMonth(route.route, date);
+  const calendar = useMonthCalendar(date);
   const factorsQuery = useFactors(date, route.route);
+  const download = useMutation({
+    mutationFn: () =>
+      exportForecast({
+        format: 'csv',
+        route: [route.route],
+        date_from: date,
+        date_to: date,
+        horizon: 'day',
+      }),
+    onSuccess: ({ blob, filename }) => saveFile(blob, filename),
+  });
 
   return (
     <div className="page">
@@ -55,90 +79,116 @@ function RouteDetails({ route, routes }: { route: Route; routes: Route[] }) {
             ))}
           </select>
         </label>
-        <RouteLabel route={route} showName />
+        <label className="toolbar__field">
+          <span className="header__label">Интервал</span>
+          <select
+            className="field"
+            value={intervalId}
+            onChange={(event) => setIntervalId(event.target.value)}
+          >
+            {HOUR_INTERVALS.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="toolbar__field">
+          <span className="header__label">Сравнить с</span>
+          <select
+            className="field"
+            value={compareEnabled ? 'week' : 'none'}
+            onChange={(event) => setCompareEnabled(event.target.value === 'week')}
+          >
+            <option value="week">неделю назад</option>
+            <option value="none">без сравнения</option>
+          </select>
+        </label>
+        <div className="toolbar__actions">
+          <button
+            type="button"
+            className="button"
+            disabled={download.isPending}
+            onClick={() => download.mutate()}
+          >
+            {download.isPending ? 'Готовим файл…' : 'Скачать срез'}
+          </button>
+          <Link className="button button--primary" to={`/decisions?route=${route.route}`}>
+            Открыть решения
+          </Link>
+        </div>
       </div>
+      {download.isError && <p className="text-up">{errorMessage(download.error)}</p>}
 
-      <Panel
-        title={
-          horizon === 'day'
-            ? `Прогноз по часам на ${formatDate(date)}`
-            : `Маршрут ${route.route}: прогноз по дням, ${monthTitle(date)}`
-        }
-      >
-        <QueryView query={forecastQuery} emptyHint="Выберите другую дату или горизонт «День»">
-          {(forecast) => <HourlyTable items={forecast.items} />}
-        </QueryView>
-      </Panel>
+      <div className="route-title">
+        <RouteLabel route={route} showName />
+        {route.depot_name && <span className="muted">Депо: {route.depot_name}</span>}
+      </div>
+      {route.is_new && (
+        <div className="notice notice--warning" role="note">
+          Истории поездок по маршруту нет — прогноз построен по похожим маршрутам, поэтому коридор
+          уверенности шире.
+        </div>
+      )}
 
-      <Panel title="Почему такой прогноз?">
-        <QueryView query={factorsQuery}>
-          {(factors) =>
-            factors.contributions?.length ? (
-              <ul className="list">
-                {factors.contributions.map((factor) => (
-                  <li key={factor.factor_code} className="list__item">
-                    <span>{factor.factor_name}</span>
-                    <span className={factor.effect_pct >= 0 ? 'text-up' : 'text-down'}>
-                      {factor.effect_pct > 0 ? '+' : ''}
-                      {formatDecimal(factor.effect_pct)}%
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="muted">Вклад факторов для этой даты не рассчитан</p>
-            )
-          }
-        </QueryView>
-      </Panel>
+      {horizon === 'month' ? (
+        <Panel title={`Маршрут ${route.route}: ${monthTitle(date)}`}>
+          <EmptyState message="Календарь месяца по дням — задача UI-5" />
+          <button type="button" className="button" onClick={() => setHorizon('day')}>
+            Переключить на «День»
+          </button>
+        </Panel>
+      ) : (
+        <div className="route-grid">
+          <Panel title={`Дни × часы, ${monthTitle(date)}`}>
+            <QueryView query={monthQuery} emptyHint="Выберите дату в ноябре–декабре 2025">
+              {(forecast) => (
+                <DaysHoursTable
+                  items={forecast.items}
+                  calendar={calendar}
+                  selectedDate={date}
+                  hours={hours}
+                  onSelectDate={setDate}
+                />
+              )}
+            </QueryView>
+          </Panel>
+
+          <div className="route-grid__side">
+            <QueryView query={monthQuery} emptyHint="Выберите дату в ноябре–декабре 2025">
+              {(forecast) => (
+                <DayForecastPanel
+                  route={route.route}
+                  date={date}
+                  items={forecast.items.filter((item) => item.date === date)}
+                  hours={hours}
+                  compareEnabled={compareEnabled}
+                />
+              )}
+            </QueryView>
+
+            <Panel title="Почему такой прогноз?">
+              <QueryView query={factorsQuery}>
+                {(factors) =>
+                  factors.contributions?.length ? (
+                    <FactorContributions contributions={factors.contributions} />
+                  ) : (
+                    <p className="muted">Вклад факторов для этой даты не рассчитан</p>
+                  )
+                }
+              </QueryView>
+            </Panel>
+
+            {/* Доли проездных, льготных и пересадок с метро — метод API-7 (волна 2), в контракте его пока нет */}
+            <Panel title={`Показатели маршрута ${route.route}`}>
+              <EmptyState
+                message="Показатели маршрута пока недоступны"
+                hint="Доли проездных, льготных карт и пересадок с метро появятся с методом API-7"
+              />
+            </Panel>
+          </div>
+        </div>
+      )}
     </div>
-  );
-}
-
-// Временная таблица вместо графика с коридором (UI-4): те же поля, что придут в график
-function HourlyTable({ items }: { items: ForecastItem[] }) {
-  const byHour = new Map(items.map((item) => [item.hour, item]));
-  return (
-    <table className="data-table">
-      <thead>
-        <tr>
-          <th>Час</th>
-          <th>Пассажиров в час</th>
-          <th>Коридор</th>
-          <th>Трамваев</th>
-          <th>Пассажиров на трамвай (норма {PASSENGERS_PER_TRAM_NORM})</th>
-        </tr>
-      </thead>
-      <tbody>
-        {DISPLAY_HOURS.map((hour) => {
-          const item = byHour.get(hour);
-          if (!item) {
-            return (
-              <tr key={hour}>
-                <td>{formatHourTime(hour)}</td>
-                <td colSpan={4} className="muted">
-                  Нет прогноза на этот час
-                </td>
-              </tr>
-            );
-          }
-          return (
-            <tr key={hour} className={isOverNorm(item) ? 'data-table__row--alert' : undefined}>
-              <td>{formatHourTime(hour)}</td>
-              <td>{formatNumber(item.prediction)}</td>
-              <td>
-                {formatNumber(item.lower)}–{formatNumber(item.upper)}
-              </td>
-              <td>{item.trams_on_line ?? '—'}</td>
-              <td>
-                {item.passengers_per_tram === null || item.passengers_per_tram === undefined
-                  ? '—'
-                  : formatDecimal(item.passengers_per_tram)}
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
   );
 }

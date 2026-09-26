@@ -1,0 +1,209 @@
+/* Экран «Маршрут» (UI-4): таблица «дни × часы», график дня, вклад факторов */
+.toolbar__actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.route-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.notice {
+  padding: 10px 14px;
+  border-radius: 8px;
+}
+
+.notice--warning {
+  border: 1px solid var(--warning);
+  background: rgb(245 181 10 / 0.08);
+}
+
+.route-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--gap);
+  align-items: start;
+}
+
+.route-grid__side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+
+@media (max-width: 1200px) {
+  .route-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* --- Таблица «дни × часы» --- */
+.heat-table--days td {
+  height: 18px;
+}
+
+.heat-table--days tbody th {
+  font-size: 12px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.heat-table__row--selected th,
+.heat-table__row--selected td {
+  box-shadow:
+    inset 0 2px 0 #60a5fa,
+    inset 0 -2px 0 #60a5fa;
+}
+
+.day-label {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.day-label__weekday {
+  color: var(--muted);
+}
+
+.heat-table__row--day-off .day-label,
+.heat-table__row--day-off .day-label__weekday {
+  color: #f87171;
+}
+
+.day-label__mark {
+  padding: 0 4px;
+  border: 1px solid currentcolor;
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+/* --- График --- */
+.chart {
+  margin: 0;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.chart-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chart-legend__key {
+  width: 18px;
+  height: 2px;
+}
+
+.chart-legend__key--forecast {
+  background: #3b82f6;
+}
+
+.chart-legend__key--corridor {
+  height: 10px;
+  border-radius: 2px;
+  background: rgb(59 130 246 / 0.25);
+}
+
+.chart-legend__key--compare {
+  background: #94a3b8;
+}
+
+.chart-legend__key--norm {
+  background: repeating-linear-gradient(90deg, #f05252 0 5px, transparent 5px 8px);
+}
+
+.chart-legend__key--over {
+  height: 10px;
+  border-radius: 2px;
+  background: rgb(240 82 82 / 0.45);
+}
+
+.chart-tooltip {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgb(11 26 44 / 0.96);
+}
+
+.chart-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 12px 0 0;
+}
+
+.chart-summary dt {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.chart-summary dd {
+  margin: 2px 0 0;
+  font-weight: 600;
+}
+
+.details {
+  margin-top: 12px;
+}
+
+.details summary {
+  color: #60a5fa;
+  cursor: pointer;
+}
+
+/* --- «Почему такой прогноз?» --- */
+.contributions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.contributions__row {
+  display: grid;
+  grid-template-columns: 180px 1fr 56px;
+  align-items: center;
+  gap: 12px;
+}
+
+.contributions__track {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--panel-raised);
+}
+
+.contributions__bar {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.contributions__bar--up {
+  background: #f97316;
+}
+
+.contributions__bar--down {
+  background: #60a5fa;
+}
+
+.contributions__value {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}

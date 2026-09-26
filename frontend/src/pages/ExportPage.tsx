@@ -5,6 +5,7 @@ import { Panel } from '../components/Panel';
 import { ErrorState } from '../components/states/ErrorState';
 import { useFilters } from '../hooks/useFilters';
 import { formatDate, monthRange } from '../utils/dates';
+import { saveFile } from '../utils/download';
 
 type ExportFormat = ExportQuery['format'];
 
@@ -17,15 +18,6 @@ const FORMATS: { value: ExportFormat; label: string }[] = [
 // Swagger отдаёт бэкенд (springdoc) по адресу /swagger-ui на том же хосте, что и API
 function swaggerUrl(): string {
   return `${new URL(API_URL, window.location.origin).origin}/swagger-ui`;
-}
-
-function saveFile(blob: Blob, filename: string): void {
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  link.click();
-  URL.revokeObjectURL(url);
 }
 
 // Каркас экрана «Экспорт и API» (UI-6)

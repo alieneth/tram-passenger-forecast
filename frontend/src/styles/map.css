@@ -1,0 +1,286 @@
+/* Карта маршрутов (UI-3): сама карта, оверлеи, подписи, шкала времени */
+.routes-map {
+  position: absolute;
+  inset: 0;
+}
+
+/* MapLibre сам ставит контейнеру position: relative — поэтому размер задаём так */
+.routes-map__canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.map-screen {
+  position: relative;
+  height: calc(100vh - var(--header-height) - 190px);
+  min-height: 420px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #0a1626;
+}
+
+.overview-map {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.overview-map__canvas {
+  position: relative;
+  height: 340px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #0a1626;
+}
+
+.map-overlay {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.map-overlay > * {
+  pointer-events: auto;
+}
+
+.map-overlay--top-right {
+  top: 12px;
+  right: 12px;
+  width: 240px;
+}
+
+.map-overlay--bottom-left {
+  bottom: 12px;
+  left: 12px;
+}
+
+.map-overlay--center {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 12px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgb(11 26 44 / 0.92);
+}
+
+.map-card,
+.layers-panel,
+.map-legend {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgb(11 26 44 / 0.92);
+}
+
+.map-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.layers-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+}
+
+.layers-panel__title {
+  float: left;
+  margin-bottom: 4px;
+  padding: 0;
+  font-weight: 600;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.toggle input {
+  accent-color: var(--accent);
+}
+
+.toggle--disabled {
+  color: var(--muted);
+  cursor: help;
+}
+
+.map-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.map-legend--compact {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  padding: 6px 10px;
+}
+
+.map-legend--compact .map-legend__line {
+  width: 14px;
+}
+
+.map-legend__title {
+  color: var(--muted);
+}
+
+.map-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.map-legend__line {
+  width: 24px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.map-legend__line--dashed {
+  background: repeating-linear-gradient(90deg, #93c5fd 0 6px, transparent 6px 10px);
+}
+
+.map-label {
+  display: flex;
+  flex-direction: column;
+  padding: 2px 8px;
+  border: 2px solid;
+  border-radius: 6px;
+  background: rgb(6 16 29 / 0.9);
+  color: var(--text);
+  font-weight: 700;
+  font-size: 13px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.map-label--new {
+  border-style: dashed;
+}
+
+.map-label__event {
+  color: var(--warning);
+  font-weight: 500;
+  font-size: 11px;
+}
+
+.map-tooltip {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 190px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgb(11 26 44 / 0.96);
+  pointer-events: none;
+}
+
+.map-tooltip__grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 12px;
+  margin: 0;
+}
+
+.map-tooltip__grid dt {
+  color: var(--muted);
+}
+
+.map-tooltip__grid dd {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.map-tooltip__event {
+  color: var(--warning);
+}
+
+.load-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.no-geometry {
+  padding: 4px 0;
+}
+
+/* --- Шкала времени --- */
+.time-slider {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+
+.time-slider .button--primary {
+  min-width: 170px;
+  justify-content: center;
+}
+
+.time-slider__speed {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+}
+
+.time-slider__current {
+  min-width: 64px;
+  font-weight: 700;
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+}
+
+.time-slider__track {
+  flex: 1 1 360px;
+  min-width: 0;
+}
+
+.time-slider__track input[type='range'] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.time-slider__ticks {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.time-slider__tick--active {
+  color: #fff;
+  font-weight: 700;
+}
+
+/* Элементы управления MapLibre — в тёмной теме */
+.maplibregl-ctrl-group {
+  background: var(--panel-raised);
+}
+
+.maplibregl-ctrl-group button + button {
+  border-top-color: var(--border);
+}
+
+.maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+  filter: invert(1);
+}

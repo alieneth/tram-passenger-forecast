@@ -32,3 +32,8 @@ export const PLAYBACK_SPEEDS: readonly number[] = [1, 2, 5, 10];
 
 // Карта открывается на утреннем пике
 export const DEFAULT_MAP_HOUR = 8;
+
+// Факт есть с января по октябрь 2025 (GET /actuals); позже — только прогноз
+export const ACTUALS_DATE_MAX = '2025-10-31';
+// Сравнение на графике маршрута: тот же день недели неделей раньше
+export const COMPARE_DAYS_BACK = 7;

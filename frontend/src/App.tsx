@@ -1,3 +1,4 @@
+import { lazy } from 'react';
 import { Route, Routes } from 'react-router';
 import { AppLayout } from './components/layout/AppLayout';
 import { NAV_ITEMS } from './config/navigation';
@@ -6,7 +7,11 @@ import { MapPage } from './pages/MapPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { OverviewPage } from './pages/OverviewPage';
 import { PlaceholderPage } from './pages/PlaceholderPage';
-import { RoutePage } from './pages/RoutePage';
+
+// Графики (Recharts) нужны только экрану «Маршрут» — грузим его отдельным чанком
+const RoutePage = lazy(() =>
+  import('./pages/RoutePage').then((module) => ({ default: module.RoutePage })),
+);
 
 const MVP_PATHS = new Set(['/', '/map', '/route', '/export']);
 
