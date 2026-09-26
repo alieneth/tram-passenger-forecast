@@ -45,7 +45,6 @@ export function MonthCalendar({ items, calendar, selectedDate, onSelectDate }: M
             'month-calendar__day',
             item.date === selectedDate ? 'month-calendar__day--selected' : '',
             isDayOff(factors) ? 'month-calendar__day--off' : '',
-            item.is_analog ? 'month-calendar__day--analog' : '',
           ].join(' ');
           return (
             <button

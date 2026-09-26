@@ -2,6 +2,7 @@ import type { FeatureCollection, LineString, Point } from 'geojson';
 import type { LngLatBoundsLike } from 'maplibre-gl';
 import type { ForecastItem, Route, RouteGeometry } from '../../api';
 import { LOAD_COLORS, loadLevel } from '../../utils/intensity';
+import { hasNoData } from '../../utils/routes';
 
 const NEUTRAL_ROUTE_COLOR = '#60a5fa';
 
@@ -32,7 +33,7 @@ export function toMapRoutes({ routes, geometries, itemFor, eventFor }: MapRoutes
 export interface RouteFeatureProps {
   route: number;
   color: string;
-  is_new: boolean;
+  no_data: boolean;
   has_event: boolean;
   dimmed: boolean;
 }
@@ -51,7 +52,9 @@ export interface MapView {
   showLoad: boolean;
 }
 
+// Маршрут без данных — всегда серый: у него нет загрузки, которую можно раскрасить
 export function routeColor(mapRoute: MapRoute, showLoad: boolean): string {
+  if (hasNoData(mapRoute.route)) return LOAD_COLORS.none;
   return showLoad ? LOAD_COLORS[loadLevel(mapRoute.item)] : NEUTRAL_ROUTE_COLOR;
 }
 
@@ -59,7 +62,7 @@ function featureProps(mapRoute: MapRoute, { selectedRoute, showLoad }: MapView):
   return {
     route: mapRoute.route.route,
     color: routeColor(mapRoute, showLoad),
-    is_new: mapRoute.route.is_new,
+    no_data: hasNoData(mapRoute.route),
     has_event: Boolean(mapRoute.eventName),
     dimmed: selectedRoute !== undefined && selectedRoute !== mapRoute.route.route,
   };

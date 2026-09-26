@@ -148,7 +148,7 @@
 }
 
 .map-legend__line--dashed {
-  background: repeating-linear-gradient(90deg, #93c5fd 0 6px, transparent 6px 10px);
+  background: repeating-linear-gradient(90deg, rgb(100 116 139) 0 6px, transparent 6px 10px);
 }
 
 .map-label {
@@ -165,7 +165,8 @@
   pointer-events: none;
 }
 
-.map-label--new {
+.map-label--no-data {
+  color: var(--muted);
   border-style: dashed;
 }
 

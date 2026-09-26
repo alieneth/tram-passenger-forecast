@@ -29,7 +29,7 @@ export function applyLocalNames(map: MapLibreMap): void {
   }
 }
 
-// Слои: свечение → подсветка события → линия (у нового маршрута — пунктир) → остановки → зона наведения
+// Слои: свечение → подсветка события → линия (у маршрута без данных — пунктир) → остановки → зона наведения
 export function addRouteLayers(map: MapLibreMap): void {
   map.addSource(LINES_SOURCE, { type: 'geojson', data: EMPTY });
   map.addSource(STOPS_SOURCE, { type: 'geojson', data: EMPTY });
@@ -58,15 +58,15 @@ export function addRouteLayers(map: MapLibreMap): void {
     id: 'route-line',
     type: 'line',
     source: LINES_SOURCE,
-    filter: ['==', ['get', 'is_new'], false],
+    filter: ['==', ['get', 'no_data'], false],
     layout: { 'line-cap': 'round', 'line-join': 'round' },
     paint: { 'line-color': ['get', 'color'], 'line-width': 4, 'line-opacity': opacity(1) },
   });
   map.addLayer({
-    id: 'route-line-new',
+    id: 'route-line-no-data',
     type: 'line',
     source: LINES_SOURCE,
-    filter: ['==', ['get', 'is_new'], true],
+    filter: ['==', ['get', 'no_data'], true],
     paint: {
       'line-color': ['get', 'color'],
       'line-width': 4,

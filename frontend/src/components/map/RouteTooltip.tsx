@@ -1,5 +1,6 @@
-import { NEW_ROUTE_LABEL } from '../../config/constants';
 import { formatDecimal, formatHourTime, formatNumber } from '../../utils/format';
+import { hasNoData } from '../../utils/routes';
+import { NoDataBadge } from '../RouteLabel';
 import type { MapRoute } from './mapData';
 
 const OFFSET_PX = 14;
@@ -34,8 +35,9 @@ export function RouteTooltip({
   return (
     <div className="map-tooltip" style={style} role="tooltip">
       <strong>Маршрут {route.route}</strong>
-      {route.is_new && <span className="badge badge--new">{NEW_ROUTE_LABEL}</span>}
-      {item ? (
+      {hasNoData(route) ? (
+        <NoDataBadge />
+      ) : item ? (
         <dl className="map-tooltip__grid">
           {item.hour !== null && item.hour !== undefined && (
             <>

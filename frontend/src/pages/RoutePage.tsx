@@ -5,14 +5,14 @@ import { errorMessage, exportForecast, type Route } from '../api';
 import { Panel } from '../components/Panel';
 import { RouteLabel } from '../components/RouteLabel';
 import { RouteMonthView } from '../components/month/RouteMonthView';
-import { NewRouteSection } from '../components/newRoute/NewRouteSection';
 import { DayForecastPanel } from '../components/route/DayForecastPanel';
 import { RouteWeekView } from '../components/week/RouteWeekView';
 import { DaysHoursTable } from '../components/route/DaysHoursTable';
 import { FactorContributions } from '../components/route/FactorContributions';
 import { EmptyState } from '../components/states/EmptyState';
+import { NoDataRouteState } from '../components/states/NoDataRouteState';
 import { QueryView } from '../components/states/QueryView';
-import { NEW_ROUTE_LABEL } from '../config/constants';
+import { NO_DATA_LABEL } from '../config/constants';
 import { HOUR_INTERVALS } from '../config/intervals';
 import { useFactors } from '../hooks/useFactors';
 import { useFilters } from '../hooks/useFilters';
@@ -23,6 +23,7 @@ import { monthTitle } from '../utils/dates';
 import { saveFile } from '../utils/download';
 import { hasNoItems } from '../utils/empty';
 import { apiHorizon, periodFor } from '../utils/horizon';
+import { hasNoData } from '../utils/routes';
 
 // Экран «Маршрут» (UI-4): «дни × часы», прогноз дня с коридором, «Почему такой прогноз?»
 export function RoutePage() {
@@ -76,6 +77,7 @@ function RouteDetails({ route, routes }: { route: Route; routes: Route[] }) {
   const [compareEnabled, setCompareEnabled] = useState(true);
   const interval = HOUR_INTERVALS.find((item) => item.id === intervalId) ?? HOUR_INTERVALS[0];
   const hours = interval?.hours ?? [];
+  const noData = hasNoData(route);
 
   const monthQuery = useRouteMonth(route.route, date);
   const calendar = useMonthCalendar(date);
@@ -105,7 +107,7 @@ function RouteDetails({ route, routes }: { route: Route; routes: Route[] }) {
             {routes.map((item) => (
               <option key={item.route} value={item.route}>
                 Маршрут {item.route}
-                {item.is_new ? ` — ${NEW_ROUTE_LABEL}` : ''}
+                {hasNoData(item) ? ` — ${NO_DATA_LABEL}` : ''}
               </option>
             ))}
           </select>
@@ -159,15 +161,15 @@ function RouteDetails({ route, routes }: { route: Route; routes: Route[] }) {
         <RouteLabel route={route} showName />
         {route.depot_name && <span className="muted">Депо: {route.depot_name}</span>}
       </div>
-      {route.is_new && <NewRouteSection route={route} routes={routes} />}
+      {noData && <NoDataRouteState route={route.route} />}
 
-      {horizon === 'month' && <RouteMonthView route={route} />}
-      {horizon === 'week' && (
+      {!noData && horizon === 'month' && <RouteMonthView route={route} />}
+      {!noData && horizon === 'week' && (
         <Panel title={`Маршрут ${route.route} · неделя по дням`}>
           <RouteWeekView route={route} />
         </Panel>
       )}
-      {horizon === 'day' && (
+      {!noData && horizon === 'day' && (
         <div className="route-grid">
           <Panel title={`Дни × часы, ${monthTitle(date)}`}>
             <QueryView

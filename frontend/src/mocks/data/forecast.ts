@@ -1,6 +1,6 @@
 // Генератор мок-прогноза и мок-факта. Детерминированный: одни и те же даты — одни и те же числа.
 // Цифры условные, но с правдоподобным ритмом: два пика в будни, ровнее в выходные,
-// спад в предновогоднюю неделю, у маршрута 5 широкий коридор (прогноз по аналогам).
+// спад в предновогоднюю неделю. Маршрут 5 исключён организаторами — прогноз 0, факта нет.
 import type { ActualItem, ForecastItem } from '../../api/types';
 import { datesBetween, isDayOff, parseDate } from './calendar';
 
@@ -28,8 +28,9 @@ const DAY_OFF_FLEET = [
   0.5, 0.4, 0.3,
 ];
 const DAY_OFF_VOLUME = 0.62;
-const CORRIDOR_HISTORY = 0.09;
-const CORRIDOR_ANALOG = 0.25;
+const CORRIDOR = 0.09;
+// Шум факта относительно прогноза: WAPE-score на проверке выходит около 0,9, как у настоящей модели
+const ACTUAL_NOISE = 0.27;
 
 interface RouteSetup {
   route: number;
@@ -38,20 +39,21 @@ interface RouteSetup {
   peakLoad: number;
   // > 1 — сильнее утренний пик, < 1 — вечерний
   morningBias: number;
-  isAnalog: boolean;
+  // Исключён организаторами: в сабмите нули, истории нет
+  noData: boolean;
 }
 
 const ROUTES: RouteSetup[] = [
-  { route: 1, dailyTotal: 16_400, peakLoad: 128, morningBias: 1.05, isAnalog: false },
-  { route: 5, dailyTotal: 9_200, peakLoad: 118, morningBias: 1, isAnalog: true },
-  { route: 7, dailyTotal: 21_300, peakLoad: 141, morningBias: 1.1, isAnalog: false },
-  { route: 11, dailyTotal: 23_800, peakLoad: 164, morningBias: 0.95, isAnalog: false },
-  { route: 12, dailyTotal: 25_600, peakLoad: 171, morningBias: 1.1, isAnalog: false },
-  { route: 17, dailyTotal: 20_650, peakLoad: 133, morningBias: 1, isAnalog: false },
-  { route: 25, dailyTotal: 12_100, peakLoad: 112, morningBias: 0.9, isAnalog: false },
-  { route: 26, dailyTotal: 20_900, peakLoad: 158, morningBias: 0.9, isAnalog: false },
-  { route: 28, dailyTotal: 14_300, peakLoad: 121, morningBias: 1, isAnalog: false },
-  { route: 50, dailyTotal: 15_200, peakLoad: 126, morningBias: 1.05, isAnalog: false },
+  { route: 1, dailyTotal: 16_400, peakLoad: 128, morningBias: 1.05, noData: false },
+  { route: 5, dailyTotal: 9_200, peakLoad: 118, morningBias: 1, noData: true },
+  { route: 7, dailyTotal: 21_300, peakLoad: 141, morningBias: 1.1, noData: false },
+  { route: 11, dailyTotal: 23_800, peakLoad: 164, morningBias: 0.95, noData: false },
+  { route: 12, dailyTotal: 25_600, peakLoad: 171, morningBias: 1.1, noData: false },
+  { route: 17, dailyTotal: 20_650, peakLoad: 133, morningBias: 1, noData: false },
+  { route: 25, dailyTotal: 12_100, peakLoad: 112, morningBias: 0.9, noData: false },
+  { route: 26, dailyTotal: 20_900, peakLoad: 158, morningBias: 0.9, noData: false },
+  { route: 28, dailyTotal: 14_300, peakLoad: 121, morningBias: 1, noData: false },
+  { route: 50, dailyTotal: 15_200, peakLoad: 126, morningBias: 1.05, noData: false },
 ];
 
 // Строки маршрута 17 на 14.11.2025 в 7 и 8 часов — ровно из примера ответа GET /forecast
@@ -143,7 +145,19 @@ function hourlyValues(setup: RouteSetup, date: string, noise: number): HourValue
 }
 
 function toForecastItems(setup: RouteSetup, date: string): ForecastItem[] {
-  const corridor = setup.isAnalog ? CORRIDOR_ANALOG : CORRIDOR_HISTORY;
+  if (setup.noData) {
+    return HOURS.map((hour) => ({
+      route: setup.route,
+      date,
+      hour,
+      prediction: 0,
+      lower: 0,
+      upper: 0,
+      trams_on_line: null,
+      passengers_per_tram: null,
+      is_analog: false,
+    }));
+  }
   return hourlyValues(setup, date, 0).map(({ hour, value, trams }) => {
     const example = CONTRACT_EXAMPLE_ITEMS.find(
       (item) => item.route === setup.route && item.date === date && item.hour === hour,
@@ -154,19 +168,19 @@ function toForecastItems(setup: RouteSetup, date: string): ForecastItem[] {
       date,
       hour,
       prediction: value,
-      lower: Math.max(0, Math.round(value * (1 - corridor))),
-      upper: Math.round(value * (1 + corridor)),
+      lower: Math.max(0, Math.round(value * (1 - CORRIDOR))),
+      upper: Math.round(value * (1 + CORRIDOR)),
       trams_on_line: trams,
       passengers_per_tram: trams ? Math.round((value / trams) * 10) / 10 : null,
-      is_analog: setup.isAnalog,
+      is_analog: false,
     };
   });
 }
 
-// Факт — та же основа плюс «жизненный» шум ±6%; у маршрута 5 истории нет
+// Факт — та же основа плюс «жизненный» шум; у маршрута 5 истории нет
 function toActualItems(setup: RouteSetup, date: string): ActualItem[] {
-  if (setup.isAnalog) return [];
-  return hourlyValues(setup, date, 0.06).map(({ hour, value, trams }) => ({
+  if (setup.noData) return [];
+  return hourlyValues(setup, date, ACTUAL_NOISE).map(({ hour, value, trams }) => ({
     route: setup.route,
     date,
     hour,
@@ -180,9 +194,9 @@ function buildAll<T>(from: string, to: string, build: (setup: RouteSetup, date: 
 }
 
 // Прогноз модели на сентябрь–октябрь (проверка на истории): по нему строится «Факт и прогноз»
-// на экране «Качество модели». У маршрута без истории такого прогноза нет — сравнивать не с чем
+// на экране «Качество модели» и WAPE. У маршрута без данных такого прогноза нет — сравнивать не с чем
 function toBacktestItems(setup: RouteSetup, date: string): ForecastItem[] {
-  return setup.isAnalog ? [] : toForecastItems(setup, date);
+  return setup.noData ? [] : toForecastItems(setup, date);
 }
 
 // Считаем один раз при первом обращении. Прогноз ноября–декабря: 10 маршрутов × 61 день × 24 часа =

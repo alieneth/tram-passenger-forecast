@@ -18,6 +18,7 @@ import { useForecast } from '../hooks/useForecast';
 import { useMonthCalendar } from '../hooks/useMonthCalendar';
 import { useRoutes } from '../hooks/useRoutes';
 import { formatDate, monthTitle, weekdayShort } from '../utils/dates';
+import { hasNoData } from '../utils/routes';
 import { hasNoItems } from '../utils/empty';
 import { periodFor } from '../utils/horizon';
 
@@ -109,7 +110,12 @@ function SummaryPane({
     <div className="page">
       <QueryView query={dayQuery} isEmpty={hasNoItems} emptyHint={EMPTY_HINT}>
         {(forecast) => (
-          <OverviewStats forecast={forecast} routesTotal={routes.length} date={date} />
+          <OverviewStats
+            forecast={forecast}
+            // Маршрут без данных не может быть перегружен — в знаменатель не входит
+            routesTotal={routes.filter((route) => !hasNoData(route)).length}
+            date={date}
+          />
         )}
       </QueryView>
       <Panel title={`${formatDate(date)}, ${weekdayShort(date)}`}>

@@ -1,8 +1,9 @@
 import type { Route } from '../../api';
-import { NEW_ROUTE_LABEL } from '../../config/constants';
+import { NO_DATA_LABEL } from '../../config/constants';
 import { HOUR_INTERVALS } from '../../config/intervals';
 import type { ScenarioState } from '../../hooks/useScenarioParams';
 import { formatHour } from '../../utils/format';
+import { hasNoData } from '../../utils/routes';
 import type { Corrections } from '../../utils/scenario';
 import { CorrectionSliders } from './CorrectionSliders';
 
@@ -45,7 +46,7 @@ export function ScenarioForm({
           {routes.map((item) => (
             <option key={item.route} value={item.route}>
               Маршрут {item.route}
-              {item.is_new ? ` — ${NEW_ROUTE_LABEL}` : ''}
+              {hasNoData(item) ? ` — ${NO_DATA_LABEL}` : ''}
             </option>
           ))}
         </select>

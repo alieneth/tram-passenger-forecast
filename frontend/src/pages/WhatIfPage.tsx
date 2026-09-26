@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getForecast, type Route } from '../api';
 import { Panel } from '../components/Panel';
+import { NoDataRouteState } from '../components/states/NoDataRouteState';
 import { QueryView } from '../components/states/QueryView';
 import { ScenarioCards } from '../components/whatIf/ScenarioCards';
 import { ScenarioChart } from '../components/whatIf/ScenarioChart';
@@ -11,6 +12,7 @@ import { useRoutes } from '../hooks/useRoutes';
 import { useScenarioParams } from '../hooks/useScenarioParams';
 import { formatDate } from '../utils/dates';
 import { hasNoItems } from '../utils/empty';
+import { isNoDataRoute } from '../utils/routes';
 import { buildScenario, peakTrams, summarize } from '../utils/scenario';
 
 // Экран «Что если» (UI-11): сколько выходов нужно, чтобы уложиться в норму — до решения.
@@ -61,29 +63,33 @@ function WhatIfScreen({ routes }: { routes: Route[] }) {
       </Panel>
       <div className="what-if-grid__main">
         <Panel title={`Пассажиров на трамвай по часам · маршрут ${route} · ${formatDate(date)}`}>
-          <QueryView query={forecastQuery} isEmpty={hasNoItems}>
-            {(forecast) => {
-              const points = buildScenario(forecast.items, {
-                hours: state.hours,
-                tramsDelta: state.tramsDelta,
-                corrections: {
-                  weather: state.correctionsPct.weather / 100,
-                  event: state.correctionsPct.event / 100,
-                  season: state.correctionsPct.season / 100,
-                },
-              });
-              return (
-                <>
-                  <ScenarioChart
-                    points={points}
-                    tramsDelta={state.tramsDelta}
-                    correctionsPct={state.correctionsPct}
-                  />
-                  <ScenarioCards summary={summarize(points)} />
-                </>
-              );
-            }}
-          </QueryView>
+          {isNoDataRoute(route) ? (
+            <NoDataRouteState route={route} />
+          ) : (
+            <QueryView query={forecastQuery} isEmpty={hasNoItems}>
+              {(forecast) => {
+                const points = buildScenario(forecast.items, {
+                  hours: state.hours,
+                  tramsDelta: state.tramsDelta,
+                  corrections: {
+                    weather: state.correctionsPct.weather / 100,
+                    event: state.correctionsPct.event / 100,
+                    season: state.correctionsPct.season / 100,
+                  },
+                });
+                return (
+                  <>
+                    <ScenarioChart
+                      points={points}
+                      tramsDelta={state.tramsDelta}
+                      correctionsPct={state.correctionsPct}
+                    />
+                    <ScenarioCards summary={summarize(points)} />
+                  </>
+                );
+              }}
+            </QueryView>
+          )}
         </Panel>
         <p className="muted">
           Выходы меняют число трамваев в выбранные часы при том же потоке; коэффициенты умножают

@@ -1,9 +1,10 @@
 import type { FactorsResponse, ForecastItem, Route } from '../../api';
-import { NEW_ROUTE_LABEL } from '../../config/constants';
+import { NO_DATA_LABEL } from '../../config/constants';
 import { dayOfMonth, formatDate, weekdayShort } from '../../utils/dates';
 import { isDayOff } from '../../utils/dayType';
 import { formatNumber, formatThousands } from '../../utils/format';
 import { intensityColor } from '../../utils/intensity';
+import { hasNoData } from '../../utils/routes';
 
 interface RoutesDaysTableProps {
   routes: Route[];
@@ -47,6 +48,7 @@ export function RoutesDaysTable({
         </thead>
         <tbody>
           {routes.map((route) => {
+            const noData = hasNoData(route);
             const total = dates.reduce(
               (sum, date) => sum + (byKey.get(`${route.route}|${date}`)?.prediction ?? 0),
               0,
@@ -55,37 +57,38 @@ export function RoutesDaysTable({
               <tr
                 key={route.route}
                 className={[
-                  route.is_new ? 'heat-table__row--new' : '',
+                  noData ? 'heat-table__row--no-data' : '',
                   route.route === selectedRoute ? 'heat-table__row--selected' : '',
                 ].join(' ')}
                 aria-selected={route.route === selectedRoute}
                 onClick={() => onSelectRoute(route.route)}
               >
-                <th
-                  scope="row"
-                  title={route.is_new ? `Маршрут ${route.route}: ${NEW_ROUTE_LABEL}` : undefined}
-                >
-                  {route.route}
-                </th>
-                {dates.map((date) => {
-                  const item = byKey.get(`${route.route}|${date}`);
-                  return (
-                    <td
-                      key={date}
-                      style={
-                        item
-                          ? { backgroundColor: intensityColor(item.prediction / max) }
-                          : undefined
-                      }
-                      title={
-                        item
-                          ? `Маршрут ${route.route}, ${formatDate(date)}: ${formatNumber(item.prediction)} пасс.`
-                          : `Маршрут ${route.route}, ${formatDate(date)}: нет прогноза`
-                      }
-                    />
-                  );
-                })}
-                <td className="heat-table__total">{formatThousands(total)}</td>
+                <th scope="row">{route.route}</th>
+                {noData && (
+                  <td className="heat-table__no-data" colSpan={dates.length + 1}>
+                    {NO_DATA_LABEL}
+                  </td>
+                )}
+                {!noData &&
+                  dates.map((date) => {
+                    const item = byKey.get(`${route.route}|${date}`);
+                    return (
+                      <td
+                        key={date}
+                        style={
+                          item
+                            ? { backgroundColor: intensityColor(item.prediction / max) }
+                            : undefined
+                        }
+                        title={
+                          item
+                            ? `Маршрут ${route.route}, ${formatDate(date)}: ${formatNumber(item.prediction)} пасс.`
+                            : `Маршрут ${route.route}, ${formatDate(date)}: нет прогноза`
+                        }
+                      />
+                    );
+                  })}
+                {!noData && <td className="heat-table__total">{formatThousands(total)}</td>}
               </tr>
             );
           })}

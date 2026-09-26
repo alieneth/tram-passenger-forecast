@@ -1,4 +1,4 @@
-import { PASSENGERS_PER_TRAM_NORM } from '../../config/constants';
+import { NO_DATA_LABEL, PASSENGERS_PER_TRAM_NORM } from '../../config/constants';
 import { LOAD_COLORS, LOAD_LABELS, type LoadLevel } from '../../utils/intensity';
 
 const LEVELS: LoadLevel[] = ['low', 'medium', 'high', 'none'];
@@ -28,7 +28,7 @@ export function MapLegend({
       )}
       <span className="map-legend__item">
         <span className="map-legend__line map-legend__line--dashed" />
-        {compact ? 'новый' : 'новый маршрут · прогноз по аналогам'}
+        {NO_DATA_LABEL}
       </span>
     </div>
   );

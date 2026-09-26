@@ -8,9 +8,11 @@ import { useDayForecast } from '../../hooks/useDayForecast';
 import { formatDate, monthTitle } from '../../utils/dates';
 import { isWaiting } from '../../utils/decisions';
 import { periodFor } from '../../utils/horizon';
+import { hasNoData } from '../../utils/routes';
 import { RouteMonthView } from '../month/RouteMonthView';
 import { RouteLabel } from '../RouteLabel';
 import { LoadingState } from '../states/LoadingState';
+import { NoDataRouteState } from '../states/NoDataRouteState';
 import { QueryView } from '../states/QueryView';
 import { Tabs } from '../Tabs';
 import { RouteWeekView } from '../week/RouteWeekView';
@@ -50,9 +52,15 @@ export function RouteWorkspace({ route, onClose }: { route: Route; onClose: () =
         </Link>
       </header>
       <div className="route-workspace__body">
-        {horizon === 'day' && <RouteDayView route={route} />}
-        {horizon === 'week' && <RouteWeekView route={route} />}
-        {horizon === 'month' && <RouteMonthView route={route} />}
+        {hasNoData(route) ? (
+          <NoDataRouteState route={route.route} />
+        ) : (
+          <>
+            {horizon === 'day' && <RouteDayView route={route} />}
+            {horizon === 'week' && <RouteWeekView route={route} />}
+            {horizon === 'month' && <RouteMonthView route={route} />}
+          </>
+        )}
       </div>
     </section>
   );

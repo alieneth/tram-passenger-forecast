@@ -8,7 +8,8 @@ import {
 import 'maplibre-gl/dist/maplibre-gl.css';
 import mapWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import { useEffect, useRef, useState } from 'react';
-import { MAP_CENTER, MAP_FIT_PADDING_PX, MAP_ZOOM } from '../../config/constants';
+import { MAP_CENTER, MAP_FIT_PADDING_PX, MAP_ZOOM, NO_DATA_LABEL } from '../../config/constants';
+import { hasNoData } from '../../utils/routes';
 import { FALLBACK_STYLE, MAP_STYLE } from '../../config/map';
 import {
   buildLines,
@@ -48,15 +49,16 @@ interface Hover {
 }
 
 function createLabel(mapRoute: MapRoute, showLoad: boolean, dimmed: boolean): HTMLElement {
+  const noData = hasNoData(mapRoute.route);
   const element = document.createElement('div');
   element.className = [
     'map-label',
-    mapRoute.route.is_new ? 'map-label--new' : '',
+    noData ? 'map-label--no-data' : '',
     dimmed ? 'map-label--dimmed' : '',
   ].join(' ');
   element.style.borderColor = routeColor(mapRoute, showLoad);
-  element.textContent = mapRoute.route.is_new
-    ? `${mapRoute.route.route} · новый`
+  element.textContent = noData
+    ? `${mapRoute.route.route} · ${NO_DATA_LABEL}`
     : String(mapRoute.route.route);
   if (mapRoute.eventName) {
     const event = document.createElement('span');

@@ -1,8 +1,9 @@
 import type { ForecastItem, Route } from '../api';
-import { DISPLAY_HOURS, NEW_ROUTE_LABEL } from '../config/constants';
+import { DISPLAY_HOURS, NO_DATA_LABEL } from '../config/constants';
 import { itemsByRouteAndHour } from '../utils/forecast';
 import { formatHour, formatHourTime, formatNumber } from '../utils/format';
 import { intensityColor } from '../utils/intensity';
+import { hasNoData } from '../utils/routes';
 
 // Тепловая таблица «маршруты × часы»: цвет — пассажиров в час относительно максимума таблицы
 export function RoutesHoursTable({
@@ -33,41 +34,46 @@ export function RoutesHoursTable({
           </tr>
         </thead>
         <tbody>
-          {routes.map((route) => (
-            <tr
-              key={route.route}
-              className={[
-                route.is_new ? 'heat-table__row--new' : '',
-                route.route === selectedRoute ? 'heat-table__row--selected' : '',
-              ].join(' ')}
-              aria-selected={route.route === selectedRoute}
-              onClick={() => onSelectRoute(route.route)}
-            >
-              <th
-                scope="row"
-                title={route.is_new ? `Маршрут ${route.route}: ${NEW_ROUTE_LABEL}` : undefined}
+          {routes.map((route) => {
+            const noData = hasNoData(route);
+            return (
+              <tr
+                key={route.route}
+                className={[
+                  noData ? 'heat-table__row--no-data' : '',
+                  route.route === selectedRoute ? 'heat-table__row--selected' : '',
+                ].join(' ')}
+                aria-selected={route.route === selectedRoute}
+                onClick={() => onSelectRoute(route.route)}
               >
-                {route.route}
-                {route.is_new && <span className="heat-table__new">новый</span>}
-              </th>
-              {DISPLAY_HOURS.map((hour) => {
-                const item = grid.get(route.route)?.get(hour);
-                return (
-                  <td
-                    key={hour}
-                    style={
-                      item ? { backgroundColor: intensityColor(item.prediction / max) } : undefined
-                    }
-                    title={
-                      item
-                        ? `Маршрут ${route.route}, ${formatHourTime(hour)}: ${formatNumber(item.prediction)} пасс./ч (${formatNumber(item.lower)}–${formatNumber(item.upper)})`
-                        : `Маршрут ${route.route}, ${formatHourTime(hour)}: нет прогноза`
-                    }
-                  />
-                );
-              })}
-            </tr>
-          ))}
+                <th scope="row">{route.route}</th>
+                {noData ? (
+                  <td className="heat-table__no-data" colSpan={DISPLAY_HOURS.length}>
+                    {NO_DATA_LABEL}
+                  </td>
+                ) : (
+                  DISPLAY_HOURS.map((hour) => {
+                    const item = grid.get(route.route)?.get(hour);
+                    return (
+                      <td
+                        key={hour}
+                        style={
+                          item
+                            ? { backgroundColor: intensityColor(item.prediction / max) }
+                            : undefined
+                        }
+                        title={
+                          item
+                            ? `Маршрут ${route.route}, ${formatHourTime(hour)}: ${formatNumber(item.prediction)} пасс./ч (${formatNumber(item.lower)}–${formatNumber(item.upper)})`
+                            : `Маршрут ${route.route}, ${formatHourTime(hour)}: нет прогноза`
+                        }
+                      />
+                    );
+                  })
+                )}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
       <div className="heat-legend">
@@ -75,8 +81,6 @@ export function RoutesHoursTable({
         <span>0</span>
         <span className="heat-legend__bar" aria-hidden="true" />
         <span>{formatNumber(max)}</span>
-        <span className="heat-legend__new" aria-hidden="true" />
-        <span>прогноз по аналогам</span>
       </div>
     </div>
   );

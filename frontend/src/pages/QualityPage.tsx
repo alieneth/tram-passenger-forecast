@@ -1,16 +1,20 @@
 import { useState } from 'react';
-import { errorMessage, isEmptyDataError, type Route } from '../api';
+import type { ActualItem, ForecastItem, Route } from '../api';
 import { Panel } from '../components/Panel';
+import { EvalDataView } from '../components/quality/EvalDataView';
 import { FactVsForecastChart } from '../components/quality/FactVsForecastChart';
 import { QualitySummary } from '../components/quality/QualitySummary';
 import { RouteErrorChart } from '../components/quality/RouteErrorChart';
 import { MAE_UNITS } from '../components/quality/units';
+import { WapeSummary } from '../components/quality/WapeSummary';
 import { EmptyState } from '../components/states/EmptyState';
-import { ErrorState } from '../components/states/ErrorState';
-import { LoadingState } from '../components/states/LoadingState';
 import { QueryView } from '../components/states/QueryView';
-import { QUALITY_CHART_FROM, QUALITY_CHART_TO } from '../config/constants';
-import { useFactVsForecast } from '../hooks/useFactVsForecast';
+import {
+  QUALITY_CHART_FROM,
+  QUALITY_CHART_TO,
+  QUALITY_EVAL_FROM,
+  QUALITY_EVAL_TO,
+} from '../config/constants';
 import { useFilters } from '../hooks/useFilters';
 import { useModelQuality } from '../hooks/useModelQuality';
 import { useRoutes } from '../hooks/useRoutes';
@@ -19,8 +23,11 @@ import { hasNoItems } from '../utils/empty';
 import { buildFactPoints, meanAbsoluteError } from '../utils/factVsForecast';
 import { formatDecimal } from '../utils/format';
 import { apiHorizon } from '../utils/horizon';
+import { hasNoData } from '../utils/routes';
+import { computeWape, formatWape } from '../utils/wape';
 
-// Экран «Качество модели» (UI-10): доказательство, что модель точнее базовой
+// Экран «Качество модели» (UI-10): главная метрика — WAPE-score организаторов, MAE и сравнение
+// с базовой моделью — дополнительно
 export function QualityPage() {
   const { horizon: viewHorizon } = useFilters();
   // Неделя и месяц — ошибка по дням, как у горизонта month
@@ -30,16 +37,21 @@ export function QualityPage() {
 
   return (
     <div className="page">
-      <QueryView query={qualityQuery}>
-        {(quality) => (
-          <h2 className="page__title">
-            Проверка на {formatDate(quality.eval_date_from)}–{formatDate(quality.eval_date_to)}{' '}
-            <span className="muted">
-              — данные, которые модель не видела · версия {quality.model_version}
-            </span>
-          </h2>
-        )}
-      </QueryView>
+      <h2 className="page__title">
+        Проверка на {formatDate(QUALITY_EVAL_FROM)}–{formatDate(QUALITY_EVAL_TO)}{' '}
+        <span className="muted">
+          — данные, которые модель не видела
+          {qualityQuery.data && ` · версия ${qualityQuery.data.model_version}`}
+        </span>
+      </h2>
+
+      <Panel title="Точность по метрике организаторов (WAPE-score)">
+        <EvalDataView>
+          {(actuals, forecast) => <WapeSummary actuals={actuals} forecast={forecast} />}
+        </EvalDataView>
+      </Panel>
+
+      <h3 className="page__subtitle">Дополнительно: MAE и сравнение с базовой моделью</h3>
       <QualitySummary />
 
       <div className="quality-grid">
@@ -58,7 +70,9 @@ export function QualityPage() {
       </div>
 
       <QueryView query={routesQuery} isEmpty={hasNoItems}>
-        {(routes) => <FactVsForecastPanel routes={routes.items.filter((route) => !route.is_new)} />}
+        {(routes) => (
+          <FactVsForecastPanel routes={routes.items.filter((route) => !hasNoData(route))} />
+        )}
       </QueryView>
     </div>
   );
@@ -66,44 +80,6 @@ export function QualityPage() {
 
 function FactVsForecastPanel({ routes }: { routes: Route[] }) {
   const [route, setRoute] = useState(routes[0]?.route ?? 1);
-  const [actualsQuery, forecastQuery] = useFactVsForecast(
-    route,
-    QUALITY_CHART_FROM,
-    QUALITY_CHART_TO,
-  );
-  const failed = [actualsQuery, forecastQuery].find((query) => query.isError);
-
-  let content;
-  if (actualsQuery.isPending || forecastQuery.isPending) {
-    content = <LoadingState />;
-  } else if (failed?.error) {
-    content = isEmptyDataError(failed.error) ? (
-      <EmptyState
-        message={failed.error.message}
-        hint="Для графика нужен прогноз модели на проверочный период (сентябрь–октябрь)"
-      />
-    ) : (
-      <ErrorState message={errorMessage(failed.error)} error={failed.error} />
-    );
-  } else {
-    const points = buildFactPoints(
-      QUALITY_CHART_FROM,
-      QUALITY_CHART_TO,
-      actualsQuery.data?.items ?? [],
-      forecastQuery.data?.items ?? [],
-    );
-    const mae = meanAbsoluteError(points);
-    content = (
-      <>
-        <FactVsForecastChart points={points} />
-        {mae !== null && (
-          <p className="muted">
-            MAE за эти две недели: {formatDecimal(Math.round(mae * 10) / 10)} пасс./ч
-          </p>
-        )}
-      </>
-    );
-  }
 
   return (
     <Panel
@@ -123,7 +99,42 @@ function FactVsForecastPanel({ routes }: { routes: Route[] }) {
         </select>
       }
     >
-      {content}
+      <EvalDataView>
+        {(actuals, forecast) => (
+          <FactVsForecastContent route={route} actuals={actuals} forecast={forecast} />
+        )}
+      </EvalDataView>
     </Panel>
+  );
+}
+
+function FactVsForecastContent({
+  route,
+  actuals,
+  forecast,
+}: {
+  route: number;
+  actuals: ActualItem[];
+  forecast: ForecastItem[];
+}) {
+  // Из данных всего проверочного периода берём две недели одного маршрута
+  const inChart = <T extends { route: number; date: string }>(item: T) =>
+    item.route === route && item.date >= QUALITY_CHART_FROM && item.date <= QUALITY_CHART_TO;
+  const routeActuals = actuals.filter(inChart);
+  const routeForecast = forecast.filter(inChart);
+  const points = buildFactPoints(QUALITY_CHART_FROM, QUALITY_CHART_TO, routeActuals, routeForecast);
+  const mae = meanAbsoluteError(points);
+  const wape = computeWape(routeActuals, routeForecast, () => false);
+
+  return (
+    <>
+      <FactVsForecastChart points={points} />
+      {mae !== null && (
+        <p className="muted">
+          За эти две недели: WAPE-score {formatWape(wape.hourly)}, MAE{' '}
+          {formatDecimal(Math.round(mae * 10) / 10)} пасс./ч
+        </p>
+      )}
+    </>
   );
 }

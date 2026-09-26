@@ -7,12 +7,13 @@ import { Panel } from '../components/Panel';
 import { EmptyState } from '../components/states/EmptyState';
 import { QueryView } from '../components/states/QueryView';
 import { Tabs } from '../components/Tabs';
-import { PASSENGERS_PER_TRAM_NORM } from '../config/constants';
+import { NO_DATA_LABEL, PASSENGERS_PER_TRAM_NORM } from '../config/constants';
 import { useDecisionsForDate } from '../hooks/useDecisions';
 import { useFilters } from '../hooks/useFilters';
 import { useRoutes } from '../hooks/useRoutes';
 import { formatDate } from '../utils/dates';
 import { decisionTab, groupDecisions, type DecisionTab } from '../utils/decisions';
+import { hasNoData } from '../utils/routes';
 
 const TABS: { id: DecisionTab; label: string }[] = [
   { id: 'new', label: 'Новые' },
@@ -65,6 +66,7 @@ export function DecisionsPage() {
               {routesQuery.data?.items.map((item) => (
                 <option key={item.route} value={item.route}>
                   Маршрут {item.route}
+                  {hasNoData(item) ? ` — ${NO_DATA_LABEL}` : ''}
                 </option>
               ))}
             </select>

@@ -11,6 +11,7 @@ import {
 import type { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
 import type { ModelQuality } from '../../api';
 import { formatDecimal } from '../../utils/format';
+import { isNoDataRoute } from '../../utils/routes';
 import { CHART_COLORS } from '../route/chartColors';
 import { MAE_UNITS } from './units';
 
@@ -25,9 +26,8 @@ type RouteRow = ModelQuality['by_route'][number];
 interface ChartRow {
   label: string;
   row: RouteRow;
-  // У маршрута без факта столбиков нет (06_opisanie-maketov, экран 6)
-  model: number | null;
-  baseline: number | null;
+  model: number;
+  baseline: number;
 }
 
 function RowTooltip({ active, payload }: TooltipContentProps<ValueType, NameType>) {
@@ -37,7 +37,6 @@ function RowTooltip({ active, payload }: TooltipContentProps<ValueType, NameType
   return (
     <div className="chart-tooltip">
       <strong>Маршрут {row.route}</strong>
-      {row.method === 'analogs' && <span className="muted">нет факта — метод аналогов</span>}
       <dl className="map-tooltip__grid">
         <dt>наша модель</dt>
         <dd>{formatDecimal(row.model_mae)}</dd>
@@ -54,15 +53,17 @@ function RowTooltip({ active, payload }: TooltipContentProps<ValueType, NameType
   );
 }
 
-// «Ошибка по маршрутам»: MAE нашей и базовой модели по каждому маршруту
+// «Ошибка по маршрутам»: MAE нашей и базовой модели по каждому маршруту с историей
 export function RouteErrorChart({ quality }: { quality: ModelQuality }) {
-  const rows: ChartRow[] = quality.by_route.map((row) => ({
-    label: row.method === 'analogs' ? `${row.route}*` : String(row.route),
-    row,
-    model: row.method === 'analogs' ? null : row.model_mae,
-    baseline: row.method === 'analogs' ? null : row.baseline_mae,
-  }));
-  const analogs = quality.by_route.filter((row) => row.method === 'analogs');
+  // Маршрут 5 исключён организаторами, а без факта сравнивать не с чем — только маршруты с историей
+  const rows: ChartRow[] = quality.by_route
+    .filter((row) => row.method === 'model' && !isNoDataRoute(row.route))
+    .map((row) => ({
+      label: String(row.route),
+      row,
+      model: row.model_mae,
+      baseline: row.baseline_mae,
+    }));
 
   return (
     <figure className="chart">
@@ -127,13 +128,6 @@ export function RouteErrorChart({ quality }: { quality: ModelQuality }) {
           />
         </BarChart>
       </ResponsiveContainer>
-      {analogs.map((row) => (
-        <p key={row.route} className="muted">
-          * Маршрут {row.route}: нет факта — метод аналогов проверен с исключением, MAE{' '}
-          {formatDecimal(row.model_mae)} {MAE_UNITS[quality.horizon]} (базовая —{' '}
-          {formatDecimal(row.baseline_mae)})
-        </p>
-      ))}
     </figure>
   );
 }

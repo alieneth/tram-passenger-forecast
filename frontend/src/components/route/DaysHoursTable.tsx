@@ -34,9 +34,7 @@ export function DaysHoursTable({
 
   return (
     <div className="heat-table-wrap">
-      <table
-        className={`heat-table heat-table--days${items.some((item) => item.is_analog) ? ' heat-table--analog' : ''}`}
-      >
+      <table className="heat-table heat-table--days">
         <thead>
           <tr>
             <th scope="col">Дата</th>

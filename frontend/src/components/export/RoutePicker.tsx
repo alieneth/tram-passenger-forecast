@@ -1,5 +1,6 @@
 import type { Route } from '../../api';
-import { NEW_ROUTE_LABEL } from '../../config/constants';
+import { hasNoData } from '../../utils/routes';
+import { NoDataBadge } from '../RouteLabel';
 
 interface RoutePickerProps {
   routes: Route[];
@@ -44,7 +45,7 @@ export function RoutePicker({ routes, value, onChange }: RoutePickerProps) {
               onChange={(event) => toggle(route.route, event.target.checked)}
             />
             Маршрут {route.route}
-            {route.is_new && <span className="badge badge--new">{NEW_ROUTE_LABEL}</span>}
+            {hasNoData(route) && <NoDataBadge />}
           </label>
         ))}
       </div>

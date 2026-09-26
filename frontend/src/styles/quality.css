@@ -4,6 +4,13 @@
   font-weight: 600;
 }
 
+.page__subtitle {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
 .quality-summary {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -77,4 +84,114 @@
   .quality-grid {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+/* WAPE-score — главная метрика организаторов */
+.wape {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: var(--gap);
+}
+
+.wape__values {
+  display: flex;
+  gap: 32px;
+  margin: 0;
+}
+
+.wape__values dt {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.wape__values dd {
+  margin: 2px 0 0;
+  font-size: 22px;
+}
+
+.wape__score {
+  font-size: 40px;
+}
+
+.wape__verdict {
+  font-weight: 600;
+}
+
+.wape--good {
+  color: var(--ok);
+}
+
+.wape--bad {
+  color: var(--warning);
+}
+
+.wape-routes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wape-routes__row {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) 52px 104px;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.wape-routes__route {
+  font-weight: 600;
+  text-align: right;
+}
+
+.wape-routes__track {
+  position: relative;
+  height: 10px;
+  border-radius: 5px;
+  background: var(--panel-raised);
+}
+
+.wape-routes__bar {
+  display: block;
+  height: 100%;
+  border-radius: 5px;
+}
+
+.wape-routes__bar.wape--good {
+  background: var(--ok);
+}
+
+.wape-routes__bar.wape--bad {
+  background: var(--warning);
+}
+
+.wape-routes__row--no-data .wape-routes__route {
+  color: var(--muted);
+}
+
+.wape-routes__row--no-data span:last-child {
+  grid-column: span 2;
+}
+
+/* Отметка порога максимального балла */
+.wape-routes__target {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 2px;
+  background: var(--text);
+  opacity: 0.6;
+}
+
+@media (max-width: 1200px) {
+  .wape {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.wape-routes__total {
+  white-space: nowrap;
 }
