@@ -2,6 +2,7 @@
 // Используется только из src/api/client.ts, когда VITE_API_URL не задан.
 import type {
   ActualsQuery,
+  DecisionsQuery,
   DownloadedFile,
   ExportQuery,
   FactorsQuery,
@@ -13,6 +14,7 @@ import { ApiError } from '../api/errors';
 import type {
   ActualItem,
   ActualsResponse,
+  DecisionList,
   FactorsResponse,
   ForecastItem,
   Health,
@@ -21,8 +23,15 @@ import type {
   RouteList,
 } from '../api/types';
 import { datesBetween } from './data/calendar';
+import { decisionsFor } from './data/decisions';
 import { factorsFor } from './data/factors';
-import { ACTUALS_FROM, FORECAST_TO, allActualItems, allForecastItems } from './data/forecast';
+import {
+  ACTUALS_FROM,
+  FORECAST_FROM,
+  FORECAST_TO,
+  allActualItems,
+  allForecastItems,
+} from './data/forecast';
 import { geometryMock } from './data/geometry';
 import { routesMock } from './data/routes';
 import { commonFailure, currentScenario } from './scenario';
@@ -197,6 +206,18 @@ export function getFactors(query: FactorsQuery): Promise<FactorsResponse> {
   const route = query.route;
   const events = factors.events.filter((event) => event.routes.includes(route));
   return respond({ ...factors, events });
+}
+
+export function getDecisions(query: DecisionsQuery): Promise<DecisionList> {
+  const dates = query.date ? [query.date] : datesBetween(FORECAST_FROM, FORECAST_TO);
+  const items = dates
+    .flatMap(decisionsFor)
+    .filter(
+      (item) =>
+        (query.route === undefined || item.route === query.route) &&
+        (!query.status?.length || query.status.includes(item.status_code)),
+    );
+  return respond({ items, total: items.length });
 }
 
 export function getHealth(): Promise<Health> {

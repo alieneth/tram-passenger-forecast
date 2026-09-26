@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import { errorMessage, type Route } from '../api';
 import { LayersPanel, type MapLayers } from '../components/map/LayersPanel';
 import { LazyRoutesMap } from '../components/map/LazyRoutesMap';
@@ -48,7 +48,14 @@ function MapScreen({ routes }: { routes: Route[] }) {
     count: geometries.length,
     isPending: geometriesPending,
   });
-  const playback = usePlayback(DISPLAY_HOURS, DEFAULT_MAP_HOUR);
+  // ?hour=8 — открыть карту сразу на нужном часе (ссылка с карточки «Пиковый час» на Обзоре)
+  const [searchParams] = useSearchParams();
+  const requestedHour = Number(searchParams.get('hour'));
+  const initialHour =
+    searchParams.has('hour') && DISPLAY_HOURS.includes(requestedHour)
+      ? requestedHour
+      : DEFAULT_MAP_HOUR;
+  const playback = usePlayback(DISPLAY_HOURS, initialHour);
   const [layers, setLayers] = useState<MapLayers>({ load: true, weather: false, events: false });
 
   const grid = useMemo(

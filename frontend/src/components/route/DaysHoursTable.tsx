@@ -34,7 +34,9 @@ export function DaysHoursTable({
 
   return (
     <div className="heat-table-wrap">
-      <table className="heat-table heat-table--days">
+      <table
+        className={`heat-table heat-table--days${items.some((item) => item.is_analog) ? ' heat-table--analog' : ''}`}
+      >
         <thead>
           <tr>
             <th scope="col">Дата</th>
@@ -73,7 +75,9 @@ export function DaysHoursTable({
                     <td
                       key={hour}
                       style={
-                        item ? { background: intensityColor(item.prediction / max) } : undefined
+                        item
+                          ? { backgroundColor: intensityColor(item.prediction / max) }
+                          : undefined
                       }
                       title={
                         item

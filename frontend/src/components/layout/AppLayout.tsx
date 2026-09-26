@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router';
 import { LoadingState } from '../states/LoadingState';
 import { ScreenErrorBoundary } from '../states/ScreenErrorBoundary';
+import { Footer } from './Footer';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 
@@ -18,6 +19,7 @@ export function AppLayout() {
           </Suspense>
         </ScreenErrorBoundary>
       </main>
+      <Footer />
     </div>
   );
 }

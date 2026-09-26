@@ -3,6 +3,7 @@ import { IS_MOCK_MODE } from './config';
 import { buildQuery, getFile, getJson, type DownloadedFile, type QueryParams } from './http';
 import type {
   ActualsResponse,
+  DecisionList,
   FactorsResponse,
   ForecastResponse,
   Health,
@@ -21,6 +22,7 @@ export type ForecastQuery = operations['getForecast']['parameters']['query'];
 export type ActualsQuery = operations['getActuals']['parameters']['query'];
 export type FactorsQuery = operations['getFactors']['parameters']['query'];
 export type ExportQuery = operations['exportForecast']['parameters']['query'];
+export type DecisionsQuery = NonNullable<operations['getDecisions']['parameters']['query']>;
 
 export type { DownloadedFile };
 
@@ -79,4 +81,15 @@ export function getHealth(signal?: AbortSignal): Promise<Health> {
 export function describeRequest(path: string, params: QueryParams): string {
   const query = buildQuery(params);
   return `${path}${query ? `?${query}` : ''}`;
+}
+
+// Методы решений требуют Bearer-токен роли «Диспетчер». Откуда фронт берёт токен, в контракте
+// пока не описано — без него API ответит 401, и экран покажет «Требуется авторизация»
+export function getDecisions(
+  query: DecisionsQuery = {},
+  signal?: AbortSignal,
+): Promise<DecisionList> {
+  return IS_MOCK_MODE
+    ? loadMock().then((mock) => mock.getDecisions(query))
+    : getJson('/decisions', query, signal);
 }

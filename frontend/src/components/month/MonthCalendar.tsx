@@ -53,7 +53,7 @@ export function MonthCalendar({ items, calendar, selectedDate, onSelectDate }: M
               type="button"
               role="gridcell"
               className={classes}
-              style={{ background: intensityColor(ratio(item.prediction)) }}
+              style={{ backgroundColor: intensityColor(ratio(item.prediction)) }}
               title={[
                 `${formatDate(item.date)}: ${formatNumber(item.prediction)} пассажиров`,
                 `коридор ${formatNumber(item.lower)} – ${formatNumber(item.upper)}`,

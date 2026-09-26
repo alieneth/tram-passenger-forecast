@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router';
 import type { ForecastItem, Route } from '../api';
-import { DISPLAY_HOURS } from '../config/constants';
+import { DISPLAY_HOURS, NEW_ROUTE_LABEL } from '../config/constants';
 import { itemsByRouteAndHour } from '../utils/forecast';
 import { formatHour, formatHourTime, formatNumber } from '../utils/format';
 import { intensityColor } from '../utils/intensity';
@@ -31,13 +31,21 @@ export function RoutesHoursTable({ routes, items }: { routes: Route[]; items: Fo
               className={route.is_new ? 'heat-table__row--new' : undefined}
               onClick={() => navigate(`/route/${route.route}`)}
             >
-              <th scope="row">{route.route}</th>
+              <th
+                scope="row"
+                title={route.is_new ? `Маршрут ${route.route}: ${NEW_ROUTE_LABEL}` : undefined}
+              >
+                {route.route}
+                {route.is_new && <span className="heat-table__new">новый</span>}
+              </th>
               {DISPLAY_HOURS.map((hour) => {
                 const item = grid.get(route.route)?.get(hour);
                 return (
                   <td
                     key={hour}
-                    style={item ? { background: intensityColor(item.prediction / max) } : undefined}
+                    style={
+                      item ? { backgroundColor: intensityColor(item.prediction / max) } : undefined
+                    }
                     title={
                       item
                         ? `Маршрут ${route.route}, ${formatHourTime(hour)}: ${formatNumber(item.prediction)} пасс./ч (${formatNumber(item.lower)}–${formatNumber(item.upper)})`
@@ -52,9 +60,11 @@ export function RoutesHoursTable({ routes, items }: { routes: Route[]; items: Fo
       </table>
       <div className="heat-legend">
         <span>Пассажиров в час (прогноз)</span>
-        <span>ниже</span>
+        <span>0</span>
         <span className="heat-legend__bar" aria-hidden="true" />
-        <span>выше</span>
+        <span>{formatNumber(max)}</span>
+        <span className="heat-legend__new" aria-hidden="true" />
+        <span>прогноз по аналогам</span>
       </div>
     </div>
   );
