@@ -17,6 +17,5 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { path: '/decisions', label: 'Решения', icon: 'decisions', wave: 'В2' },
   { path: '/what-if', label: 'Что если', icon: 'sliders', wave: 'В3' },
   { path: '/quality', label: 'Качество модели', icon: 'quality', wave: 'В2' },
-  { path: '/sources', label: 'Источники данных', icon: 'database', wave: 'В3' },
   { path: '/export', label: 'Экспорт и API', icon: 'export', wave: 'MVP' },
 ];

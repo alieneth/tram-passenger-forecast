@@ -14,7 +14,6 @@ export function Sidebar() {
         >
           <Icon name={item.icon} />
           <span>{item.label}</span>
-          {item.wave !== 'MVP' && <span className="sidebar__wave">{item.wave}</span>}
         </NavLink>
       ))}
     </nav>
