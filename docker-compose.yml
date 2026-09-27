@@ -13,6 +13,9 @@ services:
       - db_data:/var/lib/postgresql/data
       # Схема создаётся автоматически один раз при первом запуске (на пустом volume).
       - ./sql/01_create_tables.sql:/docker-entrypoint-initdb.d/01_create_tables.sql:ro
+      # Готовые данные (справочник, факт, календарь, погода, прогноз) — на пустом volume
+      # накатывается один раз при первом запуске, без ручных шагов.
+      - ./backend/db/seed/02_seed_data.sql:/docker-entrypoint-initdb.d/02_seed_data.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-tram} -d ${DB_NAME:-tram}"]
       interval: 5s
@@ -32,6 +35,8 @@ services:
       API_PORT: 8080
       PASSENGERS_PER_TRAM_NORM: ${PASSENGERS_PER_TRAM_NORM:-150}
       TRAM_PREP_MINUTES: ${TRAM_PREP_MINUTES:-40}
+      AUTH_INGEST_TOKEN: ${AUTH_INGEST_TOKEN:-change_me_ingest}
+      AUTH_DISPATCHER_TOKEN: ${AUTH_DISPATCHER_TOKEN:-change_me_dispatcher}
       TZ: ${TZ:-Europe/Moscow}
     ports:
       - "${API_PORT:-8080}:8080"
@@ -45,6 +50,19 @@ services:
         limits:
           cpus: "4"
           memory: 4G
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_MAP_STYLE_URL: ${VITE_MAP_STYLE_URL:-https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json}
+    environment:
+      # nginx проксирует /api и /swagger-ui на backend — фронт и бэк на одном origin, без CORS.
+      API_UPSTREAM: http://backend:8080
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
 
   # Разовая загрузка train.csv/test.csv в БД (DATA-1): docker compose run --rm loader
   loader:
