@@ -1,0 +1,207 @@
+/* Рабочий экран диспетчера: сплит «карта + графики/таблицы» (Q&A 26.09) */
+:root {
+  --footer-height: 34px;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: var(--gap);
+  /* Экран целиком в окне: половины прокручиваются сами, карта всегда на виду */
+  height: calc(100vh - var(--header-height) - var(--footer-height) - 2 * var(--gap));
+  min-height: 560px;
+}
+
+.workspace__map,
+.workspace__pane {
+  min-height: 0;
+  overflow: auto;
+}
+
+.workspace__pane {
+  padding-right: 2px;
+}
+
+.map-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.map-workspace--compact {
+  height: 100%;
+}
+
+.map-workspace--compact .map-screen {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 360px;
+}
+
+.map-overlay--top-left-offset {
+  top: 12px;
+  left: 52px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.segmented--small .segmented__item {
+  min-width: 0;
+  height: 26px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.map-caption {
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgb(11 26 44 / 0.85);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.map-layers-toggle summary {
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.map-layers-toggle .layers-panel {
+  margin-top: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.map-workspace__hours {
+  justify-content: center;
+}
+
+.map-workspace--compact .no-geometry .list__item {
+  padding: 2px 0;
+}
+
+.no-geometry__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.no-geometry__row:hover,
+.no-geometry__row--selected {
+  border-color: #60a5fa;
+}
+
+/* --- Развёртка маршрута справа --- */
+.route-workspace {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+
+.route-workspace__head {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  border-radius: var(--radius) var(--radius) 0 0;
+  background: var(--panel);
+}
+
+.route-workspace__head .route-label__number {
+  font-size: 17px;
+}
+
+.route-workspace__period {
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--accent-soft);
+  font-weight: 600;
+}
+
+.route-workspace__open {
+  margin-left: auto;
+  color: #60a5fa;
+}
+
+.route-workspace__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  padding: 12px 16px 16px;
+}
+
+.route-workspace__tab {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+/* Месяц маршрута в узкой панели — колонки друг под другом */
+.workspace__pane .route-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* --- «Маршруты × дни» --- */
+.heat-table--route-days td {
+  height: 22px;
+  min-width: 14px;
+}
+
+.heat-table__weekday {
+  display: block;
+  font-size: 10px;
+}
+
+.heat-table__day-off {
+  color: #f87171 !important;
+}
+
+.heat-table td.heat-table__total {
+  padding: 0 6px;
+  background: none;
+  color: var(--text);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+@media (max-width: 1100px) {
+  .workspace {
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+  }
+
+  .workspace__map,
+  .workspace__pane {
+    overflow: visible;
+  }
+
+  .map-workspace--compact .map-screen {
+    height: 420px;
+    flex: none;
+  }
+}
+
+/* Четыре цифры дня в половине экрана — сеткой 2×2 */
+.workspace__pane .stat-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}

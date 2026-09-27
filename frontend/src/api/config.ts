@@ -1,0 +1,9 @@
+// Адрес API — только из VITE_API_URL. Пусто или не задано — работаем на мок-данных из src/mocks/.
+const rawApiUrl = (import.meta.env.VITE_API_URL ?? '').trim();
+
+export const API_URL = rawApiUrl.replace(/\/+$/, '');
+export const IS_MOCK_MODE = API_URL === '';
+
+// Гибридный режим на время интеграции: метод, который бэкенд ещё не реализовал (501) или который
+// недоступен, берём из моков. В шапке тогда видно, какие данные — мок. Выключается VITE_MOCK_FALLBACK=false
+export const MOCK_FALLBACK = !IS_MOCK_MODE && import.meta.env.VITE_MOCK_FALLBACK === 'true';
