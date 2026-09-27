@@ -1,0 +1,13 @@
+{
+  "score_recomputed": 0.9109890084904277,
+  "submission_sha256": "40a05a9f0dc6ec62b0ae794eb512e09dd88c8417b559cb03f392a5d82d803836",
+  "submission_rows": 14640,
+  "prediction_sum": 12387495,
+  "forecast_rows": 13725,
+  "new_tests_passed": 5,
+  "old_submissions_unchanged": true,
+  "target_proxy_not_in_model": true,
+  "weather_mode": "climatology",
+  "future_external_used": "official closure and reopening announcements",
+  "pushed": false
+}

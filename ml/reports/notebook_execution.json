@@ -1,0 +1,26 @@
+[
+  {
+    "notebook": "01_data_quality_and_eda.ipynb",
+    "code_cells": 10,
+    "executed_cells": 10,
+    "image_outputs": 7,
+    "errors": 0,
+    "sha256": "343b2960d34087c2d65691c3d09fcf9b4f13687ffecbc1ba22ecf6be2d5ed649"
+  },
+  {
+    "notebook": "02_validation_and_external_sources.ipynb",
+    "code_cells": 9,
+    "executed_cells": 9,
+    "image_outputs": 6,
+    "errors": 0,
+    "sha256": "79e3ec9e9cea302fb8d30bbc7778b67857e1c2b64516b17f35f494d8228629ec"
+  },
+  {
+    "notebook": "03_qna_validation.ipynb",
+    "code_cells": 6,
+    "executed_cells": 6,
+    "image_outputs": 4,
+    "errors": 0,
+    "sha256": "f062be171c0a172bb33bcc3dea0cbaecbf22ebb03448dc5d8eeea8e32e4aafc7"
+  }
+]

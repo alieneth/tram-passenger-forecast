@@ -1,0 +1,11 @@
+{
+  "submission_file": "submission_qna_final_01_04_zero.csv",
+  "sha256": "7d940468ceb276c35ee55fbd0adc28d553d297389505d3716883a057195daa95",
+  "rows": 14640,
+  "route5_prediction_sum": 0,
+  "technical_hours_prediction_sum": 0,
+  "old_submission_sha256": "0fcac1502fa3423e51d784bf731a2526e18f5b3d2d58c21d7776be06eee6942f",
+  "database_written": false,
+  "database_blocker": "ML_DATABASE_URL is not configured",
+  "pushed": false
+}

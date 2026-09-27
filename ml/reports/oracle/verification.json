@@ -1,0 +1,27 @@
+{
+  "submissions": {
+    "validation_selected": {
+      "rows": 14640,
+      "sum": 12361172,
+      "sha256": "4c97ed9f5b687bd0b6bea9bb0dcba89afc807e9990187d858d49fef8a3c13bbe"
+    },
+    "development_selected": {
+      "rows": 14640,
+      "sum": 11988099,
+      "sha256": "bdb9500efe9d9e20198b01dc2102a93674e37af46d65415e0c7ffc2d002db292"
+    },
+    "restored": {
+      "rows": 14640,
+      "sum": 12414272,
+      "sha256": "89a710f9f2f22a8f93287d886158d34d236c3a6501f63e28967471ed4e559ff5"
+    }
+  },
+  "original_submissions_unchanged": true,
+  "artifact_hashes_verified": true,
+  "validation_metrics_recomputed": true,
+  "hourly_daily_sums_match": true,
+  "tests_passed": 16,
+  "ruff_passed": true,
+  "database_written": false,
+  "pushed": false
+}

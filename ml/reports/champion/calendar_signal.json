@@ -1,0 +1,148 @@
+{
+  "spring": {
+    "0": {
+      "overall": 0.8140933624601373,
+      "exception_rows": 1440,
+      "exception_absolute_error": 787371,
+      "exception_total": 687514,
+      "exception_by_date": {
+        "2025-05-01": 153049,
+        "2025-05-02": 129927,
+        "2025-05-08": 115529,
+        "2025-05-09": 135618,
+        "2025-06-12": 122048,
+        "2025-06-13": 131200
+      }
+    },
+    "0.25": {
+      "overall": 0.8287280411024387,
+      "exception_rows": 1440,
+      "exception_absolute_error": 618254,
+      "exception_total": 687514,
+      "exception_by_date": {
+        "2025-05-01": 124028,
+        "2025-05-02": 101905,
+        "2025-05-08": 86878,
+        "2025-05-09": 108758,
+        "2025-06-12": 93565,
+        "2025-06-13": 103120
+      }
+    },
+    "0.5": {
+      "overall": 0.8432091186603424,
+      "exception_rows": 1440,
+      "exception_absolute_error": 450912,
+      "exception_total": 687514,
+      "exception_by_date": {
+        "2025-05-01": 95039,
+        "2025-05-02": 73950,
+        "2025-05-08": 58823,
+        "2025-05-09": 82267,
+        "2025-06-12": 65724,
+        "2025-06-13": 75109
+      }
+    },
+    "0.75": {
+      "overall": 0.8572659110820197,
+      "exception_rows": 1440,
+      "exception_absolute_error": 288473,
+      "exception_total": 687514,
+      "exception_by_date": {
+        "2025-05-01": 66125,
+        "2025-05-02": 46681,
+        "2025-05-08": 32703,
+        "2025-05-09": 56192,
+        "2025-06-12": 39200,
+        "2025-06-13": 47572
+      }
+    },
+    "1": {
+      "overall": 0.8680089007285278,
+      "exception_rows": 1440,
+      "exception_absolute_error": 164328,
+      "exception_total": 687514,
+      "exception_by_date": {
+        "2025-05-01": 41594,
+        "2025-05-02": 25185,
+        "2025-05-08": 17718,
+        "2025-05-09": 32102,
+        "2025-06-12": 21835,
+        "2025-06-13": 25894
+      }
+    }
+  },
+  "summer": {
+    "0": {
+      "overall": 0.8135604875433082,
+      "exception_rows": 0,
+      "exception_absolute_error": 0,
+      "exception_total": 0,
+      "exception_by_date": {}
+    },
+    "0.25": {
+      "overall": 0.8135604875433082,
+      "exception_rows": 0,
+      "exception_absolute_error": 0,
+      "exception_total": 0,
+      "exception_by_date": {}
+    },
+    "0.5": {
+      "overall": 0.8135604875433082,
+      "exception_rows": 0,
+      "exception_absolute_error": 0,
+      "exception_total": 0,
+      "exception_by_date": {}
+    },
+    "0.75": {
+      "overall": 0.8135604875433082,
+      "exception_rows": 0,
+      "exception_absolute_error": 0,
+      "exception_total": 0,
+      "exception_by_date": {}
+    },
+    "1": {
+      "overall": 0.8135604875433082,
+      "exception_rows": 0,
+      "exception_absolute_error": 0,
+      "exception_total": 0,
+      "exception_by_date": {}
+    }
+  },
+  "autumn": {
+    "0": {
+      "overall": 0.8919939588290577,
+      "exception_rows": 0,
+      "exception_absolute_error": 0,
+      "exception_total": 0,
+      "exception_by_date": {}
+    },
+    "0.25": {
+      "overall": 0.8919939588290577,
+      "exception_rows": 0,
+      "exception_absolute_error": 0,
+      "exception_total": 0,
+      "exception_by_date": {}
+    },
+    "0.5": {
+      "overall": 0.8919939588290577,
+      "exception_rows": 0,
+      "exception_absolute_error": 0,
+      "exception_total": 0,
+      "exception_by_date": {}
+    },
+    "0.75": {
+      "overall": 0.8919939588290577,
+      "exception_rows": 0,
+      "exception_absolute_error": 0,
+      "exception_total": 0,
+      "exception_by_date": {}
+    },
+    "1": {
+      "overall": 0.8919939588290577,
+      "exception_rows": 0,
+      "exception_absolute_error": 0,
+      "exception_total": 0,
+      "exception_by_date": {}
+    }
+  }
+}

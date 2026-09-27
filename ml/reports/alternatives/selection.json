@@ -1,0 +1,19 @@
+{
+  "fold": "validation",
+  "key": "climatology_catboost_residual",
+  "mode": "climatology",
+  "family": "catboost",
+  "target": "residual",
+  "weight": 0.25,
+  "score": 0.8935705811941701,
+  "mae": 103.02459016393442,
+  "score_closures": 0.9050324352672602,
+  "short_turn_strength": 0.75,
+  "score_operations": 0.9109890084904277,
+  "short_turn_factor": 0.4324817518248175,
+  "short_turn_calibration_source": "https://transport.mos.ru/mostrans/all_news/125170",
+  "excluded_training_days": 16,
+  "selection_role": "inspected September-October; not an independent test",
+  "forecast_uncertainty": "Working Saturday Nov1 kept active; Nov3-4 not hard-zeroed without separate announcement",
+  "news_reopening_known_after_origin": true
+}

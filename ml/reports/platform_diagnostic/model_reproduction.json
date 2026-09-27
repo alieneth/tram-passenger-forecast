@@ -1,0 +1,9 @@
+{
+  "rows": 14640,
+  "prediction_sum": 12509286,
+  "sha256": "c725598b623ae64d7f8979a11c208efcb51f4ae6919c8c2caa40a712ec4b11bd",
+  "generated_from_model": true,
+  "reference_csv_read": false,
+  "reported_platform_score": 0.88724,
+  "score_recomputed_locally": false
+}

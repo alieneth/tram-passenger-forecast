@@ -1,0 +1,56 @@
+{
+  "training": "2025-01-01/2025-08-31",
+  "evaluation": "2025-09-01/2025-10-31",
+  "routes": 9,
+  "hours_removed_from_training": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "validation_hours": 24,
+  "objective": "regression_l1",
+  "trees": 150,
+  "weights": {
+    "seasonal": 0.98,
+    "lightgbm_residual": 0.02
+  },
+  "calendar_ablation": "Rebuild official day-type profiles and traffic day type",
+  "traffic": "Heuristic congestion profile plus constant OSM count, not measured traffic",
+  "interpretation": "Positive full-minus-without supports the group on this diagnostic window; negative means harm",
+  "independence": "Previously inspected validation, no significance claim",
+  "removed_columns": {
+    "weather": [
+      "temperature_2m_mean",
+      "precipitation_sum",
+      "snowfall_sum",
+      "wind_speed_10m_max"
+    ],
+    "calendar": [
+      "is_holiday",
+      "is_pre_holiday",
+      "is_day_off",
+      "calendar_exception",
+      "daytype_median"
+    ],
+    "events": [
+      "known_events",
+      "has_short_event"
+    ],
+    "crashes": [
+      "crash_risk_proxy"
+    ],
+    "other": [
+      "known_events",
+      "has_short_event",
+      "crash_risk_proxy"
+    ],
+    "traffic": [
+      "traffic_proxy",
+      "osm_road_count"
+    ],
+    "osm": [
+      "osm_road_count"
+    ]
+  }
+}

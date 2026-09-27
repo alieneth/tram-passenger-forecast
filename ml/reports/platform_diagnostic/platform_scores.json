@@ -1,0 +1,32 @@
+[
+  {
+    "file": "final_submission.csv",
+    "platform_score": 0.88268,
+    "sha256": "89a710f9f2f22a8f93287d886158d34d236c3a6501f63e28967471ed4e559ff5",
+    "source": "user_reported",
+    "exact_best_overall_unknown": true
+  },
+  {
+    "file": "submission_catboost_operations.csv",
+    "platform_score": 0.88506,
+    "sha256": "40a05a9f0dc6ec62b0ae794eb512e09dd88c8417b559cb03f392a5d82d803836",
+    "source": "user_reported",
+    "exact_best_overall_unknown": true
+  },
+  {
+    "file": "submission_old.csv",
+    "original_file": "00_champion_night_zero.csv",
+    "platform_score": 0.88518,
+    "sha256": "30ccf6fc55af13faae86c835fb82a3297627b429403a5ff9c30afc228741e261",
+    "source": "user_screenshot_and_old_new_identification",
+    "exact_best_overall_unknown": true
+  },
+  {
+    "file": "submission_new.csv",
+    "original_file": "03_champion_both.csv",
+    "platform_score": 0.88724,
+    "sha256": "c725598b623ae64d7f8979a11c208efcb51f4ae6919c8c2caa40a712ec4b11bd",
+    "source": "user_screenshot_and_old_new_identification",
+    "exact_best_overall_unknown": true
+  }
+]

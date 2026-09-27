@@ -1,0 +1,35 @@
+{
+  "folds": [
+    [
+      "2025-05-01",
+      "2025-06-30"
+    ],
+    [
+      "2025-07-01",
+      "2025-08-31"
+    ],
+    [
+      "2025-09-01",
+      "2025-10-31"
+    ]
+  ],
+  "variants": [
+    "full",
+    "without_all_four",
+    "without_weather",
+    "without_calendar",
+    "without_events",
+    "without_crashes"
+  ],
+  "iterations": 150,
+  "seed": 42,
+  "boost_weight": 0.02,
+  "four_sources": [
+    "Open-Meteo",
+    "XMLCalendar",
+    "KudaGo",
+    "DTP archive"
+  ],
+  "calendar_removal": "Rebuild profiles and traffic day type using weekends only",
+  "reporting": "All six months and pooled results; retrospective exploration, not independent test"
+}

@@ -1,0 +1,34 @@
+{
+  "scope": "Python features + prediction + postprocessing; excludes API, CSV and database",
+  "environment": {
+    "python": "3.12.6",
+    "os": "Windows-11-10.0.26200-SP0",
+    "processor": "AMD64 Family 25 Model 80 Stepping 0, AuthenticAMD",
+    "logical_cpus": 12,
+    "lightgbm": "4.7.0",
+    "numpy": "2.5.3"
+  },
+  "repeats": 30,
+  "warmups": 3,
+  "load_ms": 6235.888700000942,
+  "benchmarks": [
+    {
+      "batch": "one_day",
+      "rows": 240,
+      "p50_ms": 32.41630000411533,
+      "p95_ms": 35.22306499799015,
+      "min_ms": 31.009300000732765,
+      "max_ms": 35.913300001993775,
+      "max_observed_rss_mb": 158.0234375
+    },
+    {
+      "batch": "complete_submission",
+      "rows": 14640,
+      "p50_ms": 84.16455000406131,
+      "p95_ms": 95.5393999785883,
+      "min_ms": 79.43709997925907,
+      "max_ms": 99.00780001771636,
+      "max_observed_rss_mb": 163.5234375
+    }
+  ]
+}

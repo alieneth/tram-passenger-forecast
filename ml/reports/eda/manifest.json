@@ -1,0 +1,26 @@
+{
+  "input_sha256": {
+    "labels_day_train.csv": "20a61009b4ee00327784c6fa888109609fd3a1905ea3a8509b36964dd9baced7",
+    "labels_day_test.csv": "37479acea3e319ac613d72df7217bbe57b66af49644e538139174fd534ce2347",
+    "validation.csv": "00d3f48421ee01f2abd45b38e12fae62366712ee552faef6fbded91f1ca244aa",
+    "report.json": "ba22fa2053aee1290846027e306a893f7c1f9caeca5aeb39011785bd7260dcd5"
+  },
+  "label_rows": 57551,
+  "dense_rows_known_routes": 65664,
+  "missing_aggregate_hours": 8113,
+  "validation_rows": 13176,
+  "validation_score": 0.8920614645158826,
+  "quality_input_sha256": {
+    "report.json": "90665eaaa2606066409d516cf3b26483681cc8f11d4168c416daa1fd5f6df3f2",
+    "daily_counts.csv": "334f854e06c684a9dd41f1d1e7cf249cb008e8a69500ec958431fcccf2ea9d23",
+    "route_quality.csv": "5f248cb1310129db9c96ee669e90c64914cb6ef5d3b7910a6e12dc04d73d8e76",
+    "raw_route_status.csv": "44828a016fa9eaa0887de8762d9717ce534c78a4d0d334f96e8fc30ae30a47c5",
+    "hourly_anomaly_candidates.csv": "718a9037041cbcf740c6f098c742c16e27df40ef6fa51c0036f0e906312d1c6d"
+  },
+  "output_sha256": {
+    "hourly_profiles.csv": "3b8bd6b113d9cd72f488e2a06171111746cd6c774843bc8eca2ba1926177717e",
+    "target_histogram.csv": "fa017a3330e361b46620950416222c5fdef440f3c465dc4dab81a4523b27dc59",
+    "validation_predictions.csv": "3aafc575404ed048a5425042a6695b0b43f6800038c4ca68ba60dd44d20b9c9b"
+  },
+  "privacy": "Route-hour aggregates only; no card hashes or individual transactions"
+}
