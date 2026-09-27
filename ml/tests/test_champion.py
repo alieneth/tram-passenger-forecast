@@ -1,13 +1,23 @@
 """Проверка переноса, временных границ и защиты эталона."""
 
+from io import BytesIO
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import pytest
-from ml.champion.runtime import check_file, forecast, load_bundle, verify
+from ml.champion.runtime import ChampionUnpickler, check_file, forecast, load_bundle, verify
 
 ARTIFACTS = Path(__file__).resolve().parents[1] / "artifacts/champion"
+
+
+@pytest.mark.parametrize("path_class", ["WindowsPath", "PosixPath"])
+def test_cache_path_loads_on_current_platform(path_class: str) -> None:
+    payload = f"cpathlib\n{path_class}\n(Vunused_cache\ntR.".encode("ascii")
+    stream = BytesIO(payload)
+    restored = ChampionUnpickler("memory", stream, ensure_native_byte_order=True).load()
+    assert type(restored) is type(Path())
+    assert restored == Path("unused_cache")
 
 
 @pytest.fixture(scope="module")
