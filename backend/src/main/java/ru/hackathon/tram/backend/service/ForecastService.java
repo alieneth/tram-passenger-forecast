@@ -8,6 +8,7 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -25,9 +26,13 @@ public class ForecastService {
   private static final ZoneOffset MOSCOW_OFFSET = ZoneOffset.ofHours(3);
 
   private final NamedParameterJdbcTemplate jdbcTemplate;
+  private final int passengersPerTramNorm;
 
-  public ForecastService(NamedParameterJdbcTemplate jdbcTemplate) {
+  public ForecastService(
+      NamedParameterJdbcTemplate jdbcTemplate,
+      @Value("${app.passengers-per-tram-norm}") int passengersPerTramNorm) {
     this.jdbcTemplate = jdbcTemplate;
+    this.passengersPerTramNorm = passengersPerTramNorm;
   }
 
   public ForecastResponse getForecast(
@@ -88,11 +93,12 @@ public class ForecastService {
         sql.toString(),
         params,
         (rs, rowNum) -> {
+          int prediction = rs.getInt("prediction");
           ForecastItem item =
               new ForecastItem(
                   rs.getInt("route"),
                   rs.getObject("date", LocalDate.class),
-                  rs.getInt("prediction"),
+                  prediction,
                   rs.getInt("lower"),
                   rs.getInt("upper"),
                   rs.getBoolean("is_analog"));
@@ -100,14 +106,16 @@ public class ForecastService {
           if (!rs.wasNull()) {
             item.hour(hour);
           }
-          int tramsOnLine = rs.getInt("trams_on_line");
-          if (!rs.wasNull()) {
-            item.tramsOnLine(tramsOnLine);
-            if (tramsOnLine > 0) {
-              item.passengersPerTram(
-                  BigDecimal.valueOf(rs.getInt("prediction"))
-                      .divide(BigDecimal.valueOf(tramsOnLine), 1, RoundingMode.HALF_UP));
-            }
+          int tramsOnLineRaw = rs.getInt("trams_on_line");
+          // Реальных данных о числе трамваев на линии сейчас нет (прогноз Ярослава их не считает) —
+          // оцениваем по норме пассажиров на трамвай, а не оставляем поле пустым.
+          int tramsOnLine =
+              rs.wasNull() ? Math.ceilDiv(prediction, passengersPerTramNorm) : tramsOnLineRaw;
+          item.tramsOnLine(tramsOnLine);
+          if (tramsOnLine > 0) {
+            item.passengersPerTram(
+                BigDecimal.valueOf(prediction)
+                    .divide(BigDecimal.valueOf(tramsOnLine), 1, RoundingMode.HALF_UP));
           }
           return item;
         });
