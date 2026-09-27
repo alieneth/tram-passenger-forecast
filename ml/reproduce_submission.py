@@ -23,11 +23,11 @@ EXPECTED_SHA256 = "c725598b623ae64d7f8979a11c208efcb51f4ae6919c8c2caa40a712ec4b1
 PLATFORM_SCORE = 0.88724
 RELEASE_URL = (
     "https://github.com/alieneth/tram-passenger-forecast/releases/download/"
-    "ml-platform-0.88724-v2/bundle.joblib"
+    "ml-platform-0.88724-package/bundle.joblib"
 )
 RELEASE_API = (
     "https://api.github.com/repos/alieneth/tram-passenger-forecast/"
-    "releases/tags/ml-platform-0.88724-v2"
+    "releases/tags/ml-platform-0.88724-package"
 )
 
 

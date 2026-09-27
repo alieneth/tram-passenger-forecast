@@ -53,6 +53,9 @@ class ChampionUnpickler(NumpyUnpickler):
     """Перенос старого пространства имён без глобальной подмены sys.modules."""
 
     def find_class(self, module: str, name: str) -> Any:
+        # Путь к старому кэшу не должен мешать переносу Windows-модели в Linux.
+        if module == "pathlib" and name in {"WindowsPath", "PosixPath"}:
+            return Path
         if module in {"src.features", "src.external_data", "src.models"}:
             return getattr(importlib.import_module(module.replace("src.", "ml.champion.")), name)
         return super().find_class(module, name)

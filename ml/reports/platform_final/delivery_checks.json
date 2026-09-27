@@ -1,0 +1,14 @@
+{
+  "ruff_check": "passed",
+  "ruff_format": "passed",
+  "pytest": {
+    "passed": 27,
+    "skipped": 1,
+    "skipped_reason": "ML_TEST_DATABASE_URL absent; local Docker daemon unavailable"
+  },
+  "submission_sha256": "c725598b623ae64d7f8979a11c208efcb51f4ae6919c8c2caa40a712ec4b11bd",
+  "forecast_rows": 13725,
+  "model_quality_rows": 20,
+  "postgres_team_database_written": false,
+  "github_release_status": "Requires successful Actions run; cannot confirm via unauthenticated API of private repository"
+}

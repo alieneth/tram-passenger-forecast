@@ -7,6 +7,7 @@ on:
     paths:
       - .github/workflows/ml-model-release.yml
       - ml/prepare_model_release.py
+      - ml/final_package.py
       - ml/RELEASE_NOTES.md
   workflow_dispatch:
 
@@ -14,18 +15,40 @@ permissions:
   contents: write
 
 concurrency:
-  group: ml-platform-0.88724-v2-release
+  group: ml-platform-0.88724-package-release
   cancel-in-progress: false
 
 jobs:
   release:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 127.0.0.1:5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      ML_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/postgres
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Download and verify frozen model
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned dependencies
+        run: python -m pip install -r ml/requirements.txt
+      - name: Generate complete package from weights
+        run: |
+          python -m ml.final_package build --download
+          python -m ml.final_package verify
+          python -m pytest ml/tests/test_reproduce_submission.py ml/tests/test_final_package.py -q -p no:cacheprovider
+      - name: Prepare verified release assets
         run: >-
           python3 -m ml.prepare_model_release
           --output ml/artifacts/github_release
@@ -34,14 +57,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          RELEASE_TAG: ml-platform-0.88724-v2
+          RELEASE_TAG: ml-platform-0.88724-package
         run: |
           gh release create "$RELEASE_TAG" \
             --verify-tag \
             --latest=false \
             --title "ML model — platform score 0.88724" \
             --notes-file ml/RELEASE_NOTES.md \
-            ml/artifacts/github_release/bundle.joblib \
-            ml/artifacts/github_release/release_manifest.json \
-            ml/artifacts/github_release/requirements.txt \
-            ml/artifacts/github_release/MODEL_CARD.md
+            ml/artifacts/github_release/*

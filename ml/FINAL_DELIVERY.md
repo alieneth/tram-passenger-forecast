@@ -29,7 +29,7 @@ CatBoost и нейросеть в выбранный сабмит не вход�
 
 Передаваемый отдельно файл: `submission_new.csv` (исходное имя `03_champion_both.csv`).
 SHA256: `c725598b623ae64d7f8979a11c208efcb51f4ae6919c8c2caa40a712ec4b11bd`.
-Веса опубликованы отдельным GitHub Release; артефакты и сабмиты не включаются в Git по правилам проекта.
+Полный комплект публикует workflow в GitHub Release; бинарные артефакты не включаются в Git. Статус публикации проверяется на странице Actions/Release.
 
 Из корня репозитория, Python 3.11+ (проверено на Python 3.12):
 
@@ -39,7 +39,7 @@ python -m ml.reproduce_submission --download
 ```
 
 Результат: `ml/artifacts/submission_new.csv` и файл проверки рядом с ним.
-Команда загружает `bundle.joblib` из [GitHub Release](https://github.com/alieneth/tram-passenger-forecast/releases/tag/ml-platform-0.88724-v2),
+Команда загружает `bundle.joblib` из [GitHub Release](https://github.com/alieneth/tram-passenger-forecast/releases/tag/ml-platform-0.88724-package),
 проверяет SHA256 весов по `ml/champion/manifest.json`, рассчитывает прогноз
 и применяет ограничения движения. Готовый CSV не используется как вход модели.
 Внутри `bundle.joblib` сохранены деревья, исторические профили и внешние признаки;
@@ -68,9 +68,64 @@ python -m ml.experiments.platform_ablation --champion PATH_TO_ORIGINAL_SUBMISSIO
 
 Параметры поправок: `ml/reports/alternatives/selection.json`.
 
-Пакет PostgreSQL для этого выбранного CSV ещё не сформирован и в БД не записан.
-Почасовые/суточные выгрузки альтернативного CatBoost относятся к другой модели;
-не следует выдавать их за пакет выбранного сабмита.
+## Полный пакет для приложения
+
+Все файлы одной версии создаются из тех же весов; они не заимствованы у CatBoost или Q&A:
+
+```bash
+python -m ml.final_package build --download
+python -m ml.final_package verify
+```
+
+Выходная папка: `ml/artifacts/platform_final/` (при повторной сборке задайте новую `--directory`).
+
+| Файл | Содержание |
+|---|---|
+| `forecast.csv` | 13 176 почасовых + 549 суточных строк, девять маршрутов |
+| `model_quality.csv` | 20 строк: MAE модели и среднего baseline, по маршрутам и в целом, day/month |
+| `bundle.joblib` | Проверенные исходные веса и замороженные признаки |
+| `model_version.json` | Название, алгоритм, период обучения, inactive по умолчанию |
+| `manifest.json` | SHA256 каждого обязательного файла |
+| `test_submission.csv` | Точный конкурсный файл с результатом 0,88724 |
+| `intervals.json` | Калибровка границ по ошибкам этой конфигурации |
+| `factor_contribution.csv` | Изменение суточного прогноза из-за ограничений движения; не вклад в точность |
+| `validation.csv`, `metrics.json`, `provenance.json` | Проверочная история, результаты и ограничения происхождения |
+
+В GitHub Release эти файлы поставляются также единым `ml_platform_088724.zip`.
+После распаковки в `ml/artifacts/platform_final/` выполните `verify`.
+Модель загружается доверенным загрузчиком `ml.champion.runtime.load_bundle`,
+который переносит старые имена классов и пути Windows/Linux.
+
+`forecast.csv` содержит ровно входные колонки DDL: route, date, hour, horizon,
+prediction, lower, upper, trams_on_line, is_analog. Identity/id версии назначает
+адаптер БД. Для month час пустой (SQL NULL); week читает семь суточных строк.
+`trams_on_line=NULL`: подтверждённого плана выпуска нет. №5 не записывается в forecast.
+Все границы удовлетворяют 0 ≤ lower ≤ prediction ≤ upper.
+
+```bash
+python -m ml.final_package predict --start 2025-11-03 --end 2025-11-09 --horizon week --output ml/artifacts/week.csv
+python -m ml.final_package save-db
+# Только после проверки готовности API:
+python -m ml.final_package save-db --activate
+```
+
+Перед загрузкой примените согласованный DDL и заполните справочник route номерами
+1, 7, 11, 12, 17, 25, 26, 28, 50. Код ML не меняет схему и не придумывает геометрию.
+DSN задаётся через `ML_DATABASE_URL` в `ml/.env`; секреты в Git не передаются.
+Сохранение транзакционное, повтор той же версии проверяет неизменность данных;
+активация выполняется явно. Командная БД в этой работе не изменялась.
+`model_quality` и `factor_contribution` пишутся в той же транзакции.
+Маршрутных аналогов нет: требование №5 отменено организаторами.
+
+[Метрики этого выпуска](reports/platform_final/metrics.json): WAPE-score на исходных
+labels сентября–октября **0,909575**; на цели с очищенными ночными часами **0,909920**.
+Это просмотренная валидация, не скрытая оценка платформы. Коридор номинально 80%:
+калибровка сентября, проверка октября — **79,85%** по часам и **76,34%** по суткам.
+Для финального периода радиусы пересчитаны по всему сентябрю–октябрю.
+
+Поле trained_at восстановлено по времени изменения исходного артефакта;
+точное время завершения старого обучения не журналировалось. Это ограничение
+явно зафиксировано в provenance.json, новая дата обучения не выдумывается.
 
 ## Другие варианты
 
@@ -86,5 +141,5 @@ python -m ml.experiments.platform_ablation --champion PATH_TO_ORIGINAL_SUBMISSIO
 с правом чтения Contents этого репозитория. Без токена при ответе 404 загрузчик
 использует публичную копию идентичных весов из зафиксированного коммита
 `IvanCot/ml_solution`; SHA256 проверяется независимо от источника.
-Первоначальный тег `ml-platform-0.88724` сохранён; `-v2` добавляет поддержку
-закрытого Release, предсказания и веса не изменены.
+Предыдущие теги сохранены. Выпуск `-package` добавляет полный контракт поставки;
+веса и предсказания конкурсного файла не изменены.

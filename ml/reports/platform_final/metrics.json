@@ -1,0 +1,16 @@
+{
+  "platform_score_reported": 0.88724,
+  "validation_clean": {
+    "wape_score": 0.9099200016941649,
+    "mae": 87.16514875531269
+  },
+  "validation_raw": {
+    "wape_score": 0.9095749956427078,
+    "mae": 87.5321797207043
+  },
+  "interval_nominal_coverage": 0.8,
+  "october_hourly_coverage": 0.7985364396654719,
+  "october_daily_coverage": 0.7634408602150538,
+  "validation_role": "Previously inspected September-October; not an independent test",
+  "factor_role": "Change in predicted daily totals, not accuracy contribution or causal effect"
+}

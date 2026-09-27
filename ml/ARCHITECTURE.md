@@ -9,8 +9,9 @@ flowchart LR
   Features --> Fit
   Fit --> Bundle[Замороженный bundle]
   Bundle --> Predict[Python: пакетный инференс]
-  Predict --> CSV[Сабмит: 14640 строк]
-  Predict --> Rows[Калиброванные интервалы / качество / no_data]
+  Predict --> Operations[Ограничения движения 7 и 50]
+  Operations --> CSV[Сабмит: 14640 строк]
+  Operations --> Rows[Калиброванные интервалы / качество / no_data]
   Rows --> PG[PostgreSQL]
   PG --> Java[Java API читает активную версию]
 ```
@@ -20,7 +21,8 @@ flowchart LR
 - `champion/models.py`, `train.py`: L1-обучение, сравнение со средним baseline, сохранение отдельно от эталонной модели.
 - `champion/runtime.py`: SHA256, загрузка, офлайн-инференс, полная сверка с эталоном.
 - `audit_raw.py`, `data_audit.py`: сверка и EDA. `baseline.py`: средняя базовая модель.
-- `postgres.py`, `postgres_aux.py`: валидация таблиц и транзакционная запись; новый qna-выпуск формирует forecast, model_version и model_quality; интеграция с живой БД не проверена.
+- `final_package.py`: согласованные forecast, model_version, model_quality, factor_contribution, калибровка и манифест выбранного выпуска.
+- `postgres.py`, `postgres_aux.py`: валидация и транзакционная запись. Интеграционный тест PostgreSQL 16 включён в release-workflow; запись в командную БД не выполнялась.
 
 Классы старого pickle `src.*` перенаправляются внутри загрузчика в `ml.champion.*`, без глобальной подмены модулей. Старый локальный `src/` для запуска не нужен.
 
@@ -40,3 +42,5 @@ flowchart LR
 для day — часы 0–23. №5 отсутствует в forecast, его статус содержится в route_availability.json.
 [Полный контракт и запуск](QNA_UPDATE.md). Погода длинного горизонта — климатический прокси;
 оперативный day-ahead режим с выпуском погодного прогноза до origin остаётся отдельной задачей.
+
+Текущий выбранный пакет: [FINAL_DELIVERY.md](FINAL_DELIVERY.md). Команды ml.qna относятся к предыдущему эксперименту.

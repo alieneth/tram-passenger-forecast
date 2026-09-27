@@ -1,0 +1,47 @@
+{
+  "checked_at": "2026-09-27T14:35:10.341677+00:00",
+  "links": [
+    {
+      "name": "weather",
+      "url": "https://open-meteo.com/en/docs/historical-weather-api",
+      "status_code": 200,
+      "reachable": true
+    },
+    {
+      "name": "calendar",
+      "url": "https://xmlcalendar.ru/data/ru/2025/calendar.json",
+      "status_code": 200,
+      "reachable": true
+    },
+    {
+      "name": "roads",
+      "url": "https://www.openstreetmap.org/",
+      "status_code": 200,
+      "reachable": true
+    },
+    {
+      "name": "events",
+      "url": "https://kudago.com/public-api/v1.4/events/?location=msk&page_size=1",
+      "status_code": 200,
+      "reachable": true
+    },
+    {
+      "name": "crashes",
+      "url": "https://dtp-stat.ru/opendata/",
+      "status_code": 200,
+      "reachable": true
+    },
+    {
+      "name": "closures",
+      "url": "https://t.me/DtOperativno/22624",
+      "status_code": 200,
+      "reachable": true
+    },
+    {
+      "name": "reopening",
+      "url": "https://t.me/DtOperativno/23565",
+      "status_code": 200,
+      "reachable": true
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 
 [Выбранный сабмит: 0,88724 на платформе, состав модели и воспроизведение](FINAL_DELIVERY.md).
 Прирост от поправок движения №7 и №50: **0,88518 → 0,88724**.
-Модель — исторический профиль + LightGBM. [Веса в GitHub Release](https://github.com/alieneth/tram-passenger-forecast/releases/tag/ml-platform-0.88724-v2); бинарные артефакты не хранятся в Git.
+Модель — исторический профиль + LightGBM. [Веса в GitHub Release](https://github.com/alieneth/tram-passenger-forecast/releases/tag/ml-platform-0.88724-package); бинарные артефакты не хранятся в Git.
 
 Воспроизвести выбранный CSV непосредственно из сохранённой модели:
 
@@ -18,7 +18,20 @@ python -m ml.reproduce_submission --download
 [Сравнение CatBoost, ExtraTrees и нейросети](ALTERNATIVE_MODELS_REPORT.md).
 CatBoost с ограничениями движения получил **0,88506** на платформе.
 
-## Актуальный локальный выпуск после Q&A
+## Пакет для бэкенда — выбранная версия 0,88724
+
+```bash
+python -m ml.final_package build --download
+python -m ml.final_package verify
+```
+
+Папка `ml/artifacts/platform_final/`: forecast.csv, model_quality.csv,
+bundle.joblib, model_version.json, manifest.json, сабмит, калибровка интервалов,
+вклад ограничений движения и проверочные метрики. [Схема полей и загрузка в PostgreSQL](FINAL_DELIVERY.md#полный-пакет-для-приложения).
+[Полный архив GitHub Release](https://github.com/alieneth/tram-passenger-forecast/releases/tag/ml-platform-0.88724-package).
+Публикация зависит от успешного запуска Actions; команда build создаёт тот же пакет локально.
+
+## Предыдущий экспериментальный выпуск Q&A
 
 [Правила, запуск и результаты Q&A](QNA_UPDATE.md): девять прогнозируемых маршрутов,
 №5 — «нет данных» и нули только в сабмите; технические часы 01–04 занулены,
