@@ -60,6 +60,8 @@ services:
     environment:
       # nginx проксирует /api и /swagger-ui на backend — фронт и бэк на одном origin, без CORS.
       API_UPSTREAM: http://backend:8080
+      # /decisions требует Bearer-токен, а фронт его не отправляет (client.ts) — подставляет nginx
+      AUTH_DISPATCHER_TOKEN: ${AUTH_DISPATCHER_TOKEN:-change_me_dispatcher}
     ports:
       - "3000:80"
     depends_on:
