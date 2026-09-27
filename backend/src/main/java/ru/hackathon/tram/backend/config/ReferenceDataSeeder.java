@@ -3,15 +3,19 @@ package ru.hackathon.tram.backend.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 /**
  * Служебные справочники, которые не зависят от датасета организаторов — decision_status (9 статусов
  * из контракта) и setting (бизнес-параметры). Сеется при каждом старте, идемпотентно, чтобы
- * работало сразу после docker compose up без ручных шагов (см. docs/instrukciya-dlya-zhyuri.md).
+ * работало сразу после docker compose up без ручных шагов (см.
+ * docs/instrukciya-dlya-zhyuri.md). @Order(1) — DecisionGenerationRunner читает decision_status,
+ * должен стартовать после этого.
  */
 @Component
+@Order(1)
 public class ReferenceDataSeeder implements ApplicationRunner {
 
   private static final Object[][] DECISION_STATUSES = {

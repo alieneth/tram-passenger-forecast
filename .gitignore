@@ -32,6 +32,11 @@ node_modules/
 dist/
 .vite/
 
+# Разовый вывод нагрузочного теста, не сам тест
+backend/loadtest/stats_during.txt
+backend/loadtest/run_output*.txt
+backend/loadtest/summary.json
+
 # IDE и система
 .idea/
 .vscode/
