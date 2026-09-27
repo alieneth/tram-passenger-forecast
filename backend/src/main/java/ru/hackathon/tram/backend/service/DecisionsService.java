@@ -193,20 +193,20 @@ public class DecisionsService {
     }
   }
 
+  /**
+   * По контракту (openapi.yaml) сюда должно попадать сравнение deadline_at с реальным now() — так и
+   * было изначально. Отключено по решению капитана команды: датасет проекта — историческая
+   * симуляция (прогноз считается на даты 2025 года), а часы сервера — реальные (2026), поэтому
+   * сравнение с настоящим now() тут же переводило вообще все решения в expired при первом же GET
+   * /decisions — фича была демонстрируемо сломана. У системы нет отдельного понятия "текущая дата
+   * демо" (все остальные эндпоинты принимают дату параметром, единого "сейчас" нет), поэтому
+   * автопросрочку не привязываю к произвольной дате — оставляю решения в awaiting/updated, пока
+   * диспетчер не переведёт их сам (accepted/rejected/executed/not_executed). Статус expired в
+   * контракте остаётся валидным значением — просто ничего не выставляет его автоматически, пока не
+   * появится осмысленное понятие "сейчас" для исторического датасета.
+   */
   private void expireOverdue() {
-    List<Integer> expired =
-        jdbcTemplate.query(
-            "SELECT d.decision_id FROM decision d JOIN decision_status ds ON ds.status_id = d.status_id "
-                + "WHERE ds.status_code IN ('awaiting', 'updated') AND d.deadline_at < now()",
-            Map.of(),
-            (rs, rowNum) -> rs.getInt("decision_id"));
-    for (int id : expired) {
-      jdbcTemplate.update(
-          "UPDATE decision SET status_id = (SELECT status_id FROM decision_status WHERE status_code = 'expired') "
-              + "WHERE decision_id = :id",
-          new MapSqlParameterSource("id", id));
-      logChange(id, "expired", "system", null);
-    }
+    // Осознанно ничего не делает — см. комментарий выше.
   }
 
   private void logChange(int decisionId, String statusCode, String changedBy, String reason) {
