@@ -7,9 +7,10 @@ import logging
 from pathlib import Path
 
 import pandas as pd
+import requests
 
 from ml.champion.data import validate_submission
-from ml.champion.runtime import download, forecast, load_bundle
+from ml.champion.runtime import check_file, forecast, load_bundle
 from ml.config import setup_logging
 from ml.experiments.operations import apply_operations, apply_short_turn
 from ml.qna.cleaning import TECHNICAL_HOURS
@@ -19,6 +20,26 @@ DEFAULT_DIRECTORY = ML_ROOT / "artifacts/champion"
 SETTINGS_PATH = ML_ROOT / "reports/alternatives/selection.json"
 EXPECTED_SHA256 = "c725598b623ae64d7f8979a11c208efcb51f4ae6919c8c2caa40a712ec4b11bd"
 PLATFORM_SCORE = 0.88724
+RELEASE_URL = (
+    "https://github.com/alieneth/tram-passenger-forecast/releases/download/"
+    "ml-platform-0.88724/bundle.joblib"
+)
+
+
+def download_model(directory: Path) -> None:
+    """Из Release нужны только веса; до десериализации проверяем доверенный хэш."""
+    directory.mkdir(parents=True, exist_ok=True)
+    target = directory / "bundle.joblib"
+    if target.exists():
+        check_file(target, target.name)
+        return
+    response = requests.get(RELEASE_URL, timeout=(10, 60))
+    response.raise_for_status()
+    temporary = directory / "bundle.joblib.part"
+    temporary.write_bytes(response.content)
+    check_file(temporary, target.name)
+    temporary.replace(target)
+    logging.info("Веса скачаны из GitHub Release и проверены")
 
 
 def predict(directory: Path = DEFAULT_DIRECTORY) -> pd.DataFrame:
@@ -52,7 +73,7 @@ def main() -> None:
     if args.output.suffix.lower() != ".csv":
         raise ValueError("Выходной файл должен иметь расширение .csv")
     if args.download:
-        download(args.directory)
+        download_model(args.directory)
     frame = predict(args.directory)
     payload = verified_csv(frame)
     if args.output.exists() and args.output.read_bytes() != payload:

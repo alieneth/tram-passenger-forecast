@@ -29,7 +29,7 @@ CatBoost и нейросеть в выбранный сабмит не вход�
 
 Передаваемый отдельно файл: `submission_new.csv` (исходное имя `03_champion_both.csv`).
 SHA256: `c725598b623ae64d7f8979a11c208efcb51f4ae6919c8c2caa40a712ec4b11bd`.
-Артефакты и сабмиты не включаются в Git по правилам проекта.
+Веса опубликованы отдельным GitHub Release; артефакты и сабмиты не включаются в Git по правилам проекта.
 
 Из корня репозитория, Python 3.11+ (проверено на Python 3.12):
 
@@ -39,8 +39,8 @@ python -m ml.reproduce_submission --download
 ```
 
 Результат: `ml/artifacts/submission_new.csv` и файл проверки рядом с ним.
-Команда загружает зафиксированный архив модели из URL в
-`ml/champion/manifest.json`, проверяет SHA256 весов, рассчитывает прогноз
+Команда загружает `bundle.joblib` из [GitHub Release](https://github.com/alieneth/tram-passenger-forecast/releases/tag/ml-platform-0.88724),
+проверяет SHA256 весов по `ml/champion/manifest.json`, рассчитывает прогноз
 и применяет ограничения движения. Готовый CSV не используется как вход модели.
 Внутри `bundle.joblib` сохранены деревья, исторические профили и внешние признаки;
 исходный датасет для этого инференса не нужен. Загружать joblib следует только
