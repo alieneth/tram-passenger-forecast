@@ -141,9 +141,7 @@ public class ApiController implements DefaultApi {
   public ResponseEntity<String> exportForecast(
       String format, LocalDate dateFrom, LocalDate dateTo, List<Integer> route, Horizon horizon) {
     if ("xlsx".equals(format)) {
-      // Возвращаемый тип метода — String (общий для трёх content-type в контракте), бинарный xlsx
-      // в него корректно не положить. Честная 501, а не битый файл под видом .xlsx.
-      return notImplemented();
+      return exportXlsx(dateFrom, dateTo, route, horizon == null ? Horizon.DAY : horizon);
     }
     String filename;
     String body;
@@ -191,5 +189,27 @@ public class ApiController implements DefaultApi {
 
   private <T> ResponseEntity<T> notImplemented() {
     return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(null);
+  }
+
+  /**
+   * Контракт схлопнул text/csv и xlsx в один тип ответа — сгенерированная сигнатура метода
+   * фиксирована как ResponseEntity{@code <String>}. На рантайме дженерики Java стёрты: Spring
+   * сериализует по фактическому объекту в теле (byte[] → ByteArrayHttpMessageConverter), а не по
+   * объявленному типу метода, так что unchecked-приведение здесь безопасно и не портит файл.
+   */
+  @SuppressWarnings("unchecked")
+  private ResponseEntity<String> exportXlsx(
+      LocalDate dateFrom, LocalDate dateTo, List<Integer> route, Horizon horizon) {
+    byte[] xlsx = exportService.exportXlsx(dateFrom, dateTo, route, horizon);
+    ResponseEntity<byte[]> response =
+        ResponseEntity.ok()
+            .header(
+                "Content-Disposition",
+                "attachment; filename=forecast_" + dateFrom + "_" + dateTo + ".xlsx")
+            .contentType(
+                MediaType.parseMediaType(
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+            .body(xlsx);
+    return (ResponseEntity<String>) (ResponseEntity<?>) response;
   }
 }

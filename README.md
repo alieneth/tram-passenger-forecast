@@ -60,8 +60,8 @@ docker compose run --rm loader
 
 ## API
 
-Контракт — [`docs/openapi.yaml`](docs/openapi.yaml) (OpenAPI 3.0.3), реализованы все 11 методов
-(`/export` — только csv и submission, xlsx не поддержан). Подробности — [`backend/README.md`](backend/README.md).
+Контракт — [`docs/openapi.yaml`](docs/openapi.yaml) (OpenAPI 3.0.3), реализованы все 11 методов,
+включая `/export` во всех трёх форматах (csv, submission, xlsx). Подробности — [`backend/README.md`](backend/README.md).
 
 ## Производительность
 

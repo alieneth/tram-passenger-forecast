@@ -45,7 +45,7 @@ src/main/java/ru/hackathon/tram/backend/
 
 Все 11 методов контракта реализованы и читают реальные данные (не мок):
 `/health`, `/routes`, `/routes/{route}/geometry`, `/forecast`, `/actuals`, `/factors`,
-`/export` (csv, submission), `/validations` (приём), `/model/quality`, `/decisions` (чтение и смена статуса).
+`/export` (csv, submission, xlsx), `/validations` (приём), `/model/quality`, `/decisions` (чтение и смена статуса).
 
 - Единый формат ошибок по схеме `Error` из `docs/openapi.yaml`.
 - Базовая bearer-авторизация (`AuthService`) — токены из `AUTH_INGEST_TOKEN`/`AUTH_DISPATCHER_TOKEN`.
@@ -53,10 +53,16 @@ src/main/java/ru/hackathon/tram/backend/
   (справочник, факт, календарь, погода, прогноз) грузятся автоматически, см. `db/README.md`.
 - `ReferenceDataSeeder` — `decision_status`/`setting` сеются при каждом старте приложения.
 
+## Известное допущение (xlsx)
+
+Сгенерированный `exportForecast` возвращает `ResponseEntity<String>` — контракт схлопнул
+`text/csv` и xlsx в один тип ответа. Реальный `.xlsx` (Apache POI) кладём в тело через
+unchecked-приведение типа в `ApiController.exportXlsx` — на рантайме дженерики Java стёрты,
+Spring сериализует по фактическому объекту (`byte[]`), а не по объявленному типу метода.
+Работает и проверено (`file` подтверждает `Microsoft Excel 2007+`, содержимое читается openpyxl).
+
 ## В работе / не начато
 
-- `/export?format=xlsx` — сгенерированный метод возвращает `String`, бинарный xlsx в него не положить
-  корректно; отдаём 501, а не битый файл.
 - Генерация решений (сравнение прогноза с нормой, предложение переброски трамваев) — есть только
   чтение/смена статуса уже существующих решений, самой бизнес-логики создания решений нет.
 - WAPE-score на проверочный период (сентябрь–октябрь) на экране «Качество модели» — у Ярослава
