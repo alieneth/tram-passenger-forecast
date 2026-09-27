@@ -43,17 +43,28 @@ src/main/java/ru/hackathon/tram/backend/
 
 ## Готово
 
-- `GET /api/v1/health`, `GET /api/v1/routes`, `GET /api/v1/routes/{route}/geometry`.
+Все 11 методов контракта реализованы и читают реальные данные (не мок):
+`/health`, `/routes`, `/routes/{route}/geometry`, `/forecast`, `/actuals`, `/factors`,
+`/export` (csv, submission), `/validations` (приём), `/model/quality`, `/decisions` (чтение и смена статуса).
+
 - Единый формат ошибок по схеме `Error` из `docs/openapi.yaml`.
-- `docker-compose.yml` (корень репозитория) + `backend/Dockerfile`: `docker compose up -d`.
-- DATA-1: скрипты загрузки train/test в `backend/db/` (не проверены на реальных данных — см. предупреждение там).
+- Базовая bearer-авторизация (`AuthService`) — токены из `AUTH_INGEST_TOKEN`/`AUTH_DISPATCHER_TOKEN`.
+- `docker-compose.yml` (корень репозитория) + `backend/Dockerfile`: `docker compose up -d` — данные
+  (справочник, факт, календарь, погода, прогноз) грузятся автоматически, см. `db/README.md`.
+- `ReferenceDataSeeder` — `decision_status`/`setting` сеются при каждом старте приложения.
 
 ## В работе / не начато
 
-- Остальные методы контракта: `/forecast`, `/actuals`, `/factors`, `/export`, `/validations`, `/model/quality`, `/decisions*`
-  (в `ApiController` — заглушки 501, а не выдуманные данные).
-- Приём потоковых данных + скрипт-имитатор.
+- `/export?format=xlsx` — сгенерированный метод возвращает `String`, бинарный xlsx в него не положить
+  корректно; отдаём 501, а не битый файл.
+- Генерация решений (сравнение прогноза с нормой, предложение переброски трамваев) — есть только
+  чтение/смена статуса уже существующих решений, самой бизнес-логики создания решений нет.
+- WAPE-score на проверочный период (сентябрь–октябрь) на экране «Качество модели» — у Ярослава
+  прогноза на этот период нет, только на ноябрь–декабрь.
+- Приём потоковых данных — скрипт-имитатор из истории не написан (сам приём — `POST /validations` — работает).
 - Нагрузочный тест: цель p95 < 300 мс, сотни RPS, контейнер 2–4 vCPU / 2–4 ГБ (лимиты уже в `docker-compose.yml`, тест не прогонялся).
+- Сырые 62 млн строк валидаций не загружены — из-за этого `trams_on_line`/доли метро-проездного
+  в `/actuals` отсутствуют (в `/forecast` `trams_on_line` — оценка по норме, см. `ForecastService`).
 
 ## Известное допущение
 

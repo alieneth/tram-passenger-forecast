@@ -47,10 +47,12 @@ cp .env.example .env
 docker compose up -d
 ```
 
-API поднимется на `http://localhost:8080/api/v1`, PostgreSQL — на `localhost:5432`. Схема создаётся
-автоматически из `sql/01_create_tables.sql` при первом запуске (на пустом volume).
+API поднимется на `http://localhost:8080/api/v1`, PostgreSQL — на `localhost:5433` (5432 на хосте
+часто занят другим локальным Postgres). Схема и демо-данные (справочник, факт, календарь, погода,
+прогноз на ноябрь–декабрь) накатываются автоматически при первом запуске на пустом volume —
+никаких ручных команд не нужно.
 
-Загрузка train/test в БД (~62 млн строк, см. [`backend/db/README.md`](backend/db/README.md)):
+Полные сырые валидации (~62 млн строк, опционально — см. [`backend/db/README.md`](backend/db/README.md)):
 
 ```bash
 docker compose run --rm loader
@@ -58,8 +60,8 @@ docker compose run --rm loader
 
 ## API
 
-Контракт — [`docs/openapi.yaml`](docs/openapi.yaml) (OpenAPI 3.0.3). Реализовано пока: `GET /health`,
-`GET /routes`, `GET /routes/{route}/geometry` — см. [`backend/README.md`](backend/README.md).
+Контракт — [`docs/openapi.yaml`](docs/openapi.yaml) (OpenAPI 3.0.3), реализованы все 11 методов
+(`/export` — только csv и submission, xlsx не поддержан). Подробности — [`backend/README.md`](backend/README.md).
 
 ## Производительность
 
