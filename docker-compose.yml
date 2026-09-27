@@ -46,6 +46,19 @@ services:
           cpus: "4"
           memory: 4G
 
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_MAP_STYLE_URL: ${VITE_MAP_STYLE_URL:-https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json}
+    environment:
+      # nginx проксирует /api и /swagger-ui на backend — фронт и бэк на одном origin, без CORS.
+      API_UPSTREAM: http://backend:8080
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
   # Разовая загрузка train.csv/test.csv в БД (DATA-1): docker compose run --rm loader
   loader:
     image: postgres:16
