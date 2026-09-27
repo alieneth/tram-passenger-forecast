@@ -39,7 +39,7 @@ python -m ml.reproduce_submission --download
 ```
 
 Результат: `ml/artifacts/submission_new.csv` и файл проверки рядом с ним.
-Команда загружает `bundle.joblib` из [GitHub Release](https://github.com/alieneth/tram-passenger-forecast/releases/tag/ml-platform-0.88724),
+Команда загружает `bundle.joblib` из [GitHub Release](https://github.com/alieneth/tram-passenger-forecast/releases/tag/ml-platform-0.88724-v2),
 проверяет SHA256 весов по `ml/champion/manifest.json`, рассчитывает прогноз
 и применяет ограничения движения. Готовый CSV не используется как вход модели.
 Внутри `bundle.joblib` сохранены деревья, исторические профили и внешние признаки;
@@ -81,3 +81,10 @@ python -m ml.experiments.platform_ablation --champion PATH_TO_ORIGINAL_SUBMISSIO
 [EDA](DATA_QUALITY.md), [ноутбуки и графики](notebooks/),
 [область определения](MODEL_SCOPE.md), [аудит требований](REQUIREMENTS_AUDIT.md),
 [источники](EXTERNAL_SOURCES_TABLE.md), [архитектура](ARCHITECTURE.md).
+
+Если репозиторий закрыт, для скачивания Release задайте `GH_TOKEN` или `GITHUB_TOKEN`
+с правом чтения Contents этого репозитория. Без токена при ответе 404 загрузчик
+использует публичную копию идентичных весов из зафиксированного коммита
+`IvanCot/ml_solution`; SHA256 проверяется независимо от источника.
+Первоначальный тег `ml-platform-0.88724` сохранён; `-v2` добавляет поддержку
+закрытого Release, предсказания и веса не изменены.

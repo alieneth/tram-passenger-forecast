@@ -9,7 +9,7 @@ import urllib.request
 from pathlib import Path
 
 ML_ROOT = Path(__file__).resolve().parent
-RELEASE_TAG = "ml-platform-0.88724"
+RELEASE_TAG = "ml-platform-0.88724-v2"
 
 
 def prepare(output: Path, code_commit: str) -> None:

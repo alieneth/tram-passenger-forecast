@@ -2,14 +2,19 @@ name: Publish verified ML model
 
 on:
   push:
-    tags:
-      - ml-platform-0.88724
+    branches:
+      - yaroslav/ml-2-platform-champion
+    paths:
+      - .github/workflows/ml-model-release.yml
+      - ml/prepare_model_release.py
+      - ml/RELEASE_NOTES.md
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 concurrency:
-  group: ml-platform-0.88724-release
+  group: ml-platform-0.88724-v2-release
   cancel-in-progress: false
 
 jobs:
@@ -29,8 +34,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ml-platform-0.88724-v2
         run: |
-          gh release create "$GITHUB_REF_NAME" \
+          gh release create "$RELEASE_TAG" \
             --verify-tag \
             --latest=false \
             --title "ML model — platform score 0.88724" \

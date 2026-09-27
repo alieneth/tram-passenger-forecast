@@ -4,13 +4,14 @@ import argparse
 import hashlib
 import json
 import logging
+import os
 from pathlib import Path
 
 import pandas as pd
 import requests
 
 from ml.champion.data import validate_submission
-from ml.champion.runtime import check_file, forecast, load_bundle
+from ml.champion.runtime import check_file, forecast, load_bundle, manifest
 from ml.config import setup_logging
 from ml.experiments.operations import apply_operations, apply_short_turn
 from ml.qna.cleaning import TECHNICAL_HOURS
@@ -22,7 +23,11 @@ EXPECTED_SHA256 = "c725598b623ae64d7f8979a11c208efcb51f4ae6919c8c2caa40a712ec4b1
 PLATFORM_SCORE = 0.88724
 RELEASE_URL = (
     "https://github.com/alieneth/tram-passenger-forecast/releases/download/"
-    "ml-platform-0.88724/bundle.joblib"
+    "ml-platform-0.88724-v2/bundle.joblib"
+)
+RELEASE_API = (
+    "https://api.github.com/repos/alieneth/tram-passenger-forecast/"
+    "releases/tags/ml-platform-0.88724-v2"
 )
 
 
@@ -33,13 +38,26 @@ def download_model(directory: Path) -> None:
     if target.exists():
         check_file(target, target.name)
         return
-    response = requests.get(RELEASE_URL, timeout=(10, 60))
+    token = os.getenv("GH_TOKEN") or os.getenv("GITHUB_TOKEN")
+    if token:
+        headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"}
+        metadata = requests.get(RELEASE_API, headers=headers, timeout=(10, 60))
+        metadata.raise_for_status()
+        asset = next(a for a in metadata.json()["assets"] if a["name"] == "bundle.joblib")
+        headers["Accept"] = "application/octet-stream"
+        response = requests.get(asset["url"], headers=headers, timeout=(10, 60))
+    else:
+        response = requests.get(RELEASE_URL, timeout=(10, 60))
+        if response.status_code == 404:
+            # Закрытый Release требует API-токен; публичная копия имеет тот же хэш.
+            logging.warning("Release недоступен без авторизации; используем публичную копию весов")
+            response = requests.get(manifest()["files"]["bundle.joblib"]["url"], timeout=(10, 60))
     response.raise_for_status()
     temporary = directory / "bundle.joblib.part"
     temporary.write_bytes(response.content)
     check_file(temporary, target.name)
     temporary.replace(target)
-    logging.info("Веса скачаны из GitHub Release и проверены")
+    logging.info("Веса скачаны и проверены по SHA256")
 
 
 def predict(directory: Path = DEFAULT_DIRECTORY) -> pd.DataFrame:

@@ -2,7 +2,7 @@
 
 [Выбранный сабмит: 0,88724 на платформе, состав модели и воспроизведение](FINAL_DELIVERY.md).
 Прирост от поправок движения №7 и №50: **0,88518 → 0,88724**.
-Модель — исторический профиль + LightGBM. [Веса в GitHub Release](https://github.com/alieneth/tram-passenger-forecast/releases/tag/ml-platform-0.88724); бинарные артефакты не хранятся в Git.
+Модель — исторический профиль + LightGBM. [Веса в GitHub Release](https://github.com/alieneth/tram-passenger-forecast/releases/tag/ml-platform-0.88724-v2); бинарные артефакты не хранятся в Git.
 
 Воспроизвести выбранный CSV непосредственно из сохранённой модели:
 
