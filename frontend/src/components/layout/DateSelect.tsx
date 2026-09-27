@@ -1,6 +1,6 @@
 import { FORECAST_DATE_MAX, FORECAST_DATE_MIN } from '../../config/constants';
 import { useFilters } from '../../hooks/useFilters';
-import { addDays, datesInRange, formatDate, monthTitle } from '../../utils/dates';
+import { addDays, clampDate, datesInRange, formatDate, monthTitle } from '../../utils/dates';
 import { periodFor } from '../../utils/horizon';
 import { Icon } from '../Icon';
 
@@ -43,7 +43,7 @@ export function DateSelect() {
         className="button date-stepper__button"
         aria-label={horizon === 'week' ? 'Предыдущая неделя' : 'Предыдущий день'}
         disabled={date <= FORECAST_DATE_MIN}
-        onClick={() => setDate(addDays(date, -step))}
+        onClick={() => setDate(clampDate(addDays(date, -step), FORECAST_DATE_MIN, FORECAST_DATE_MAX))}
       >
         <Icon name="chevronLeft" size={16} />
       </button>
@@ -54,14 +54,18 @@ export function DateSelect() {
         value={date}
         min={FORECAST_DATE_MIN}
         max={FORECAST_DATE_MAX}
-        onChange={(event) => event.target.value && setDate(event.target.value)}
+        onChange={(event) => {
+          const value = event.target.value;
+          if (!value) return;
+          setDate(clampDate(value, FORECAST_DATE_MIN, FORECAST_DATE_MAX));
+        }}
       />
       <button
         type="button"
         className="button date-stepper__button"
         aria-label={horizon === 'week' ? 'Следующая неделя' : 'Следующий день'}
         disabled={date >= FORECAST_DATE_MAX}
-        onClick={() => setDate(addDays(date, step))}
+        onClick={() => setDate(clampDate(addDays(date, step), FORECAST_DATE_MIN, FORECAST_DATE_MAX))}
       >
         <Icon name="chevronRight" size={16} />
       </button>
