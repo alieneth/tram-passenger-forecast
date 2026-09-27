@@ -37,6 +37,7 @@ services:
       TRAM_PREP_MINUTES: ${TRAM_PREP_MINUTES:-40}
       AUTH_INGEST_TOKEN: ${AUTH_INGEST_TOKEN:-change_me_ingest}
       AUTH_DISPATCHER_TOKEN: ${AUTH_DISPATCHER_TOKEN:-change_me_dispatcher}
+      DB_POOL_SIZE: ${DB_POOL_SIZE:-30}
       TZ: ${TZ:-Europe/Moscow}
     ports:
       - "${API_PORT:-8080}:8080"
