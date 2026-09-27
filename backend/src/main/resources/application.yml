@@ -24,6 +24,9 @@ spring:
 app:
   passengers-per-tram-norm: ${PASSENGERS_PER_TRAM_NORM:150}
   tram-prep-minutes: ${TRAM_PREP_MINUTES:40}
+  auth:
+    ingest-token: ${AUTH_INGEST_TOKEN:change_me_ingest}
+    dispatcher-token: ${AUTH_DISPATCHER_TOKEN:change_me_dispatcher}
 
 management:
   endpoints:
