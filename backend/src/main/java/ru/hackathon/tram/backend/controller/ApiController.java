@@ -25,6 +25,7 @@ import ru.hackathon.tram.backend.generated.model.RouteGeometry;
 import ru.hackathon.tram.backend.generated.model.RouteList;
 import ru.hackathon.tram.backend.generated.model.ValidationBatch;
 import ru.hackathon.tram.backend.service.ActualsService;
+import ru.hackathon.tram.backend.service.FactorsService;
 import ru.hackathon.tram.backend.service.HealthService;
 import ru.hackathon.tram.backend.service.RouteService;
 
@@ -41,12 +42,17 @@ public class ApiController implements DefaultApi {
   private final RouteService routeService;
   private final HealthService healthService;
   private final ActualsService actualsService;
+  private final FactorsService factorsService;
 
   public ApiController(
-      RouteService routeService, HealthService healthService, ActualsService actualsService) {
+      RouteService routeService,
+      HealthService healthService,
+      ActualsService actualsService,
+      FactorsService factorsService) {
     this.routeService = routeService;
     this.healthService = healthService;
     this.actualsService = actualsService;
+    this.factorsService = factorsService;
   }
 
   @Override
@@ -98,7 +104,7 @@ public class ApiController implements DefaultApi {
 
   @Override
   public ResponseEntity<FactorsResponse> getFactors(LocalDate date, Integer route) {
-    return notImplemented();
+    return ResponseEntity.ok(factorsService.getFactors(date, route));
   }
 
   @Override
