@@ -21,7 +21,24 @@ DATABASE_URL="postgresql://tram:change_me@localhost:5433/tram" python backend/db
 Скрипт идемпотентный (`ON CONFLICT DO UPDATE` для route/stop, `route_stop` — полная перезалить),
 можно гонять повторно.
 
-## 1. Валидации (train.csv/test.csv, ~62 млн строк)
+## 1а. Быстрый путь для `/actuals` — labels_day_*.csv (готовый почасовой агрегат)
+
+Если сырых `train.csv`/`test.csv` под рукой нет, а `data/labels/labels_day_train.csv` и
+`labels_day_test.csv` (46 234 + 11 317 строк, `route;date;hour;boardings`) есть — можно залить
+`boardings_hourly` напрямую, без ML-пайплайна и без 62 млн строк:
+
+```bash
+MSYS_NO_PATHCONV=1 docker compose run --rm --entrypoint psql loader -f /scripts/04_load_labels.sql
+```
+
+(`MSYS_NO_PATHCONV=1` нужен только в Git Bash на Windows — иначе он переписывает `/scripts/...`
+в путь на хосте.) `trams_on_line` и доли (метро/проездной/соцкарта) остаются `NULL` — их даёт
+только шаг 1 (сырые валидации, там есть `bus_exit_no`/`good_type`/`pass_route`).
+
+Проверено вживую (27.09): `INSERT 0 57551`, `GET /api/v1/actuals?date_from=2025-09-01&date_to=2025-10-31`
+отдаёт реальные данные (демо-диапазон сентябрь–октябрь из `CLAUDE.md` раздела 12.2).
+
+## 1. Валидации (train.csv/test.csv, ~62 млн строк) — для остального (bus_exit_no, доли, /validations)
 
 ```bash
 docker compose run --rm loader
@@ -31,7 +48,7 @@ docker compose run --rm loader
 временную `validation_staging`, извлекает `route` числом из `ngpt_route` («25 трамвай» → `25`),
 переносит в `validation` (поле `source` = `train`/`test`), затем агрегирует `boardings_hourly`
 (`boardings` — строки с `validation_result = 1` по часу, `trams_on_line` — уникальные `bus_exit_no`
-за час — см. `CLAUDE.md` разделы 3 и 12.3).
+за час — см. `CLAUDE.md` разделы 3 и 12.3). Перезаписывает то, что уже залил шаг 1а, полными данными.
 
 ## Если 62 млн строк грузятся медленно
 
@@ -43,5 +60,6 @@ docker compose run --rm loader
 
 ## Не проверено вживую
 
-Справочник (шаг 0) проверен на реальном файле. Валидации (шаг 1) — нет: `data/train.csv` и
-`data/test.csv` (62 млн строк) в этой копии не появлялись. Проверить при первом реальном запуске.
+Справочник (шаг 0) и labels (шаг 1а) проверены на реальных файлах. Сырые валидации (шаг 1) — нет:
+`data/train.csv` и `data/test.csv` (62 млн строк) в этой копии не появлялись. Проверить при первом
+реальном запуске.

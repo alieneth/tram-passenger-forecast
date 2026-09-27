@@ -24,6 +24,7 @@ import ru.hackathon.tram.backend.generated.model.ModelQuality;
 import ru.hackathon.tram.backend.generated.model.RouteGeometry;
 import ru.hackathon.tram.backend.generated.model.RouteList;
 import ru.hackathon.tram.backend.generated.model.ValidationBatch;
+import ru.hackathon.tram.backend.service.ActualsService;
 import ru.hackathon.tram.backend.service.HealthService;
 import ru.hackathon.tram.backend.service.RouteService;
 
@@ -39,10 +40,13 @@ public class ApiController implements DefaultApi {
 
   private final RouteService routeService;
   private final HealthService healthService;
+  private final ActualsService actualsService;
 
-  public ApiController(RouteService routeService, HealthService healthService) {
+  public ApiController(
+      RouteService routeService, HealthService healthService, ActualsService actualsService) {
     this.routeService = routeService;
     this.healthService = healthService;
+    this.actualsService = actualsService;
   }
 
   @Override
@@ -89,7 +93,7 @@ public class ApiController implements DefaultApi {
   @Override
   public ResponseEntity<ActualsResponse> getActuals(
       LocalDate dateFrom, LocalDate dateTo, List<Integer> route, String granularity) {
-    return notImplemented();
+    return ResponseEntity.ok(actualsService.getActuals(dateFrom, dateTo, route, granularity));
   }
 
   @Override
